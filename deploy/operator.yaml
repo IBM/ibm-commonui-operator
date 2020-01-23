@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: common-webui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: common-webui
+  template:
+    metadata:
+      labels:
+        name: common-webui
+    spec:
+      serviceAccountName: common-webui
+      containers:
+        - name: common-webui
+          # Replace this with the built image name
+          image: REPLACE_IMAGE
+          command:
+          - common-webui
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: OPERATOR_NAME
+              value: "common-webui"
