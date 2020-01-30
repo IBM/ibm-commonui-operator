@@ -1,0 +1,31 @@
+apiVersion: operators.ibm.com/v1alpha1
+kind: LegacyHeaderService
+metadata:
+  name: example-legacyheaderservice
+  namespace: default
+spec:
+  globalConfig:
+    CLOUDPAK_VERSION: 3.2.4
+    authServiceUrl: https://icp-management-ingress:443/idauth
+    cfcRouterUrl: https://icp-management-ingress:443
+    identityProviderUrl: https://icp-management-ingress:443/idprovider
+    cluster_name: mycluster
+    default_admin_user: admin
+    router_https_port: 443
+    session_polling_interval: 5000
+    legacyuiconfig:
+      ingressPath: /header2
+      cpuLimits: 300m
+      cpuMemory: 200Mi
+      requestLimits: 300m
+      requestMemory: 200Mi
+      imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64
+      imageTag: 1.1.0
+      serviceName: platform-header
+      legacyDocUrl: /header/api/v1/doc
+      legacyLogoAltText: IBM Cloud Pak
+      legacyLogoHeight: 355px
+      legacyLogoPath: "/common-nav/graphics/ibm-cloudpack-logo.svg"
+      legacyLogoWidth: 18px
+      legacySupportUrl: /path/to/support.html
+    operatorVersion: 1.1.0

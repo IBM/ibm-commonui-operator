@@ -57,6 +57,7 @@ rules:
 - apiGroups:
   - operators.ibm.com
   resources:
-  - '*'
+  - commonwebuiservices 
+  - legacyheaderservices
   verbs:
   - '*'

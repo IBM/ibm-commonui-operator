@@ -14,13 +14,13 @@
 // limitations under the License.
 //
 
-package apis
+package controller
 
 import (
-	"github.com/example-inc/app-operator/pkg/apis/operators/v1alpha1"
+	"github.com/example-inc/app-operator/pkg/controller/legacyheaderservice"
 )
 
 func init() {
-	// Register the types with the Scheme so the components can map objects to GroupVersionKinds and back
-	AddToSchemes = append(AddToSchemes, v1alpha1.SchemeBuilder.AddToScheme)
+	// AddToManagerFuncs is a list of functions to create controllers and add them to a manager.
+	AddToManagerFuncs = append(AddToManagerFuncs, legacyheaderservice.Add)
 }
