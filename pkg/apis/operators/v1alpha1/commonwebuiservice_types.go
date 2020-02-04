@@ -25,7 +25,7 @@ type CommonWebUIConfig struct {
 	CPUMemory     string `json:"cpuMemory,omitempty"`
 	RequestLimits string `json:"requestLimits,omitempty"`
 	RequestMemory string `json:"requestMemory,omitempty"`
-	IngressPath              string `json:"ingressPath,omitempty"`
+	IngressPath   string `json:"ingressPath,omitempty"`
 }
 
 // CommonWebUIGlobalConfig defines the desired state of CommonWebUIGlobalConfig
