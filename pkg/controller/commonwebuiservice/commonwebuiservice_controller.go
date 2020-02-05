@@ -149,20 +149,25 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 		reqLogger.Info("Creating a new Common web ui DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace, "DaemonSet.Name", newDaemonSet.Name)
 		err = r.client.Create(context.TODO(), newDaemonSet)
 		if err != nil {
-			reqLogger.Error(err, "Failed to create new common web ui DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace,
+			reqLogger.Error(err, "Failed to create new Common web ui DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace,
 				"DaemonSet.Name", newDaemonSet.Name)
 			return reconcile.Result{}, err
 		}
 		// DaemonSet created successfully - return and requeue
 		needToRequeue = true
 	} else if err != nil {
-		reqLogger.Error(err, "Failed to get Rdr DaemonSet")
+		reqLogger.Error(err, "Failed to get Common web ui DaemonSet")
 		return reconcile.Result{}, err
 	}
 	
+	if needToRequeue {
+		// one or more resources was created, so requeue the request
+		reqLogger.Info("Requeue the request")
+		return reconcile.Result{Requeue: true}, nil
+	}
 
 	// Pod already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
+	reqLogger.Info("CS??? all done")
 	return reconcile.Result{}, nil
 }
 
