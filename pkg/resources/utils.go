@@ -17,7 +17,6 @@
 package resources
 
 import (
-	certmgr "github.com/ibm/metering-operator/pkg/apis/certmanager/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"

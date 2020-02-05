@@ -4,7 +4,7 @@ import (
 	"context"
 	gorun "runtime"
 
-	res "github.com/ibm/metering-operator/pkg/resources"
+	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 
@@ -140,21 +140,16 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 	opVersion := instance.Spec.OperatorVersion
 	reqLogger.Info("got CommonWebUIService instance, version=" + opVersion)
 
-	// Set CommonWebUIService instance as the owner and controller
-	// if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
-	// 	return reconcile.Result{}, err
-	// }
-
 	// Check if the DaemonSet already exists, if not create a new one
 	currentDaemonSet := &appsv1.DaemonSet{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.DaemonSetName, Namespace: instance.Namespace}, currentDaemonSet)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new DaemonSet
 		newDaemonSet := r.newDaemonSetForCR(instance)
-		reqLogger.Info("Creating a new Rdr DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace, "DaemonSet.Name", newDaemonSet.Name)
+		reqLogger.Info("Creating a new Common web ui DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace, "DaemonSet.Name", newDaemonSet.Name)
 		err = r.client.Create(context.TODO(), newDaemonSet)
 		if err != nil {
-			reqLogger.Error(err, "Failed to create new Rdr DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace,
+			reqLogger.Error(err, "Failed to create new common web ui DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace,
 				"DaemonSet.Name", newDaemonSet.Name)
 			return reconcile.Result{}, err
 		}
@@ -186,6 +181,11 @@ func newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.D
 		reqLogger.Info("CS??? rdrImage=" + image)
 	}
 
+	commonVolumes := append(res.Logs4jsVolume, res.ClusterCaVolume)
+
+	commonwebuiContainer := res.CommonWebUIContainer
+	commonwebuiContainer.Image = image
+	commonwebuiContainer.Name = res.DaemonSetName
 
 	daemon := &appsv1.DaemonSet{
 			ObjectMeta: metav1.ObjectMeta{
@@ -229,7 +229,7 @@ func newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.D
 							},
 						},
 					},
-					Volumes: rdrVolumes,
+					Volumes: commonVolumes,
 					TerminationGracePeriodSeconds: &res.Seconds60,
 					Tolerations: []corev1.Toleration{
 						{
@@ -243,7 +243,7 @@ func newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.D
 						},
 					},
 					Containers: []corev1.Container{
-						rdrMainContainer,
+						commonwebuiContainer,
 					},
 				},
 			},
