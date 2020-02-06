@@ -13,19 +13,19 @@ spec:
     default_admin_user: admin
     router_https_port: 443
     session_polling_interval: 5000
-    legacyuiconfig:
-      ingressPath: /header2
-      cpuLimits: 300m
-      cpuMemory: 200Mi
-      requestLimits: 300m
-      requestMemory: 200Mi
-      imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64
-      imageTag: 1.1.0
-      serviceName: platform-header
-      legacyDocUrl: /header/api/v1/doc
-      legacyLogoAltText: IBM Cloud Pak
-      legacyLogoHeight: 355px
-      legacyLogoPath: "/common-nav/graphics/ibm-cloudpack-logo.svg"
-      legacyLogoWidth: 18px
-      legacySupportUrl: /path/to/support.html
-    operatorVersion: 1.1.0
+  legacyuiconfig:
+    ingressPath: /header2
+    cpuLimits: 300m
+    cpuMemory: 200Mi
+    requestLimits: 300m
+    requestMemory: 200Mi
+    imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64
+    imageTag: 1.1.0
+    serviceName: platform-header
+    legacyDocUrl: /header/api/v1/doc
+    legacyLogoAltText: IBM Cloud Pak
+    legacyLogoHeight: 355px
+    legacyLogoPath: "/common-nav/graphics/ibm-cloudpack-logo.svg"
+    legacyLogoWidth: 18px
+    legacySupportUrl: /path/to/support.html
+  operatorVersion: 1.1.0

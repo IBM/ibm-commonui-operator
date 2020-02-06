@@ -13,7 +13,7 @@ spec:
     default_admin_user: admin
     router_https_port: 443
     session_polling_interval: 5000
-  uiConfig:
+  uiconfig:
     ingressPath: /common-nav2
     cpuLimits: 300m
     cpuMemory: 200Mi
