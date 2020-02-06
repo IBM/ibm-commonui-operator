@@ -6,11 +6,13 @@ import (
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
 
+	"k8s.io/apimachinery/pkg/util/intstr"
+
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
+	// netv1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -25,6 +27,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
 const commonwebuiserviceCrType = "commonwebuiservice_cr"
+
+var commonVolume = []corev1.Volume{}
 
 var log = logf.Log.WithName("controller_commonwebuiservice")
 
@@ -72,7 +76,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource "Daemonset" and requeue the owner CommonWebUIService
 	err = c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &operatorv1alpha1.CommonWebUIService{},
+		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
 	})
 	if err != nil {
 		return err
@@ -122,6 +126,10 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling CommonWebUIService")
 
+	// if we need to create several resources, set a flag so we just requeue one time instead of after each create.
+	needToRequeue := false
+
+
 	// Fetch the CommonWebUIService CR instance
 	instance := &operatorsv1alpha1.CommonWebUIService{}
 
@@ -166,12 +174,12 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{Requeue: true}, nil
 	}
 
-	// Pod already exists - don't requeue
+	// Resources exists - don't requeue
 	reqLogger.Info("CS??? all done")
 	return reconcile.Result{}, nil
 }
 
-func newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.DaemonSet {
+func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.DaemonSet {
 	reqLogger := log.WithValues("func", "daemonForReader", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
@@ -186,7 +194,8 @@ func newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.D
 		reqLogger.Info("CS??? rdrImage=" + image)
 	}
 
-	commonVolumes := append(res.Logs4jsVolume, res.ClusterCaVolume)
+	commonVolume := append(commonVolume, res.Log4jsVolume)
+	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 
 	commonwebuiContainer := res.CommonWebUIContainer
 	commonwebuiContainer.Image = image
@@ -211,44 +220,44 @@ func newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.D
 						},
 					},
 				},
-			},
-			Template: corev1.PodTemplateSpec{
-				ObjectMeta: metav1.ObjectMeta{
-					Labels: podLabels,
-				},
-				Spec: corev1.PodSpec{
-					Affinity: &corev1.Affinity{
-						NodeAffinity: &corev1.NodeAffinity{
-							RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
-								NodeSelectorTerms: []corev1.NodeSelectorTerm{
-									{
-										MatchExpressions: []corev1.NodeSelectorRequirement{
-											{
-												Key:      "beta.kubernetes.io/arch",
-												Operator: corev1.NodeSelectorOpIn,
-												Values:   []string{gorun.GOARCH},
+				Template: corev1.PodTemplateSpec{
+					ObjectMeta: metav1.ObjectMeta{
+						Labels: podLabels,
+					},
+					Spec: corev1.PodSpec{
+						Affinity: &corev1.Affinity{
+							NodeAffinity: &corev1.NodeAffinity{
+								RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+									NodeSelectorTerms: []corev1.NodeSelectorTerm{
+										{
+											MatchExpressions: []corev1.NodeSelectorRequirement{
+												{
+													Key:      "beta.kubernetes.io/arch",
+													Operator: corev1.NodeSelectorOpIn,
+													Values:   []string{gorun.GOARCH},
+												},
 											},
 										},
 									},
 								},
 							},
 						},
-					},
-					Volumes: commonVolumes,
-					TerminationGracePeriodSeconds: &res.Seconds60,
-					Tolerations: []corev1.Toleration{
-						{
-							Key:      "dedicated",
-							Operator: corev1.TolerationOpExists,
-							Effect:   corev1.TaintEffectNoSchedule,
+						Volumes: commonVolumes,
+						TerminationGracePeriodSeconds: &res.Seconds60,
+						Tolerations: []corev1.Toleration{
+							{
+								Key:      "dedicated",
+								Operator: corev1.TolerationOpExists,
+								Effect:   corev1.TaintEffectNoSchedule,
+							},
+							{
+								Key:      "CriticalAddonsOnly",
+								Operator: corev1.TolerationOpExists,
+							},
 						},
-						{
-							Key:      "CriticalAddonsOnly",
-							Operator: corev1.TolerationOpExists,
+						Containers: []corev1.Container{
+							commonwebuiContainer,
 						},
-					},
-					Containers: []corev1.Container{
-						commonwebuiContainer,
 					},
 				},
 			},

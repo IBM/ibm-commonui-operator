@@ -16,23 +16,23 @@
 
 package resources
 
-import (
+// import (
 
-	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
-	logf "sigs.k8s.io/controller-runtime/pkg/log"
-)
+// 	corev1 "k8s.io/api/core/v1"
+// 	netv1 "k8s.io/api/networking/v1beta1"
+// 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+// 	"k8s.io/apimachinery/pkg/util/intstr"
+// 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+// )
 
 const ReleaseName = "common-web-ui"
 const DaemonSetName = "common-web-ui"
 const ChartName = "webui-nav"
-const ChartVersion = 1.0.2
+const ChartVersion = "1.0.2"
 
 // returns the labels associated with the resource being created
 func LabelsForMetadata(deploymentName string) map[string]string {
-	return map[string]string{"app": deploymentName, "chart": ChartName , "version": ChartVersion
+	return map[string]string{"app": deploymentName, "chart": ChartName , "version": ChartVersion,
 		"heritage": "operator", "release": ReleaseName}
 }
 
