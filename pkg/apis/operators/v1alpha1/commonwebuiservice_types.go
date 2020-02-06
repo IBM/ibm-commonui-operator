@@ -33,7 +33,7 @@ type CommonWebUIConfig struct {
 type CommonWebUIGlobalConfig struct {
 	PullSecret               string `json:"pullSecret,omitempty"`
 	RouterURL                string `json:"cfcRouterUrl,omitempty"`
-	IdentityProviderURL      string `json:identityProviderUrl,omitempty"`
+	IdentityProviderURL      string `json:"identityProviderUrl,omitempty"`
 	AuthServiceURL           string `json:"authServiceUrl,omitempty"`
 	CloudPakVersion          string `json:"CLOUDPAK_VERSION,omitempty"`
 	DefaultAdminUser         string `json:"default_admin_user,omitempty"`

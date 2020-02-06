@@ -45,6 +45,8 @@ spec:
                   type: string
                 default_admin_user:
                   type: string
+                identityProviderUrl:
+                  type: string
                 pullSecret:
                   type: string
                 router_https_port:

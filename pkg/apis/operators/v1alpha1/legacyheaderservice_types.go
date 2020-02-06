@@ -30,7 +30,7 @@ type LegacyHeaderServiceSpec struct {
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 	LegacyUIConfig  CommonWebUILegacyConfig `json:"legacyuiconfig,omitempty"`
-	GlobalUIConfig  CommonWebUIGlobalConfig `json:"globalConfig,omitempty"`
+	GlobalUIConfig  CommonWebUILegacyGlobalConfig `json:"globalConfig,omitempty"`
 	OperatorVersion string                  `json:"operatorVersion,omitempty"`
 }
 
@@ -55,10 +55,10 @@ type CommonWebUILegacyConfig struct {
 
 // CommonWebUIGlobalConfig defines the desired state of CommonWebUIGlobalConfig
 // +k8s:openapi-gen=true
-type CommonWebUIGlobalConfig struct {
+type CommonWebUILegacyGlobalConfig struct {
 	PullSecret               string `json:"pullSecret,omitempty"`
 	RouterURL                string `json:"cfcRouterUrl,omitempty"`
-	IdentityProviderURL      string `json:identityProviderUrl,omitempty"`
+	IdentityProviderURL      string `json:"identityProviderUrl,omitempty"`
 	AuthServiceURL           string `json:"authServiceUrl,omitempty"`
 	CloudPakVersion          string `json:"CLOUDPAK_VERSION,omitempty"`
 	DefaultAdminUser         string `json:"default_admin_user,omitempty"`
