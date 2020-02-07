@@ -12,6 +12,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+
 	// netv1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,6 +27,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
+
 const commonwebuiserviceCrType = "commonwebuiservice_cr"
 
 var commonVolume = []corev1.Volume{}
@@ -100,7 +102,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// 	return err
 	// }
 
-
 	return nil
 }
 
@@ -128,7 +129,6 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 
 	// if we need to create several resources, set a flag so we just requeue one time instead of after each create.
 	needToRequeue := false
-
 
 	// Fetch the CommonWebUIService CR instance
 	instance := &operatorsv1alpha1.CommonWebUIService{}
@@ -167,7 +167,7 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 		reqLogger.Error(err, "Failed to get Common web ui DaemonSet")
 		return reconcile.Result{}, err
 	}
-	
+
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
@@ -188,79 +188,90 @@ func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alp
 	var image string
 	if instance.Spec.CommonUIConfig.ImageRegistry == "" {
 		image = res.DefaultImageRegistry + "/" + res.DefaultImageName + ":" + res.DefaultImageTag
-		reqLogger.Info("CS??? default rdrImage=" + image)
+		reqLogger.Info("CS??? default Image=" + image)
 	} else {
-		image = instance.Spec.CommonUIConfig.ImageRegistry + "/" + res.DefaultImageName + ":" + res.DefaultImageTag
-		reqLogger.Info("CS??? rdrImage=" + image)
+		image = instance.Spec.CommonUIConfig.ImageRegistry + "/" + res.DefaultImageName + ":" + instance.Spec.CommonUIConfig.ImageTag
+		reqLogger.Info("CS??? Image=" + image)
 	}
 
 	commonVolume := append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 
+	var nodeSelector map[string]string = make(map[string]string)
+	nodeSelector["master"] = "true"
+
 	commonwebuiContainer := res.CommonWebUIContainer
 	commonwebuiContainer.Image = image
 	commonwebuiContainer.Name = res.DaemonSetName
+	commonwebuiContainer.Env[1].Value = instance.Spec.GlobalUIConfig.RouterURL
+	commonwebuiContainer.Env[3].Value = instance.Spec.GlobalUIConfig.IdentityProviderURL
+	commonwebuiContainer.Env[4].Value = instance.Spec.GlobalUIConfig.AuthServiceURL
+	commonwebuiContainer.Env[7].Value = instance.Spec.GlobalUIConfig.CloudPakVersion
+	commonwebuiContainer.Env[8].Value = instance.Spec.GlobalUIConfig.DefaultAdminUser
+	commonwebuiContainer.Env[9].Value = instance.Spec.GlobalUIConfig.ClusterName
+	// commonwebuiContainer.Env[10].Value = string(instance.Spec.GlobalUIConfig.SessionPollingInterval)
 
 	daemon := &appsv1.DaemonSet{
-			ObjectMeta: metav1.ObjectMeta{
-					Name:      res.DaemonSetName,
-					Namespace: instance.Namespace,
-					Labels:    metaLabels,
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      res.DaemonSetName,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Spec: appsv1.DaemonSetSpec{
+			Selector: &metav1.LabelSelector{
+				MatchLabels: selectorLabels,
 			},
-			Spec: appsv1.DaemonSetSpec{
-				Selector: &metav1.LabelSelector{
-					MatchLabels: selectorLabels,
-				},
-				UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
-					Type: appsv1.RollingUpdateDaemonSetStrategyType,
-					RollingUpdate: &appsv1.RollingUpdateDaemonSet{
-						MaxUnavailable: &intstr.IntOrString{
-							Type:   intstr.Int,
-							IntVal: 1,
-						},
+			UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
+				Type: appsv1.RollingUpdateDaemonSetStrategyType,
+				RollingUpdate: &appsv1.RollingUpdateDaemonSet{
+					MaxUnavailable: &intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: 1,
 					},
 				},
-				Template: corev1.PodTemplateSpec{
-					ObjectMeta: metav1.ObjectMeta{
-						Labels: podLabels,
-					},
-					Spec: corev1.PodSpec{
-						Affinity: &corev1.Affinity{
-							NodeAffinity: &corev1.NodeAffinity{
-								RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
-									NodeSelectorTerms: []corev1.NodeSelectorTerm{
-										{
-											MatchExpressions: []corev1.NodeSelectorRequirement{
-												{
-													Key:      "beta.kubernetes.io/arch",
-													Operator: corev1.NodeSelectorOpIn,
-													Values:   []string{gorun.GOARCH},
-												},
+			},
+			Template: corev1.PodTemplateSpec{
+				ObjectMeta: metav1.ObjectMeta{
+					Labels: podLabels,
+				},
+				Spec: corev1.PodSpec{
+					Affinity: &corev1.Affinity{
+						NodeAffinity: &corev1.NodeAffinity{
+							RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
+								NodeSelectorTerms: []corev1.NodeSelectorTerm{
+									{
+										MatchExpressions: []corev1.NodeSelectorRequirement{
+											{
+												Key:      "beta.kubernetes.io/arch",
+												Operator: corev1.NodeSelectorOpIn,
+												Values:   []string{gorun.GOARCH},
 											},
 										},
 									},
 								},
 							},
 						},
-						Volumes: commonVolumes,
-						TerminationGracePeriodSeconds: &res.Seconds60,
-						Tolerations: []corev1.Toleration{
-							{
-								Key:      "dedicated",
-								Operator: corev1.TolerationOpExists,
-								Effect:   corev1.TaintEffectNoSchedule,
-							},
-							{
-								Key:      "CriticalAddonsOnly",
-								Operator: corev1.TolerationOpExists,
-							},
+					},
+					Volumes:                       commonVolumes,
+					TerminationGracePeriodSeconds: &res.Seconds60,
+					NodeSelector:                  nodeSelector,
+					Tolerations: []corev1.Toleration{
+						{
+							Key:      "dedicated",
+							Operator: corev1.TolerationOpExists,
+							Effect:   corev1.TaintEffectNoSchedule,
 						},
-						Containers: []corev1.Container{
-							commonwebuiContainer,
+						{
+							Key:      "CriticalAddonsOnly",
+							Operator: corev1.TolerationOpExists,
 						},
+					},
+					Containers: []corev1.Container{
+						commonwebuiContainer,
 					},
 				},
 			},
+		},
 	}
 	// Set Commonsvcsuiserive instance as the owner and controller of the DaemonSet
 	err := controllerutil.SetControllerReference(instance, daemon, r.scheme)

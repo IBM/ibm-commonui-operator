@@ -1,4 +1,3 @@
-
 //
 // Copyright 2020 IBM Corporation
 //
@@ -36,8 +35,8 @@ var FalseVar = false
 var Replica1 int32 = 1
 var Seconds60 int64 = 60
 
-var cpu300 = resource.NewMilliQuantity(300, resource.DecimalSI)          // 300m
-var memory256 = resource.NewQuantity(256*1024*1024, resource.BinarySI)   // 256Mi
+var cpu300 = resource.NewMilliQuantity(300, resource.DecimalSI)        // 300m
+var memory256 = resource.NewQuantity(256*1024*1024, resource.BinarySI) // 256Mi
 
 const Log4jsVolumeName = "log4js"
 const ClusterCaVolumeName = "cluster-ca"
@@ -56,7 +55,7 @@ var Log4jsVolume = corev1.Volume{
 				},
 			},
 			// DefaultMode: &DefaultMode,
-			Optional:    &TrueVar,
+			Optional: &TrueVar,
 		},
 	},
 }
@@ -65,7 +64,7 @@ var ClusterCaVolume = corev1.Volume{
 	Name: ClusterCaVolumeName,
 	VolumeSource: corev1.VolumeSource{
 		Secret: &corev1.SecretVolumeSource{
-			SecretName:  "cluster-ca-cert",
+			SecretName: "cluster-ca-cert",
 			Items: []corev1.KeyToPath{
 				{
 					Key:  "tls.key",
@@ -77,7 +76,7 @@ var ClusterCaVolume = corev1.Volume{
 				},
 			},
 			// DefaultMode: &DefaultMode,
-			Optional:    &TrueVar,
+			Optional: &TrueVar,
 		},
 	},
 }
@@ -88,6 +87,9 @@ var commonSecurityContext = corev1.SecurityContext{
 	ReadOnlyRootFilesystem:   &TrueVar,
 	RunAsNonRoot:             &TrueVar,
 	Capabilities: &corev1.Capabilities{
+		Add: []corev1.Capability{
+			"NET_ADMIN",
+		},
 		Drop: []corev1.Capability{
 			"ALL",
 		},
@@ -97,8 +99,8 @@ var commonSecurityContext = corev1.SecurityContext{
 var CommonWebUIContainer = corev1.Container{
 	Image: "common-web-ui",
 	//CS??? Image: "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64/metering-data-manager:3.3.1",
-	Name: "common-web-ui",
-	ImagePullPolicy: corev1.PullAlways,
+	Name:            "common-web-ui",
+	ImagePullPolicy: corev1.PullIfNotPresent,
 
 	Resources: corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{
@@ -185,9 +187,9 @@ var CommonWebUIContainer = corev1.Container{
 			Value: "8443",
 		},
 		{
-			Name:  "OAUTH2_CLIENT_REGISTRATION_SECRET",
-			ValueFrom: &corev1.EnvVarSource {
-				SecretKeyRef: &corev1.SecretKeySelector {
+			Name: "OAUTH2_CLIENT_REGISTRATION_SECRET",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: "platform-oidc-credentials",
 					},
@@ -212,9 +214,9 @@ var CommonWebUIContainer = corev1.Container{
 			Value: "300",
 		},
 		{
-			Name:  "ROKS_ENABLED",
-			ValueFrom: &corev1.EnvVarSource {
-				ConfigMapKeyRef: &corev1.ConfigMapKeySelector {
+			Name: "ROKS_ENABLED",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: "platform-auth-idp",
 					},
@@ -223,9 +225,9 @@ var CommonWebUIContainer = corev1.Container{
 			},
 		},
 		{
-			Name:  "WLP_CLIENT_ID",
-			ValueFrom: &corev1.EnvVarSource {
-				SecretKeyRef: &corev1.SecretKeySelector {
+			Name: "WLP_CLIENT_ID",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: "platform-oidc-credentials",
 					},
@@ -234,9 +236,9 @@ var CommonWebUIContainer = corev1.Container{
 			},
 		},
 		{
-			Name:  "WLP_CLIENT_SECRET",
-			ValueFrom: &corev1.EnvVarSource {
-				SecretKeyRef: &corev1.SecretKeySelector {
+			Name: "WLP_CLIENT_SECRET",
+			ValueFrom: &corev1.EnvVarSource{
+				SecretKeyRef: &corev1.SecretKeySelector{
 					LocalObjectReference: corev1.LocalObjectReference{
 						Name: "platform-oidc-credentials",
 					},
