@@ -84,19 +84,19 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// // Watch for changes to secondary resource "Service" and requeue the owner CommonWebUIService
-	// err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
-	// 	IsController: true,
-	// 	OwnerType:    &operatorv1alpha1.CommonWebUIService{},
-	// })
-	// if err != nil {
-	// 	return err
-	// }
+	// Watch for changes to secondary resource "Service" and requeue the owner CommonWebUIService
+	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
+	})
+	if err != nil {
+		return err
+	}
 
 	// Watch for changes to secondary resource "Ingress" and requeue the owner CommonWebUIService
 	// err = c.Watch(&source.Kind{Type: &netv1.Ingress{}}, &handler.EnqueueRequestForOwner{
 	// 	IsController: true,
-	// 	OwnerType:    &operatorv1alpha1.CommonWebUIService{},
+	// 	OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
 	// })
 	// if err != nil {
 	// 	return err
@@ -168,19 +168,26 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 		return reconcile.Result{}, err
 	}
 
+	// Check if the common web ui Service already exist. If not, create a new one.
+	err = r.reconcileService(instance, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
 		return reconcile.Result{Requeue: true}, nil
 	}
 
+	reqLogger.Info("got Services, checking Certificates")
 	// Resources exists - don't requeue
 	reqLogger.Info("CS??? all done")
 	return reconcile.Result{}, nil
 }
 
 func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.DaemonSet {
-	reqLogger := log.WithValues("func", "daemonForReader", "instance.Name", instance.Name)
+	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
 	podLabels := res.LabelsForPodMetadata(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
@@ -280,4 +287,74 @@ func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alp
 		return nil
 	}
 	return daemon
+}
+
+// Check if the Common web ui Service already exist. If not, create a new one.
+// This function was created to reduce the cyclomatic complexity :)
+func (r *ReconcileCommonWebUIService) reconcileService(instance *operatorsv1alpha1.CommonWebUIService, needToRequeue *bool) error {
+	reqLogger := log.WithValues("func", "reconcileService", "instance.Name", instance.Name)
+
+	reqLogger.Info("checking common web ui Service")
+	// Check if the Common web ui Service already exists, if not create a new one
+	currentService := &corev1.Service{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.ServiceName, Namespace: instance.Namespace}, currentService)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new Service
+		newService := r.serviceForCommonWebUI(instance)
+		reqLogger.Info("Creating a new common web ui Service", "Service.Namespace", newService.Namespace, "Service.Name", newService.Name)
+		err = r.client.Create(context.TODO(), newService)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new common web ui Service", "Service.Namespace", newService.Namespace, "Service.Name", newService.Name)
+			return err
+		}
+		// Service created successfully - return and requeue
+		*needToRequeue = true
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get common web ui Service")
+		return err
+	}
+
+	reqLogger.Info("got common web ui Service")
+
+	return nil
+}
+
+// serviceForCommonWebUI returns a common web ui Service object
+func (r *ReconcileCommonWebUIService) serviceForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *corev1.Service {
+	reqLogger := log.WithValues("func", "serviceForCommonWebUI", "instance.Name", instance.Name)
+	metaLabels := res.LabelsForMetadata(res.ServiceName)
+	metaLabels["kubernetes.io/cluster-service"] = "true"
+	metaLabels["kubernetes.io/name"] = instance.Spec.CommonUIConfig.ServiceName
+	metaLabels["app"] = instance.Spec.CommonUIConfig.ServiceName
+	selectorLabels := res.LabelsForSelector(res.ServiceName, commonwebuiserviceCrType, instance.Name)
+
+	reqLogger.Info("CS??? Entry")
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      res.ServiceName,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: instance.Spec.CommonUIConfig.ServiceName,
+					Port: 3000,
+					TargetPort: intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: 3000,
+					},
+				},
+			},
+			Selector: selectorLabels,
+		},
+	}
+
+	// Set Metering instance as the owner and controller of the Service
+	err := controllerutil.SetControllerReference(instance, service, r.scheme)
+	if err != nil {
+		reqLogger.Error(err, "Failed to set owner for common web ui Service")
+		return nil
+	}
+	return service
 }

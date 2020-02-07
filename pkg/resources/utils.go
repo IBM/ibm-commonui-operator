@@ -27,12 +27,13 @@ package resources
 
 const ReleaseName = "common-web-ui"
 const DaemonSetName = "common-web-ui"
+const ServiceName = "common-web-ui"
 const ChartName = "webui-nav"
 const ChartVersion = "1.0.2"
 
 // returns the labels associated with the resource being created
 func LabelsForMetadata(deploymentName string) map[string]string {
-	return map[string]string{"app": deploymentName, "chart": ChartName , "version": ChartVersion,
+	return map[string]string{"app": deploymentName, "chart": ChartName, "version": ChartVersion,
 		"heritage": "operator", "release": ReleaseName}
 }
 
