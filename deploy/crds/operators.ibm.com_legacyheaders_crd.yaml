@@ -1,20 +1,20 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: commonwebuiservices.operators.ibm.com
+  name: legacyheaders.operators.ibm.com
 spec:
   group: operators.ibm.com
   names:
-    kind: CommonWebUIService
-    listKind: CommonWebUIServiceList
-    plural: commonwebuiservices
-    singular: commonwebuiservice
+    kind: LegacyHeader
+    listKind: LegacyHeaderList
+    plural: legacyheaders
+    singular: legacyheader
   scope: Namespaced
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: CommonWebUIService is the Schema for the commonwebuiservices API
+      description: LegacyHeader is the Schema for the legacyHeader API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -29,34 +29,37 @@ spec:
         metadata:
           type: object
         spec:
-          description: CommonWebUIServiceSpec defines the desired state of CommonWebUIServiceSpec
+          description: LegacyHeaderServiceSpec defines the desired state of LegacyHeaderService
           properties:
-            globalConfig:
-              description: CommonWebUIGlobalConfig defines the desired state of CommonWebUIGlobalConfig
+            globalUIConfig:
+              description: GlobalUIConfig defines the desired state of GlobalUIConfig
               properties:
-                CLOUDPAK_VERSION:
+                authServiceURL:
                   type: string
-                authServiceUrl:
+                cloudPakVersion:
                   type: string
-                cfcRouterUrl:
+                clusterName:
                   type: string
-                cluster_name:
+                defaultAdminUser:
                   type: string
-                default_admin_user:
+                identityProviderURL:
                   type: string
                 pullSecret:
                   type: string
-                router_https_port:
+                routerHTTPSPort:
                   format: int32
                   type: integer
-                session_polling_interval:
+                routerURL:
+                  type: string
+                sessionPollingInterval:
                   format: int32
                   type: integer
               type: object
-            operatorVersion:
-              type: string
-            uiconfig:
-              description: CommonWebUIConfig defines the desired state of CommonWebUIConfig
+            legacyConfig:
+              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                Important: Run "operator-sdk generate k8s" to regenerate code after
+                modifying this file Add custom validation using kubebuilder tags:
+                https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
               properties:
                 cpuLimits:
                   type: string
@@ -68,6 +71,18 @@ spec:
                   type: string
                 ingressPath:
                   type: string
+                legacyDocURL:
+                  type: string
+                legacyLogoAltText:
+                  type: string
+                legacyLogoHeight:
+                  type: string
+                legacyLogoPath:
+                  type: string
+                legacyLogoWidth:
+                  type: string
+                legacySupportURL:
+                  type: string
                 requestLimits:
                   type: string
                 requestMemory:
@@ -75,9 +90,11 @@ spec:
                 serviceName:
                   type: string
               type: object
+            operatorVersion:
+              type: string
           type: object
         status:
-          description: CommonWebUIServiceStatus defines the observed state of CommonWebUIService
+          description: LegacyHeaderStatus defines the observed state of LegacyHeaderService
           properties:
             nodes:
               description: 'INSERT ADDITIONAL STATUS FIELD - define observed state

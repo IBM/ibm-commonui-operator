@@ -7,12 +7,12 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// CommonWebUIServiceSpec defines the desired state of CommonWebUIServiceSpec
+// CommonWebUISpec defines the desired state of CommonWebUISpec
 // +k8s:openapi-gen=true
-type CommonWebUIServiceSpec struct {
-	CommonUIConfig  CommonWebUIConfig       `json:"uiconfig,omitempty"`
-	GlobalUIConfig  CommonWebUIGlobalConfig `json:"globalConfig,omitempty"`
-	OperatorVersion string                  `json:"operatorVersion,omitempty"`
+type CommonWebUISpec struct {
+	CommonWebUIConfig CommonWebUIConfig `json:"commonWebUIConfig,omitempty"`
+	GlobalUIConfig    GlobalUIConfig    `json:"globalUIConfig,omitempty"`
+	OperatorVersion   string            `json:"operatorVersion,omitempty"`
 }
 
 // CommonWebUIConfig defines the desired state of CommonWebUIConfig
@@ -25,26 +25,26 @@ type CommonWebUIConfig struct {
 	CPUMemory     string `json:"cpuMemory,omitempty"`
 	RequestLimits string `json:"requestLimits,omitempty"`
 	RequestMemory string `json:"requestMemory,omitempty"`
-	IngressPath              string `json:"ingressPath,omitempty"`
+	IngressPath   string `json:"ingressPath,omitempty"`
 }
 
-// CommonWebUIGlobalConfig defines the desired state of CommonWebUIGlobalConfig
+// GlobalUIConfig defines the desired state of GlobalUIConfig
 // +k8s:openapi-gen=true
-type CommonWebUIGlobalConfig struct {
-	PullSecret               string `json:"pullSecret,omitempty"`
-	RouterURL                string `json:"cfcRouterUrl,omitempty"`
-	IdentityProviderURL      string `json:identityProviderUrl,omitempty"`
-	AuthServiceURL           string `json:"authServiceUrl,omitempty"`
-	CloudPakVersion          string `json:"CLOUDPAK_VERSION,omitempty"`
-	DefaultAdminUser         string `json:"default_admin_user,omitempty"`
-	RouterHTTPSPort          int32 `json:"router_https_port,omitempty"`
-	ClusterName              string `json:"cluster_name,omitempty"`
-	SessionPollingInterval   int32 `json:"session_polling_interval,omitempty"`
+type GlobalUIConfig struct {
+	PullSecret             string `json:"pullSecret,omitempty"`
+	RouterURL              string `json:"routerURL,omitempty"`
+	IdentityProviderURL    string `json:"identityProviderURL,omitempty"`
+	AuthServiceURL         string `json:"authServiceURL,omitempty"`
+	CloudPakVersion        string `json:"cloudPakVersion,omitempty"`
+	DefaultAdminUser       string `json:"defaultAdminUser,omitempty"`
+	RouterHTTPSPort        int32  `json:"routerHTTPSPort,omitempty"`
+	ClusterName            string `json:"clusterName,omitempty"`
+	SessionPollingInterval int32  `json:"sessionPollingInterval,omitempty"`
 }
 
-// CommonWebUIServiceStatus defines the observed state of CommonWebUIService
+// CommonWebUIStatus defines the observed state of CommonWebUI
 // +k8s:openapi-gen=true
-type CommonWebUIServiceStatus struct {
+type CommonWebUIStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
@@ -53,27 +53,27 @@ type CommonWebUIServiceStatus struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// CommonWebUIService is the Schema for the commonwebuiservices API
+// CommonWebUI is the Schema for the commonwebuis API
 // +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=commonwebuiservices,scope=Namespaced
-type CommonWebUIService struct {
+// +kubebuilder:resource:path=commonwebuis,scope=Namespaced
+type CommonWebUI struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   CommonWebUIServiceSpec   `json:"spec,omitempty"`
-	Status CommonWebUIServiceStatus `json:"status,omitempty"`
+	Spec   CommonWebUISpec   `json:"spec,omitempty"`
+	Status CommonWebUIStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// CommonWebUIServiceList contains a list of CommonWebUIService
-type CommonWebUIServiceList struct {
+// CommonWebUIList contains a list of CommonWebUI
+type CommonWebUIList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []CommonWebUIService `json:"items"`
+	Items           []CommonWebUI `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&CommonWebUIService{}, &CommonWebUIServiceList{})
+	SchemeBuilder.Register(&CommonWebUI{}, &CommonWebUIList{})
 }

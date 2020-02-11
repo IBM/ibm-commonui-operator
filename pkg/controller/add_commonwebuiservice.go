@@ -1,7 +1,7 @@
 package controller
 
 import (
-	"github.com/example-inc/app-operator/pkg/controller/commonwebuiservice"
+	"github.com/ibm/ibm-commonui-operator/pkg/controller/commonwebuiservice"
 )
 
 func init() {

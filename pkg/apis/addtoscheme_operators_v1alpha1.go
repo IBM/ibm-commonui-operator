@@ -17,7 +17,7 @@
 package apis
 
 import (
-	"github.com/example-inc/app-operator/pkg/apis/operators/v1alpha1"
+	"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 )
 
 func init() {
