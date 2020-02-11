@@ -13,7 +13,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 
-	// netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -75,6 +75,16 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource
+	// Watch for changes to secondary resource ConfigMap and requeue the owner CommonWebUIService
+	err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
+	})
+	if err != nil {
+		return err
+	}
+
+	// TODO(user): Modify this to be the types you create that are owned by the primary resource
 	// Watch for changes to secondary resource "Daemonset" and requeue the owner CommonWebUIService
 	err = c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
@@ -94,13 +104,13 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to secondary resource "Ingress" and requeue the owner CommonWebUIService
-	// err = c.Watch(&source.Kind{Type: &netv1.Ingress{}}, &handler.EnqueueRequestForOwner{
-	// 	IsController: true,
-	// 	OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
-	// })
-	// if err != nil {
-	// 	return err
-	// }
+	err = c.Watch(&source.Kind{Type: &netv1.Ingress{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
+	})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -148,6 +158,12 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 	opVersion := instance.Spec.OperatorVersion
 	reqLogger.Info("got CommonWebUIService instance, version=" + opVersion)
 
+	// Check if the config maps already exist. If not, create a new one.
+	err = r.reconcileConfigMaps(instance, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
 	// Check if the DaemonSet already exists, if not create a new one
 	currentDaemonSet := &appsv1.DaemonSet{}
 	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.DaemonSetName, Namespace: instance.Namespace}, currentDaemonSet)
@@ -173,6 +189,11 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 	if err != nil {
 		return reconcile.Result{}, err
 	}
+	// Check if the common web ui Ingresses already exist. If not, create a new one.
+	err = r.reconcileIngresses(instance, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
 
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
@@ -186,11 +207,78 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 	return reconcile.Result{}, nil
 }
 
+func (r *ReconcileCommonWebUIService) reconcileConfigMaps(instance *operatorsv1alpha1.CommonWebUIService, needToRequeue *bool) error {
+	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
+
+	reqLogger.Info("checking log4js config map Service")
+	// Check if the log4js config map already exists, if not create a new one
+	currentConfigMap := &corev1.ConfigMap{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.Log4jsConfigMap, Namespace: instance.Namespace}, currentConfigMap)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new ConfigMap
+		newConfigMap := res.Log4jsConfigMapUI(instance)
+
+		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set owner for log4js config map", "Namespace", newConfigMap.Namespace,
+				"Name", newConfigMap.Name)
+			return err
+		}
+
+		reqLogger.Info("Creating a log4js config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
+		err = r.client.Create(context.TODO(), newConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create a config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
+			return err
+		}
+		// Service created successfully - return and requeue
+		*needToRequeue = true
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get log 4js config map")
+		return err
+	}
+
+	reqLogger.Info("got log4js config map")
+
+	// Check if the common config map already exists, if not create a new one
+	currentConfigMap = &corev1.ConfigMap{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.CommonConfigMap, Namespace: instance.Namespace}, currentConfigMap)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new ConfigMap
+		newConfigMap := res.CommonConfigMapUI(instance)
+
+		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set owner for common config map", "Namespace", newConfigMap.Namespace,
+				"Name", newConfigMap.Name)
+			return err
+		}
+
+		reqLogger.Info("Creating a common config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
+		err = r.client.Create(context.TODO(), newConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create a config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
+			return err
+		}
+		// Service created successfully - return and requeue
+		*needToRequeue = true
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get common config map")
+		return err
+	}
+
+	reqLogger.Info("got common config map")
+
+	return nil
+
+}
+
 func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.DaemonSet {
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
 	podLabels := res.LabelsForPodMetadata(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
+	Annotations := res.DeamonSetAnnotations
 
 	var image string
 	if instance.Spec.CommonUIConfig.ImageRegistry == "" {
@@ -239,7 +327,8 @@ func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alp
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
-					Labels: podLabels,
+					Labels:      podLabels,
+					Annotations: Annotations,
 				},
 				Spec: corev1.PodSpec{
 					Affinity: &corev1.Affinity{
@@ -280,7 +369,7 @@ func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alp
 			},
 		},
 	}
-	// Set Commonsvcsuiserive instance as the owner and controller of the DaemonSet
+	// Set Commonsvcsuiservice instance as the owner and controller of the DaemonSet
 	err := controllerutil.SetControllerReference(instance, daemon, r.scheme)
 	if err != nil {
 		reqLogger.Error(err, "Failed to set owner for Rdr DaemonSet")
@@ -300,7 +389,15 @@ func (r *ReconcileCommonWebUIService) reconcileService(instance *operatorsv1alph
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.ServiceName, Namespace: instance.Namespace}, currentService)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new Service
-		newService := r.serviceForCommonWebUI(instance)
+		newService := res.ServiceForCommonWebUI(instance)
+
+		// Set Commonsvcsuiservice instance as the owner and controller of the Service
+		err := controllerutil.SetControllerReference(instance, newService, r.scheme)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set owner for common web ui Service")
+			return nil
+		}
+
 		reqLogger.Info("Creating a new common web ui Service", "Service.Namespace", newService.Namespace, "Service.Name", newService.Name)
 		err = r.client.Create(context.TODO(), newService)
 		if err != nil {
@@ -319,42 +416,94 @@ func (r *ReconcileCommonWebUIService) reconcileService(instance *operatorsv1alph
 	return nil
 }
 
-// serviceForCommonWebUI returns a common web ui Service object
-func (r *ReconcileCommonWebUIService) serviceForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *corev1.Service {
-	reqLogger := log.WithValues("func", "serviceForCommonWebUI", "instance.Name", instance.Name)
-	metaLabels := res.LabelsForMetadata(res.ServiceName)
-	metaLabels["kubernetes.io/cluster-service"] = "true"
-	metaLabels["kubernetes.io/name"] = instance.Spec.CommonUIConfig.ServiceName
-	metaLabels["app"] = instance.Spec.CommonUIConfig.ServiceName
-	selectorLabels := res.LabelsForSelector(res.ServiceName, commonwebuiserviceCrType, instance.Name)
+// Check if the common web ui Ingresses already exist. If not, create a new one.
+// This function was created to reduce the cyclomatic complexity :)
+func (r *ReconcileCommonWebUIService) reconcileIngresses(instance *operatorsv1alpha1.CommonWebUIService, needToRequeue *bool) error {
+	reqLogger := log.WithValues("func", "reconcileIngresses", "instance.Name", instance.Name)
 
-	reqLogger.Info("CS??? Entry")
-	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.ServiceName,
-			Namespace: instance.Namespace,
-			Labels:    metaLabels,
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Name: instance.Spec.CommonUIConfig.ServiceName,
-					Port: 3000,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 3000,
-					},
-				},
-			},
-			Selector: selectorLabels,
-		},
-	}
+	reqLogger.Info("checking  common web ui api ingress")
+	// Check if the common web ui api ingress already exists, if not create a new one
+	apiIngress := &netv1.Ingress{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.ApiIngress, Namespace: instance.Namespace}, apiIngress)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new Ingress
+		newApiIngress := res.ApiIngressForCommonWebUI(instance)
 
-	// Set Metering instance as the owner and controller of the Service
-	err := controllerutil.SetControllerReference(instance, service, r.scheme)
-	if err != nil {
-		reqLogger.Error(err, "Failed to set owner for common web ui Service")
-		return nil
+		// Set instance as the owner and controller of the ingress
+		err := controllerutil.SetControllerReference(instance, newApiIngress, r.scheme)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set owner for api ingress")
+			return nil
+		}
+
+		reqLogger.Info("Creating a new common web ui api Ingress", "Ingress.Namespace", newApiIngress.Namespace, "Ingress.Name", newApiIngress.Name)
+		err = r.client.Create(context.TODO(), newApiIngress)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new common web ui api Ingress", "Ingress.Namespace", newApiIngress.Namespace, "Ingress.Name", newApiIngress.Name)
+			return err
+		}
+		// Ingress created successfully - return and requeue
+		*needToRequeue = true
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get common web ui api Ingress")
+		return err
 	}
-	return service
+	reqLogger.Info("got common web ui api Ingress, checking common web ui callback Ingress")
+
+	// Check if the common web ui api ingress already exists, if not create a new one
+	callbackIngress := &netv1.Ingress{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.CallbackIngress, Namespace: instance.Namespace}, callbackIngress)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new Ingress
+		newCallbackIngress := res.CallbackIngressForCommonWebUI(instance)
+
+		// Set instance as the owner and controller of the ingress
+		err := controllerutil.SetControllerReference(instance, newCallbackIngress, r.scheme)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set owner for callback ingress")
+			return nil
+		}
+
+		reqLogger.Info("Creating a new common web ui callback Ingress", "Ingress.Namespace", newCallbackIngress.Namespace, "Ingress.Name", newCallbackIngress.Name)
+		err = r.client.Create(context.TODO(), newCallbackIngress)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new common web ui callback Ingress", "Ingress.Namespace", newCallbackIngress.Namespace, "Ingress.Name", newCallbackIngress.Name)
+			return err
+		}
+		// Ingress created successfully - return and requeue
+		*needToRequeue = true
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get common web ui callback Ingress")
+		return err
+	}
+	reqLogger.Info("got common web ui callback Ingress, checking common web ui nav Ingress")
+
+	navIngress := &netv1.Ingress{}
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.NavIngress, Namespace: instance.Namespace}, navIngress)
+	if err != nil && errors.IsNotFound(err) {
+		// Define a new Ingress
+		newNavIngress := res.NavIngressForCommonWebUI(instance)
+
+		// Set instance as the owner and controller of the ingress
+		err := controllerutil.SetControllerReference(instance, newNavIngress, r.scheme)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set owner for Nav ingress")
+			return nil
+		}
+
+		reqLogger.Info("Creating a new common web ui nav Ingress", "Ingress.Namespace", newNavIngress.Namespace, "Ingress.Name", newNavIngress.Name)
+		err = r.client.Create(context.TODO(), newNavIngress)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new common web ui nav Ingress", "Ingress.Namespace", newNavIngress.Namespace, "Ingress.Name", newNavIngress.Name)
+			return err
+		}
+		// Ingress created successfully - return and requeue
+		*needToRequeue = true
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get common web ui callback Ingress")
+		return err
+	}
+	reqLogger.Info("got common web ui nav Ingress")
+
+	return nil
 }
