@@ -1,0 +1,18 @@
+apiVersion: operators.ibm.com/v1alpha1
+kind: CloudPakSwitcher
+metadata:
+  name: MCM
+  namespace: default
+spec:
+  cloudPakInfo:
+    logoUrl: "{{ .Values.ingressPath }}/graphics/mcm-cloudpak-icon.svg"
+    label: "mcm2"
+    display: "Cloud Pak for Multicloud Manager"
+    landingPage: "/multicloud"
+    otherLinks:
+    - label: "link1"
+      display: "Link One"
+      url:  "/multicloud/link1"
+    - label: "link2"
+      display: "Link Two"
+      url: "/multicloud/link2"

@@ -1,0 +1,89 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: cloudpakswitcher.operators.ibm.com
+spec:
+  group: operators.ibm.com
+  names:
+    kind: CloudPakSwitcher
+    listKind: CloudPakSwitcherList
+    plural: cloudpakswitchers
+    singular: cloudpakswitcher
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: CloudPakSwitcher is the Schema for the cloudpakswitcher API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: CloudPakSwitcherSpec defines the desired state of CloudPakSwitcher
+          properties:
+            cloudPakInfo:
+              type: object
+              required: ["logoUrl", "label", "display", "landingPage"]
+              properties:
+                logoUrl:
+                  description: The URL that provides the cloud pak logo. Must be an unprotected URL.
+                  type: string
+                label:
+                  description: Cloud Pak label
+                  type: string
+                display: 
+                  description: Display string for the cloud pak
+                  type: string
+                landingPage:
+                  description: Link for landing page of the particular cloud pak
+                  type: string
+                otherLinks:
+                  description: List of links for quick navigation
+                  type: array
+                  items:
+                    type: object
+                    required: ["label", "display", "url"]
+                    properties:
+                      label:
+                        description: Label for the hotLinks
+                        type: string
+                      display:
+                        description: Test to be displayed in switcher
+                        type: string
+                      url:
+                        description: URL for the link
+                        type: string
+                      target:
+                        description: name of the tab or _blank where the link will launch within the window
+                        type: string
+          type: object
+        status:
+          description: CloudPakSwitcherStatus defines the observed state of CloudPakSwitcher
+          properties:
+            nodes:
+              description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
+                of cluster Important: Run "operator-sdk generate k8s" to regenerate
+                code after modifying this file Add custom validation using kubebuilder
+                tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
+              items:
+                type: string
+              type: array
+          required:
+          - nodes
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true

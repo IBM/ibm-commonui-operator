@@ -1,0 +1,11 @@
+apiVersion: operators.ibm.com/v1alpha1
+kind: CloudPakSwitcher
+metadata:
+  name: MCM
+  namespace: kube-system
+spec:
+  cloudPakInfo:
+    logoUrl: "{{ .Values.ingressPath }}/graphics/icp4i-cloudpak-icon.svg"
+    label: "icp4i"
+    display: "Cloud Pak for Integration"
+    landingPage: "/icp4i"
