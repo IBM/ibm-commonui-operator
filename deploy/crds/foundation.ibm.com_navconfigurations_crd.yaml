@@ -1,0 +1,150 @@
+  apiVersion: apiextensions.k8s.io/v1beta1
+  kind: CustomResourceDefinition
+  metadata:
+    name: navconfigurations.foundation.ibm.com
+  spec:
+    group: foundation.ibm.com
+    versions:
+      - name: v1
+        served: true
+        storage: true
+    validation:
+      openAPIV3Schema:
+        type: object
+        properties:
+          logoutRedirects:
+            description: A list a URLs we make requests to logout the users of all applications within the cloudpack.
+            type: array
+            items:
+              type: string
+          header:
+            type: object
+            required: ["logoUrl"]
+            properties:
+              disabledItem:
+                description: An array of header items that should be disabled when running within this CR context. Valid values are 'catalog', 'createResource', 'bookmark'
+                type: array
+                items:
+                  type: string
+              logoUrl:
+                description: The URL that provides the login page logo. Must be an unprotected URL.
+                type: string
+              logoWidth:
+                description: Width of the logo for the login page in pixels
+                type: string
+              logoHeight:
+                description: Height of the logo for the login page in pixels
+                type: string
+              docUrlMapping:
+                description: URL of the Knowledge center page for the cloud pak
+                type: string
+              supportUrl:
+                description: URL of the Support page for the cloud pak
+                type: string
+              gettingStartedUrl:
+                description: URL of the Getting started page for the cloud pak
+                type: string
+          about:
+            type: object
+            required: ["logoUrl"]
+            properties:
+              logoUrl:
+                description: URL of the Logo on the About page for the cloud pak
+                type: string
+              licenses:
+                description: List of licenses we ship with the cloud pak
+                type: array
+                items:
+                  type: string
+              copyright:
+                description: Copyright string for the cloud pak
+                type: string
+              version:
+                description: Version of the cloud pak
+                type: string
+              edition:
+                description: Edition of the cloud pak
+                type: string
+          login:
+            type: object
+            required: ["logoAltText", "logoUrl"]
+            properties:
+              logoAltText:
+                description: Alternate text of the shared header logo for cloud pak
+                type: string
+              logoUrl:
+                description: URL of the shared header logo for the cloud pak
+                type: string
+              logoWidth:
+                description: Width of the shared header logo in pixels
+                type: string
+              logoHeight:
+                description: Height of the shared header logo in pixels
+                type: string
+              loginDialog:
+                type: object
+                properties:
+                  enabled:
+                    description: This value is used to enable/disable the user acceptance dialog on the login page
+                    type: boolean
+                  dialogHeaderText:
+                    description: Text that will display as the title of the user acceptance dialog on the login page
+                    type: string
+                  dialogText:
+                    description: Text that will display as the content of the user acceptance dialog on the login page
+                    type: string
+                  acceptText:
+                    description: Text that will display as the accept button text
+                    type: string
+          navItems:
+            type: array
+            items:
+              type: object
+              required: ["id", "label"]
+              properties:
+                id:
+                  description: Id of the navigation item, must be unique
+                  type: string
+                label:
+                  description: label of the navigation item
+                  type: string
+                url:
+                  description: URL of the nav item. It can either but an FQDN or a relative path based on the ingress of the cluster
+                  type: string
+                target:
+                  description: name of the tab or _blank where the navigation item will launch within the window
+                  type: string
+                iconUrl:
+                  description: URL of the icon that will display for the top level parents.
+                  type: string
+                parentId:
+                  description: ID of the parent this child item will be nested under
+                  type: string
+                namespace:
+                  description: Namespace where the microservice associated with this item is running. Used with service detection
+                  type: string
+                serviceName:
+                  description: Name of the service running in the namespace above tied to the deployment/daemonset. Used for service detection
+                  type: string
+                sericeId:
+                  description: Must be unique from a different microservice link. But the service id should remain the same for all links running on the same microservice for rendering purposes.
+                  type: string
+                detectionServiceName:
+                  description: Informs the shared web console detection service to use the serviceName for auto discovery. Value should be true or false string
+                  type: string
+                detectionLabelSelector:
+                  description: The label selector for the microservice for detection.
+                  type: string
+                isAuthorized:
+                  description: A list of authorized roles for the user
+                  type: array
+                  items:
+                    type: string
+    scope: Namespaced
+    names:
+      plural: navconfigurations
+      singular: navconfiguration
+      kind: NavConfiguration
+      shortNames:
+      - navconfig
+  
