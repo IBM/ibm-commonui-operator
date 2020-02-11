@@ -19,7 +19,7 @@ package legacyheaderservice
 import (
 	"context"
 
-	operatorv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
+	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -62,7 +62,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource LegacyHeaderService
-	err = c.Watch(&source.Kind{Type: &operatorv1alpha1.LegacyHeaderService{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &operatorsv1alpha1.LegacyHeader{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource Pods and requeue the owner LegacyHeaderService
 	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &operatorv1alpha1.LegacyHeaderService{},
+		OwnerType:    &operatorsv1alpha1.LegacyHeader{},
 	})
 	if err != nil {
 		return err
@@ -103,7 +103,7 @@ func (r *ReconcileLegacyHeaderService) Reconcile(request reconcile.Request) (rec
 	reqLogger.Info("Reconciling LegacyHeaderService")
 
 	// Fetch the LegacyHeaderService instance
-	instance := &operatorv1alpha1.LegacyHeaderService{}
+	instance := &operatorsv1alpha1.LegacyHeader{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -146,7 +146,7 @@ func (r *ReconcileLegacyHeaderService) Reconcile(request reconcile.Request) (rec
 }
 
 // newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *operatorv1alpha1.LegacyHeaderService) *corev1.Pod {
+func newPodForCR(cr *operatorsv1alpha1.LegacyHeader) *corev1.Pod {
 	labels := map[string]string{
 		"app": cr.Name,
 	}

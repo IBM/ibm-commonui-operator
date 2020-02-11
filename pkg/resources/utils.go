@@ -146,7 +146,7 @@ func LabelsForPodMetadata(deploymentName string, crType string, crName string) m
 	return podLabels
 }
 
-func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUIService) *corev1.ConfigMap {
+func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
 	reqLogger := log.WithValues("func", "log4jsConfigMap", "Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(Log4jsConfigMap)
@@ -163,7 +163,7 @@ func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUIService) *corev1.C
 	return configmap
 }
 
-func CommonConfigMapUI(instance *operatorsv1alpha1.CommonWebUIService) *corev1.ConfigMap {
+func CommonConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
 	reqLogger := log.WithValues("func", "commonConfigMap", "Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(CommonConfigMap)
@@ -181,25 +181,25 @@ func CommonConfigMapUI(instance *operatorsv1alpha1.CommonWebUIService) *corev1.C
 }
 
 // serviceForCommonWebUI returns a common web ui Service object
-func ServiceForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *corev1.Service {
+func ServiceForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.Service {
 	reqLogger := log.WithValues("func", "serviceForCommonWebUI", "instance.Name", instance.Name)
 	metaLabels := LabelsForMetadata(ServiceName)
 	metaLabels["kubernetes.io/cluster-service"] = "true"
-	metaLabels["kubernetes.io/name"] = instance.Spec.CommonUIConfig.ServiceName
-	metaLabels["app"] = instance.Spec.CommonUIConfig.ServiceName
+	metaLabels["kubernetes.io/name"] = instance.Spec.CommonWebUIConfig.ServiceName
+	metaLabels["app"] = instance.Spec.CommonWebUIConfig.ServiceName
 	selectorLabels := LabelsForSelector(ServiceName, commonwebuiserviceCrType, instance.Name)
 
 	reqLogger.Info("CS??? Entry")
 	service := &corev1.Service{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Spec.CommonUIConfig.ServiceName,
+			Name:      instance.Spec.CommonWebUIConfig.ServiceName,
 			Namespace: instance.Namespace,
 			Labels:    metaLabels,
 		},
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
 				{
-					Name: instance.Spec.CommonUIConfig.ServiceName,
+					Name: instance.Spec.CommonWebUIConfig.ServiceName,
 					Port: 3000,
 					TargetPort: intstr.IntOrString{
 						Type:   intstr.Int,
@@ -213,12 +213,12 @@ func ServiceForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *core
 	return service
 }
 
-func ApiIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *netv1.Ingress {
+func ApiIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.Ingress {
 	reqLogger := log.WithValues("func", "apiIngressForCommonWebUI", "Ingress.Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(ApiIngress)
 	Annotations := ApiIngressAnnotations
-	IngressPath := instance.Spec.CommonUIConfig.IngressPath
+	IngressPath := instance.Spec.CommonWebUIConfig.IngressPath
 	ApiIngressPath := IngressPath + "/api/"
 	LogoutIngressPath := IngressPath + "/logout/"
 	ingress := &netv1.Ingress{
@@ -237,7 +237,7 @@ func ApiIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *n
 								{
 									Path: ApiIngressPath,
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.CommonUIConfig.ServiceName,
+										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
 										ServicePort: intstr.IntOrString{
 											Type:   intstr.Int,
 											IntVal: 3000,
@@ -247,7 +247,7 @@ func ApiIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *n
 								{
 									Path: LogoutIngressPath,
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.CommonUIConfig.ServiceName,
+										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
 										ServicePort: intstr.IntOrString{
 											Type:   intstr.Int,
 											IntVal: 3000,
@@ -265,7 +265,7 @@ func ApiIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *n
 
 }
 
-func CallbackIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *netv1.Ingress {
+func CallbackIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.Ingress {
 	reqLogger := log.WithValues("func", "callbackIngressForCommonWebUI", "Ingress.Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(CallbackIngress)
@@ -286,7 +286,7 @@ func CallbackIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIServic
 								{
 									Path: "/auth/liberty/callback",
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.CommonUIConfig.ServiceName,
+										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
 										ServicePort: intstr.IntOrString{
 											Type:   intstr.Int,
 											IntVal: 3000,
@@ -304,7 +304,7 @@ func CallbackIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIServic
 
 }
 
-func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *netv1.Ingress {
+func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.Ingress {
 	reqLogger := log.WithValues("func", "navIngressForCommonWebUI", "Ingress.Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(NavIngress)
@@ -323,9 +323,9 @@ func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUIService) *n
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: instance.Spec.CommonUIConfig.IngressPath,
+									Path: instance.Spec.CommonWebUIConfig.IngressPath,
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.CommonUIConfig.ServiceName,
+										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
 										ServicePort: intstr.IntOrString{
 											Type:   intstr.Int,
 											IntVal: 3000,

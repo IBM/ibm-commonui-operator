@@ -59,7 +59,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// Watch for changes to primary resource CommonWebUIService
-	err = c.Watch(&source.Kind{Type: &operatorsv1alpha1.CommonWebUIService{}}, &handler.EnqueueRequestForObject{})
+	err = c.Watch(&source.Kind{Type: &operatorsv1alpha1.CommonWebUI{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource Pods and requeue the owner CommonWebUIService
 	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
+		OwnerType:    &operatorsv1alpha1.CommonWebUI{},
 	})
 	if err != nil {
 		return err
@@ -78,7 +78,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource ConfigMap and requeue the owner CommonWebUIService
 	err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
+		OwnerType:    &operatorsv1alpha1.CommonWebUI{},
 	})
 	if err != nil {
 		return err
@@ -88,7 +88,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource "Daemonset" and requeue the owner CommonWebUIService
 	err = c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
+		OwnerType:    &operatorsv1alpha1.CommonWebUI{},
 	})
 	if err != nil {
 		return err
@@ -97,7 +97,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource "Service" and requeue the owner CommonWebUIService
 	err = c.Watch(&source.Kind{Type: &corev1.Service{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
+		OwnerType:    &operatorsv1alpha1.CommonWebUI{},
 	})
 	if err != nil {
 		return err
@@ -106,7 +106,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource "Ingress" and requeue the owner CommonWebUIService
 	err = c.Watch(&source.Kind{Type: &netv1.Ingress{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &operatorsv1alpha1.CommonWebUIService{},
+		OwnerType:    &operatorsv1alpha1.CommonWebUI{},
 	})
 	if err != nil {
 		return err
@@ -141,7 +141,7 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 	needToRequeue := false
 
 	// Fetch the CommonWebUIService CR instance
-	instance := &operatorsv1alpha1.CommonWebUIService{}
+	instance := &operatorsv1alpha1.CommonWebUI{}
 
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
@@ -207,7 +207,7 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileCommonWebUIService) reconcileConfigMaps(instance *operatorsv1alpha1.CommonWebUIService, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUIService) reconcileConfigMaps(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking log4js config map Service")
@@ -273,7 +273,7 @@ func (r *ReconcileCommonWebUIService) reconcileConfigMaps(instance *operatorsv1a
 
 }
 
-func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUIService) *appsv1.DaemonSet {
+func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) *appsv1.DaemonSet {
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
@@ -281,11 +281,11 @@ func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alp
 	Annotations := res.DeamonSetAnnotations
 
 	var image string
-	if instance.Spec.CommonUIConfig.ImageRegistry == "" {
+	if instance.Spec.CommonWebUIConfig.ImageRegistry == "" {
 		image = res.DefaultImageRegistry + "/" + res.DefaultImageName + ":" + res.DefaultImageTag
 		reqLogger.Info("CS??? default Image=" + image)
 	} else {
-		image = instance.Spec.CommonUIConfig.ImageRegistry + "/" + res.DefaultImageName + ":" + instance.Spec.CommonUIConfig.ImageTag
+		image = instance.Spec.CommonWebUIConfig.ImageRegistry + "/" + res.DefaultImageName + ":" + instance.Spec.CommonWebUIConfig.ImageTag
 		reqLogger.Info("CS??? Image=" + image)
 	}
 
@@ -380,7 +380,7 @@ func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alp
 
 // Check if the Common web ui Service already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileCommonWebUIService) reconcileService(instance *operatorsv1alpha1.CommonWebUIService, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUIService) reconcileService(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileService", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking common web ui Service")
@@ -418,7 +418,7 @@ func (r *ReconcileCommonWebUIService) reconcileService(instance *operatorsv1alph
 
 // Check if the common web ui Ingresses already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileCommonWebUIService) reconcileIngresses(instance *operatorsv1alpha1.CommonWebUIService, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUIService) reconcileIngresses(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileIngresses", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking  common web ui api ingress")

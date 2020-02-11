@@ -25,18 +25,18 @@ import (
 
 // LegacyHeaderServiceSpec defines the desired state of LegacyHeaderService
 // +k8s:openapi-gen=true
-type LegacyHeaderServiceSpec struct {
+type LegacyHeaderSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	LegacyUIConfig  CommonWebUILegacyConfig `json:"legacyuiconfig,omitempty"`
-	GlobalUIConfig  CommonWebUILegacyGlobalConfig `json:"globalConfig,omitempty"`
-	OperatorVersion string                  `json:"operatorVersion,omitempty"`
+	LegacyConfig         LegacyConfig         `json:"legacyConfig,omitempty"`
+	LegacyGlobalUIConfig LegacyGlobalUIConfig `json:"globalUIConfig,omitempty"`
+	OperatorVersion      string               `json:"operatorVersion,omitempty"`
 }
 
-// CommonWebUILegacyConfig defines the desired state of CommonWebUILegacyConfig
+// LegacyConfig defines the desired state of LegacyConfig
 // +k8s:openapi-gen=true
-type CommonWebUILegacyConfig struct {
+type LegacyConfig struct {
 	ServiceName       string `json:"serviceName,omitempty"`
 	ImageRegistry     string `json:"imageRegistry,omitempty"`
 	ImageTag          string `json:"imageTag,omitempty"`
@@ -47,29 +47,29 @@ type CommonWebUILegacyConfig struct {
 	LegacyLogoPath    string `json:"legacyLogoPath,omitempty"`
 	LegacyLogoWidth   string `json:"legacyLogoWidth,omitempty"`
 	LegacyLogoHeight  string `json:"legacyLogoHeight,omitempty"`
-	LegacySupportURL  string `json:"legacySupportUrl,omitempty"`
-	LegacyDocURL      string `json:"legacyDocUrl,omitempty"`
+	LegacySupportURL  string `json:"legacySupportURL,omitempty"`
+	LegacyDocURL      string `json:"legacyDocURL,omitempty"`
 	LegacyLogoAltText string `json:"legacyLogoAltText,omitempty"`
 	IngressPath       string `json:"ingressPath,omitempty"`
 }
 
-// CommonWebUIGlobalConfig defines the desired state of CommonWebUIGlobalConfig
+// GlobalUIConfig defines the desired state of GlobalUIConfig
 // +k8s:openapi-gen=true
-type CommonWebUILegacyGlobalConfig struct {
-	PullSecret               string `json:"pullSecret,omitempty"`
-	RouterURL                string `json:"cfcRouterUrl,omitempty"`
-	IdentityProviderURL      string `json:"identityProviderUrl,omitempty"`
-	AuthServiceURL           string `json:"authServiceUrl,omitempty"`
-	CloudPakVersion          string `json:"CLOUDPAK_VERSION,omitempty"`
-	DefaultAdminUser         string `json:"default_admin_user,omitempty"`
-	RouterHTTPSPort          int32 `json:"router_https_port,omitempty"`
-	ClusterName              string `json:"cluster_name,omitempty"`
-	SessionPollingInterval   int32 `json:"session_polling_interval,omitempty"`
+type LegacyGlobalUIConfig struct {
+	PullSecret             string `json:"pullSecret,omitempty"`
+	RouterURL              string `json:"routerURL,omitempty"`
+	IdentityProviderURL    string `json:"identityProviderURL,omitempty"`
+	AuthServiceURL         string `json:"authServiceURL,omitempty"`
+	CloudPakVersion        string `json:"cloudPakVersion,omitempty"`
+	DefaultAdminUser       string `json:"defaultAdminUser,omitempty"`
+	RouterHTTPSPort        int32  `json:"routerHTTPSPort,omitempty"`
+	ClusterName            string `json:"clusterName,omitempty"`
+	SessionPollingInterval int32  `json:"sessionPollingInterval,omitempty"`
 }
 
-// LegacyHeaderServiceStatus defines the observed state of LegacyHeaderService
+// LegacyHeaderStatus defines the observed state of LegacyHeaderService
 // +k8s:openapi-gen=true
-type LegacyHeaderServiceStatus struct {
+type LegacyHeaderStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
@@ -78,27 +78,27 @@ type LegacyHeaderServiceStatus struct {
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// LegacyHeaderService is the Schema for the legacyheaderservices API
+// LegacyHeader is the Schema for the legacyHeader API
 // +k8s:openapi-gen=true
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=legacyheaderservices,scope=Namespaced
-type LegacyHeaderService struct {
+// +kubebuilder:resource:path=legacyheaders,scope=Namespaced
+type LegacyHeader struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   LegacyHeaderServiceSpec   `json:"spec,omitempty"`
-	Status LegacyHeaderServiceStatus `json:"status,omitempty"`
+	Spec   LegacyHeaderSpec   `json:"spec,omitempty"`
+	Status LegacyHeaderStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// LegacyHeaderServiceList contains a list of LegacyHeaderService
-type LegacyHeaderServiceList struct {
+// LegacyHeaderList contains a list of LegacyHeader
+type LegacyHeaderList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []LegacyHeaderService `json:"items"`
+	Items           []LegacyHeader `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&LegacyHeaderService{}, &LegacyHeaderServiceList{})
+	SchemeBuilder.Register(&LegacyHeader{}, &LegacyHeaderList{})
 }

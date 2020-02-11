@@ -1,21 +1,20 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: legacyheaderservices.operators.ibm.com
+  name: legacyheaders.operators.ibm.com
 spec:
   group: operators.ibm.com
   names:
-    kind: LegacyHeaderService
-    listKind: LegacyHeaderServiceList
-    plural: legacyheaderservices
-    singular: legacyheaderservice
+    kind: LegacyHeader
+    listKind: LegacyHeaderList
+    plural: legacyheaders
+    singular: legacyheader
   scope: Namespaced
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: LegacyHeaderService is the Schema for the legacyheaderservices
-        API
+      description: LegacyHeader is the Schema for the legacyHeader API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -32,31 +31,33 @@ spec:
         spec:
           description: LegacyHeaderServiceSpec defines the desired state of LegacyHeaderService
           properties:
-            globalConfig:
-              description: CommonWebUIGlobalConfig defines the desired state of CommonWebUIGlobalConfig
+            globalUIConfig:
+              description: GlobalUIConfig defines the desired state of GlobalUIConfig
               properties:
-                CLOUDPAK_VERSION:
+                authServiceURL:
                   type: string
-                authServiceUrl:
+                cloudPakVersion:
                   type: string
-                cfcRouterUrl:
+                clusterName:
                   type: string
-                cluster_name:
+                defaultAdminUser:
                   type: string
-                default_admin_user:
+                identityProviderURL:
                   type: string
                 identityProviderUrl:
                   type: string
                 pullSecret:
                   type: string
-                router_https_port:
+                routerHTTPSPort:
                   format: int32
                   type: integer
-                session_polling_interval:
+                routerURL:
+                  type: string
+                sessionPollingInterval:
                   format: int32
                   type: integer
               type: object
-            legacyuiconfig:
+            legacyConfig:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 Important: Run "operator-sdk generate k8s" to regenerate code after
                 modifying this file Add custom validation using kubebuilder tags:
@@ -72,7 +73,7 @@ spec:
                   type: string
                 ingressPath:
                   type: string
-                legacyDocUrl:
+                legacyDocURL:
                   type: string
                 legacyLogoAltText:
                   type: string
@@ -82,7 +83,7 @@ spec:
                   type: string
                 legacyLogoWidth:
                   type: string
-                legacySupportUrl:
+                legacySupportURL:
                   type: string
                 requestLimits:
                   type: string
@@ -95,7 +96,7 @@ spec:
               type: string
           type: object
         status:
-          description: LegacyHeaderServiceStatus defines the observed state of LegacyHeaderService
+          description: LegacyHeaderStatus defines the observed state of LegacyHeaderService
           properties:
             nodes:
               description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
