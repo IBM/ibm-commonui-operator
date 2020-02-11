@@ -1,0 +1,26 @@
+apiVersion: operators.ibm.com/v1alpha1
+kind: CommonWebUI
+metadata:
+  name: example-commonwebui
+spec:
+  commonWebUIConfig:
+    cloudPakVersion: 3.2.4
+    authServiceURL: https://icp-management-ingress:443/idauth
+    routerURL: https://icp-management-ingress:443
+    identityProviderURL: https://icp-management-ingress:443/idprovider
+    clusterName: mycluster
+    defaultAdminUser: admin
+    routerHTTPSPort: 443
+    sessionPollingInterval: 5000
+  globalUIConfig:
+    ingressPath: /common-nav2
+    cpuLimits: 300m
+    cpuMemory: 200Mi
+    requestLimits: 300m
+    requestMemory: 200Mi
+    imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64
+    imageTag: 1.1.0
+    serviceName: common-web-ui
+  operatorVersion: 1.1.0
+
+  

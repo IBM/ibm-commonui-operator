@@ -1,4 +1,4 @@
-module github.com/example-inc/app-operator
+module github.com/ibm/ibm-commonui-operator
 
 go 1.13
 
