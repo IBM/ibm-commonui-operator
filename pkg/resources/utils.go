@@ -134,6 +134,8 @@ var Log4jsData = map[string]string{
 	  }`,
 }
 
+// REVISIT for legacy controller
+// This is temporary
 var CommonData = map[string]string{
 	"ui-config.json": `    {
 		"icpText": "IBM CLOUD PAK",
@@ -197,6 +199,9 @@ func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMa
 	return configmap
 }
 
+// REVISIT
+// Need to build this config map for legacy header intance and the set the values dynamically for it,
+// since it is not required for common header
 func CommonConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
 	reqLogger := log.WithValues("func", "commonConfigMap", "Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
