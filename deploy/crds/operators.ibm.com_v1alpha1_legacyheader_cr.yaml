@@ -21,10 +21,10 @@ spec:
     imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64
     imageTag: 1.1.0
     serviceName: platform-header
-    legacyDocUrl: /header/api/v1/doc
+    legacyDocURL: /header/api/v1/doc
     legacyLogoAltText: IBM Cloud Pak
     legacyLogoHeight: 355px
     legacyLogoPath: "/common-nav/graphics/ibm-cloudpack-logo.svg"
     legacyLogoWidth: 18px
-    legacySupportUrl: /path/to/support.html
+    legacySupportURL: /path/to/support.html
   operatorVersion: 1.1.0

@@ -44,8 +44,6 @@ spec:
                   type: string
                 identityProviderURL:
                   type: string
-                identityProviderUrl:
-                  type: string
                 pullSecret:
                   type: string
                 routerHTTPSPort:

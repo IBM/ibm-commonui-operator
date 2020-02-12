@@ -48,8 +48,9 @@ var DeamonSetAnnotations = map[string]string{
 
 var ApiIngressAnnotations = map[string]string{
 	"kubernetes.io/ingress.class": "ibm-icp-management",
-	"icp.management.ibm.com/configuration-snippet": `add_header 'X-XSS-Protection' '1' always;
-        add_header Content-Security-Policy "default-src 'none'; font-src 'unsafe-inline' 'self'; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com"`,
+	"icp.management.ibm.com/configuration-snippet": `
+		add_header 'X-XSS-Protection' '1' always;
+        add_header Content-Security-Policy "default-src 'none'; font-src 'unsafe-inline' 'self'; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com";`,
 }
 
 var CallbackIngressAnnotations = map[string]string{
@@ -61,9 +62,42 @@ var NavIngressAnnotations = map[string]string{
 	"kubernetes.io/ingress.class":      "ibm-icp-management",
 	"icp.management.ibm.com/auth-type": "access-token",
 	"icp.management.ibm.com/app-root":  "/common-nav?root=true",
-	"icp.management.ibm.com/configuration-snippet": `add_header 'X-XSS-Protection' '1' always;
-        add_header Content-Security-Policy "default-src 'none'; font-src 'unsafe-inline' 'self'; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com"`,
+	"icp.management.ibm.com/configuration-snippet": `
+		add_header 'X-XSS-Protection' '1' always;
+        add_header Content-Security-Policy "default-src 'none'; font-src 'unsafe-inline' 'self'; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com";`,
 }
+
+// var Log4jsData = map[string]interface{}{
+// 	"log4js.json": map[string]interface{}{
+// 		"appenders": map[string]interface{}{
+// 			"console": map[string]interface{}{
+// 				"type": "console",
+// 				"layout": map[string]string{
+// 					"type":    "pattern",
+// 					"pattern": "[%d] [%p] [webui-nav] [%c] %m",
+// 				},
+// 			},
+// 		},
+// 		"catagories": map[string]interface{}{
+// 			"default": map[string]interface{}{
+// 				"appenders": "[console]",
+// 				"level":     "info",
+// 			},
+// 			"request": map[string]interface{}{
+// 				"appenders": "[console]",
+// 				"level":     "error",
+// 			},
+// 			"socket.io": map[string]interface{}{
+// 				"appenders": "[console]",
+// 				"level":     "error",
+// 			},
+// 			"status": map[string]interface{}{
+// 				"appenders": "[console]",
+// 				"level":     "info",
+// 			},
+// 		},
+// 	},
+// }
 
 var Log4jsData = map[string]string{
 	"log4js.json": `   {
@@ -150,7 +184,7 @@ func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMa
 	reqLogger := log.WithValues("func", "log4jsConfigMap", "Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(Log4jsConfigMap)
-
+	// jsonData, _ := json.Marshal(Log4jsData["log4js.json"])
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      Log4jsConfigMap,
@@ -167,6 +201,31 @@ func CommonConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMa
 	reqLogger := log.WithValues("func", "commonConfigMap", "Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(CommonConfigMap)
+	// data := map[string]interface{}{
+	// 	"ui-config.json": map[string]interface{}{
+	// 		"icpText": "IBM Cloud Pak",
+	// 		"loginDialog": map[string]interface{}{
+	// 			"enable":     false,
+	// 			"headerText": "Header text here",
+	// 			"dialogText": "You must set your dialog for this environment. To set the dialog: SSH into your boot/master node and run the following command: 'kubectl edit configmap platform-ui-config -n kube-system'. In the ConfigMap, locate the 'ui-config.json' parameter and find the 'loginDialog' > 'dialogText' key. Replace the default text with your dialog text, then save your changes.",
+	// 			"acceptText": "Your acceptance text here",
+	// 		},
+	// 		"login": map[string]interface{}{
+	// 			"path":   "/common-nav/api/graphics/logincloudpak.svg",
+	// 			"width":  "190px",
+	// 			"height": "47px",
+	// 		},
+	// 		"about": map[string]interface{}{
+	// 			"path": "IBM Coud Pak",
+	// 		},
+	// 		"header": map[string]interface{}{
+	// 			"path":   "/common-nav/graphics/ibm-cloudpack-logo.svg",
+	// 			"width":  "355px",
+	// 			"height": "18px",
+	// 		},
+	// 	},
+	// }
+	// jsonData, _ := json.Marshal(data["ui-config.json"])
 
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
