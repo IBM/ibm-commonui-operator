@@ -1,0 +1,61 @@
+apiVersion: foundation.ibm.com/v1
+kind: NavConfiguration
+metadata:
+  labels:
+    name: icp4i
+  name: icp4i
+spec:
+  header:
+    logoUrl: "/common-nav/graphics/ibm-cloudpak-integration.svg"
+    logoAltText: "Cloud Pak for Integration"
+    disabledItem: ['catalog', 'createResource', 'bookmark']
+  navItems:
+    - id: "metering"
+      label: "Metering"
+      url: "/metering/dashboard?ace_config={ 'showClusterData': false }&dashboard=cpi.icp.main&useNav=icp4i"
+      namespace: "kube-system"
+      serviceName: "metering-ui"
+      serviceId: "metering-ui"
+      parentId: "administer"
+      detectionServiceName: "true"
+    - id: "monitoring"
+      label: "Monitoring"
+      url: "/grafana"
+      namespace: "kube-system"
+      serviceName: "monitoring-prometheus"
+      serviceId: "monitoring-ui"
+      parentId: "administer"
+      target: "_blank"
+      detectionServiceName: "true"
+      isAuthorized:
+        - "Administrator"
+        - "ClusterAdministrator"
+        - "Operator"
+    - id: "releases"
+      label: "Helm Releases"
+      url: "/catalog/instances?useNav=icp4i"
+      parentId: "administer"
+      serviceId: "catalog-ui"
+    - id: "repos"
+      label: "Helm Repositories"
+      url: "/catalog/repositories?useNav=icp4i"
+      parentId: "administer"
+      serviceId: "catalog-ui"
+    - id: "administer"
+      label: "Administer"
+      iconUrl: "{{ .Values.ingressPath }}/graphics/administer.svg"
+    - id: "id-access"
+      label: "Identity and Access"
+      url: "{{ .Values.ingressPath }}/identity-access?useNav=icp4i"
+      parentId: "administer"
+      serviceId: "webui-nav"
+    - id: "logging"
+      label: "Logging"
+      url: "/kibana"
+      serviceId: "kibana"
+      target: "logging"
+      serviceName: "kibana"
+      namespace: "kube-system"
+      detectionServiceName: "true"
+      parentId: "administer"
+      

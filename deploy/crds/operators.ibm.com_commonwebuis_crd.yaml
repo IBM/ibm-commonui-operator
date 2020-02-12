@@ -1,21 +1,20 @@
 apiVersion: apiextensions.k8s.io/v1beta1
 kind: CustomResourceDefinition
 metadata:
-  name: legacyheaderservices.operators.ibm.com
+  name: commonwebuis.operators.ibm.com
 spec:
   group: operators.ibm.com
   names:
-    kind: LegacyHeaderService
-    listKind: LegacyHeaderServiceList
-    plural: legacyheaderservices
-    singular: legacyheaderservice
+    kind: CommonWebUI
+    listKind: CommonWebUIList
+    plural: commonwebuis
+    singular: commonwebui
   scope: Namespaced
   subresources:
     status: {}
   validation:
     openAPIV3Schema:
-      description: LegacyHeaderService is the Schema for the legacyheaderservices
-        API
+      description: CommonWebUI is the Schema for the commonwebuis API
       properties:
         apiVersion:
           description: 'APIVersion defines the versioned schema of this representation
@@ -30,35 +29,10 @@ spec:
         metadata:
           type: object
         spec:
-          description: LegacyHeaderServiceSpec defines the desired state of LegacyHeaderService
+          description: CommonWebUISpec defines the desired state of CommonWebUISpec
           properties:
-            globalConfig:
-              description: CommonWebUIGlobalConfig defines the desired state of CommonWebUIGlobalConfig
-              properties:
-                CLOUDPAK_VERSION:
-                  type: string
-                authServiceUrl:
-                  type: string
-                cfcRouterUrl:
-                  type: string
-                cluster_name:
-                  type: string
-                default_admin_user:
-                  type: string
-                pullSecret:
-                  type: string
-                router_https_port:
-                  format: int32
-                  type: integer
-                session_polling_interval:
-                  format: int32
-                  type: integer
-              type: object
-            legacyuiconfig:
-              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-                Important: Run "operator-sdk generate k8s" to regenerate code after
-                modifying this file Add custom validation using kubebuilder tags:
-                https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
+            commonWebUIConfig:
+              description: CommonWebUIConfig defines the desired state of CommonWebUIConfig
               properties:
                 cpuLimits:
                   type: string
@@ -70,18 +44,6 @@ spec:
                   type: string
                 ingressPath:
                   type: string
-                legacyDocUrl:
-                  type: string
-                legacyLogoAltText:
-                  type: string
-                legacyLogoHeight:
-                  type: string
-                legacyLogoPath:
-                  type: string
-                legacyLogoWidth:
-                  type: string
-                legacySupportUrl:
-                  type: string
                 requestLimits:
                   type: string
                 requestMemory:
@@ -89,11 +51,35 @@ spec:
                 serviceName:
                   type: string
               type: object
+            globalUIConfig:
+              description: GlobalUIConfig defines the desired state of GlobalUIConfig
+              properties:
+                authServiceURL:
+                  type: string
+                cloudPakVersion:
+                  type: string
+                clusterName:
+                  type: string
+                defaultAdminUser:
+                  type: string
+                identityProviderURL:
+                  type: string
+                pullSecret:
+                  type: string
+                routerHTTPSPort:
+                  format: int32
+                  type: integer
+                routerURL:
+                  type: string
+                sessionPollingInterval:
+                  format: int32
+                  type: integer
+              type: object
             operatorVersion:
               type: string
           type: object
         status:
-          description: LegacyHeaderServiceStatus defines the observed state of LegacyHeaderService
+          description: CommonWebUIStatus defines the observed state of CommonWebUI
           properties:
             nodes:
               description: 'INSERT ADDITIONAL STATUS FIELD - define observed state

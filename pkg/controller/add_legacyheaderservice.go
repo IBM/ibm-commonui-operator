@@ -17,7 +17,7 @@
 package controller
 
 import (
-	"github.com/example-inc/app-operator/pkg/controller/legacyheaderservice"
+	"github.com/ibm/ibm-commonui-operator/pkg/controller/legacyheaderservice"
 )
 
 func init() {
