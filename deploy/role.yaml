@@ -59,5 +59,6 @@ rules:
   resources:
   - commonwebuiservices 
   - legacyheaderservices
+  - cloudpakswitchers
   verbs:
   - '*'

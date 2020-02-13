@@ -1,7 +1,7 @@
 apiVersion: operators.ibm.com/v1alpha1
 kind: CloudPakSwitcher
 metadata:
-  name: MCM
+  name: mcm-cloudpakswitcher
   namespace: default
 spec:
   cloudPakInfo:
