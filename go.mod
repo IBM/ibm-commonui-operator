@@ -2,17 +2,6 @@ module github.com/ibm/ibm-commonui-operator
 
 go 1.13
 
-require (
-	github.com/go-openapi/spec v0.19.0
-	github.com/operator-framework/operator-sdk v0.12.0
-	github.com/spf13/pflag v1.0.3
-	k8s.io/api v0.0.0
-	k8s.io/apimachinery v0.0.0
-	k8s.io/client-go v11.0.0+incompatible
-	k8s.io/kube-openapi v0.0.0-20190918143330-0270cf2f1c1d
-	sigs.k8s.io/controller-runtime v0.3.0
-)
-
 // Pinned to kubernetes-1.15.4
 replace (
 	k8s.io/api => k8s.io/api v0.0.0-20190918195907-bd6ac527cfd2
@@ -36,3 +25,20 @@ replace (
 	k8s.io/metrics => k8s.io/metrics v0.0.0-20190918202012-3c1ca76f5bda
 	k8s.io/sample-apiserver => k8s.io/sample-apiserver v0.0.0-20190918201353-5cc279503896
 )
+
+replace github.com/operator-framework/operator-sdk => github.com/operator-framework/operator-sdk v0.12.0
+
+require (
+	github.com/go-openapi/spec v0.19.6
+	github.com/operator-framework/operator-sdk v0.0.0-00010101000000-000000000000
+	github.com/spf13/pflag v1.0.5
+	k8s.io/api v0.0.0
+	k8s.io/apimachinery v0.0.0
+	k8s.io/client-go v11.0.0+incompatible
+	k8s.io/kube-openapi v0.0.0-20200204173128-addea2498afe
+	sigs.k8s.io/controller-runtime v0.4.0
+)
+
+replace github.com/ibm/ibm-commonui-operator => ./
+
+replace github.com/ibm/ibm-commonui-operator/pkg/apis/operator/v1alpha1 => ./pkg/apis/operator/v1alpha1

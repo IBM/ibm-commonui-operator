@@ -29,9 +29,9 @@ type LegacyHeaderSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	LegacyConfig  LegacyConfig `json:"legacyConfig,omitempty"`
+	LegacyConfig    LegacyConfig   `json:"legacyConfig,omitempty"`
 	GlobalUIConfig  GlobalUIConfig `json:"globalUIConfig,omitempty"`
-	OperatorVersion string                  `json:"operatorVersion,omitempty"`
+	OperatorVersion string         `json:"operatorVersion,omitempty"`
 }
 
 // LegacyConfig defines the desired state of LegacyConfig
@@ -56,15 +56,15 @@ type LegacyConfig struct {
 // GlobalUIConfig defines the desired state of GlobalUIConfig
 // +k8s:openapi-gen=true
 type GlobalUIConfig struct {
-	PullSecret               string `json:"pullSecret,omitempty"`
-	RouterURL                string `json:"routerURL,omitempty"`
-	IdentityProviderURL      string `json:"identityProviderURL,omitempty"`
-	AuthServiceURL           string `json:"authServiceURL,omitempty"`
-	CloudPakVersion          string `json:"cloudPakVersion,omitempty"`
-	DefaultAdminUser         string `json:"defaultAdminUser,omitempty"`
-	RouterHTTPSPort          int32 `json:"routerHTTPSPort,omitempty"`
-	ClusterName              string `json:"clusterName,omitempty"`
-	SessionPollingInterval   int32 `json:"sessionPollingInterval,omitempty"`
+	PullSecret             string `json:"pullSecret,omitempty"`
+	RouterURL              string `json:"routerURL,omitempty"`
+	IdentityProviderURL    string `json:"identityProviderURL,omitempty"`
+	AuthServiceURL         string `json:"authServiceURL,omitempty"`
+	CloudPakVersion        string `json:"cloudPakVersion,omitempty"`
+	DefaultAdminUser       string `json:"defaultAdminUser,omitempty"`
+	RouterHTTPSPort        int32  `json:"routerHTTPSPort,omitempty"`
+	ClusterName            string `json:"clusterName,omitempty"`
+	SessionPollingInterval int32  `json:"sessionPollingInterval,omitempty"`
 }
 
 // LegacyHeaderStatus defines the observed state of LegacyHeaderService
