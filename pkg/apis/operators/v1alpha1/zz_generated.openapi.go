@@ -28,15 +28,16 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUI":        schema_pkg_apis_operators_v1alpha1_CommonWebUI(ref),
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUIConfig":  schema_pkg_apis_operators_v1alpha1_CommonWebUIConfig(ref),
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUISpec":    schema_pkg_apis_operators_v1alpha1_CommonWebUISpec(ref),
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUIStatus":  schema_pkg_apis_operators_v1alpha1_CommonWebUIStatus(ref),
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.GlobalUIConfig":     schema_pkg_apis_operators_v1alpha1_GlobalUIConfig(ref),
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyConfig":       schema_pkg_apis_operators_v1alpha1_LegacyConfig(ref),
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyHeader":       schema_pkg_apis_operators_v1alpha1_LegacyHeader(ref),
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyHeaderSpec":   schema_pkg_apis_operators_v1alpha1_LegacyHeaderSpec(ref),
-		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyHeaderStatus": schema_pkg_apis_operators_v1alpha1_LegacyHeaderStatus(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUI":          schema_pkg_apis_operators_v1alpha1_CommonWebUI(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUIConfig":    schema_pkg_apis_operators_v1alpha1_CommonWebUIConfig(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUISpec":      schema_pkg_apis_operators_v1alpha1_CommonWebUISpec(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUIStatus":    schema_pkg_apis_operators_v1alpha1_CommonWebUIStatus(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.GlobalUIConfig":       schema_pkg_apis_operators_v1alpha1_GlobalUIConfig(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyConfig":         schema_pkg_apis_operators_v1alpha1_LegacyConfig(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyGlobalUIConfig": schema_pkg_apis_operators_v1alpha1_LegacyGlobalUIConfig(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyHeader":         schema_pkg_apis_operators_v1alpha1_LegacyHeader(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyHeaderSpec":     schema_pkg_apis_operators_v1alpha1_LegacyHeaderSpec(ref),
+		"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyHeaderStatus":   schema_pkg_apis_operators_v1alpha1_LegacyHeaderStatus(ref),
 	}
 }
 
@@ -368,6 +369,73 @@ func schema_pkg_apis_operators_v1alpha1_LegacyConfig(ref common.ReferenceCallbac
 	}
 }
 
+func schema_pkg_apis_operators_v1alpha1_LegacyGlobalUIConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "LegacyGlobalUIConfig defines the desired state of LegacyGlobalUIConfig",
+				Type:        []string{"object"},
+				Properties: map[string]spec.Schema{
+					"pullSecret": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"routerURL": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"identityProviderURL": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"authServiceURL": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"cloudPakVersion": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"defaultAdminUser": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"routerHTTPSPort": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int32",
+						},
+					},
+					"clusterName": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"sessionPollingInterval": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int32",
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 func schema_pkg_apis_operators_v1alpha1_LegacyHeader(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
@@ -416,7 +484,7 @@ func schema_pkg_apis_operators_v1alpha1_LegacyHeaderSpec(ref common.ReferenceCal
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
-				Description: "LegacyHeaderServiceSpec defines the desired state of LegacyHeaderService",
+				Description: "LegacyHeaderSpec defines the desired state of LegacyHeaderSpec",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
 					"legacyConfig": {
@@ -425,9 +493,9 @@ func schema_pkg_apis_operators_v1alpha1_LegacyHeaderSpec(ref common.ReferenceCal
 							Ref:         ref("github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyConfig"),
 						},
 					},
-					"globalUIConfig": {
+					"legacyGlobalUIConfig": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.GlobalUIConfig"),
+							Ref: ref("github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyGlobalUIConfig"),
 						},
 					},
 					"operatorVersion": {
@@ -440,7 +508,7 @@ func schema_pkg_apis_operators_v1alpha1_LegacyHeaderSpec(ref common.ReferenceCal
 			},
 		},
 		Dependencies: []string{
-			"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.GlobalUIConfig", "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyConfig"},
+			"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyConfig", "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.LegacyGlobalUIConfig"},
 	}
 }
 

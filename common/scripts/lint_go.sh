@@ -15,3 +15,4 @@
 # limitations under the License.
 
 GOGC=25 golangci-lint run -c ./common/config/.golangci.yml
+# GO111MODULE=off GOGC=25 golangci-lint run -c ./common/config/.golangci.yml

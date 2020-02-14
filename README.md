@@ -1,5 +1,3 @@
-# ibm-commonui-operator
-Operator used to install the common webui service
 <p align="center"><a href="http://35.227.205.240/?job=build_go-repo-template_postsubmit">
 <!-- prow build badge, godoc, and go report card-->
 <img alt="Build Status" src="http://35.227.205.240/badge.svg?jobs=build_go-repo-template_postsubmit">
@@ -20,9 +18,9 @@ Operator used to install the common webui service
 
 <!-- END doctoc generated TOC please keep comment here to allow auto update -->
 
-# Top level title
+# ibm-commonui-operator
 
-xxx...
+Operator used to install the common webui service
 
 ## What is the XXX
 

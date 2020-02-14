@@ -23,15 +23,15 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// LegacyHeaderServiceSpec defines the desired state of LegacyHeaderService
+// LegacyHeaderSpec defines the desired state of LegacyHeaderSpec
 // +k8s:openapi-gen=true
 type LegacyHeaderSpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
 	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
-	LegacyConfig    LegacyConfig   `json:"legacyConfig,omitempty"`
-	GlobalUIConfig  GlobalUIConfig `json:"globalUIConfig,omitempty"`
-	OperatorVersion string         `json:"operatorVersion,omitempty"`
+	LegacyConfig         LegacyConfig         `json:"legacyConfig,omitempty"`
+	LegacyGlobalUIConfig LegacyGlobalUIConfig `json:"legacyGlobalUIConfig,omitempty"`
+	OperatorVersion      string               `json:"operatorVersion,omitempty"`
 }
 
 // LegacyConfig defines the desired state of LegacyConfig
@@ -53,9 +53,9 @@ type LegacyConfig struct {
 	IngressPath       string `json:"ingressPath,omitempty"`
 }
 
-// GlobalUIConfig defines the desired state of GlobalUIConfig
+// LegacyGlobalUIConfig defines the desired state of LegacyGlobalUIConfig
 // +k8s:openapi-gen=true
-type GlobalUIConfig struct {
+type LegacyGlobalUIConfig struct {
 	PullSecret             string `json:"pullSecret,omitempty"`
 	RouterURL              string `json:"routerURL,omitempty"`
 	IdentityProviderURL    string `json:"identityProviderURL,omitempty"`
