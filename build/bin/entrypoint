@@ -5,8 +5,8 @@
 
 if ! whoami &>/dev/null; then
   if [ -w /etc/passwd ]; then
-    echo "${USER_NAME:-common-webui}:x:$(id -u):$(id -g):${USER_NAME:-common-webui} user:${HOME}:/sbin/nologin" >> /etc/passwd
+    echo "${USER_NAME:-go-repo-template}:x:$(id -u):$(id -g):${USER_NAME:-go-repo-template} user:${HOME}:/sbin/nologin" >> /etc/passwd
   fi
 fi
 
-exec ${OPERATOR} $@
+exec ${BINARY} $@

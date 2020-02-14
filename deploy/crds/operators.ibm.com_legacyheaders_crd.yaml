@@ -29,32 +29,8 @@ spec:
         metadata:
           type: object
         spec:
-          description: LegacyHeaderServiceSpec defines the desired state of LegacyHeaderService
+          description: LegacyHeaderSpec defines the desired state of LegacyHeaderSpec
           properties:
-            globalUIConfig:
-              description: GlobalUIConfig defines the desired state of GlobalUIConfig
-              properties:
-                authServiceURL:
-                  type: string
-                cloudPakVersion:
-                  type: string
-                clusterName:
-                  type: string
-                defaultAdminUser:
-                  type: string
-                identityProviderURL:
-                  type: string
-                pullSecret:
-                  type: string
-                routerHTTPSPort:
-                  format: int32
-                  type: integer
-                routerURL:
-                  type: string
-                sessionPollingInterval:
-                  format: int32
-                  type: integer
-              type: object
             legacyConfig:
               description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
                 Important: Run "operator-sdk generate k8s" to regenerate code after
@@ -89,6 +65,30 @@ spec:
                   type: string
                 serviceName:
                   type: string
+              type: object
+            legacyGlobalUIConfig:
+              description: LegacyGlobalUIConfig defines the desired state of LegacyGlobalUIConfig
+              properties:
+                authServiceURL:
+                  type: string
+                cloudPakVersion:
+                  type: string
+                clusterName:
+                  type: string
+                defaultAdminUser:
+                  type: string
+                identityProviderURL:
+                  type: string
+                pullSecret:
+                  type: string
+                routerHTTPSPort:
+                  format: int32
+                  type: integer
+                routerURL:
+                  type: string
+                sessionPollingInterval:
+                  format: int32
+                  type: integer
               type: object
             operatorVersion:
               type: string

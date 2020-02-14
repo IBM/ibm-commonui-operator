@@ -12,7 +12,7 @@ spec:
     loginDialog:
       enable: false
       headerText: Header text here
-      dialogText: You must set your dialog for this environment. To set the dialog: SSH into your boot/master node and run the following command: 'kubectl edit configmap platform-ui-config -n kube-system'. In the ConfigMap, locate the 'ui-config.json' parameter and find the 'loginDialog' > 'dialogText' key. Replace the default text with your dialog text, then save your changes.
+      dialogText: "You must set your dialog for this environment. To set the dialog: SSH into your boot/master node and run the following command: 'kubectl edit configmap platform-ui-config -n kube-system'. In the ConfigMap, locate the 'ui-config.json' parameter and find the 'loginDialog' > 'dialogText' key. Replace the default text with your dialog text, then save your changes."
       acceptText: Your acceptance text here
   header:
     logoUrl: /common-nav/api/graphics/logincloudpak.svg
