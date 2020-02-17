@@ -19,7 +19,7 @@ package legacyheaderservice
 import (
 	"context"
 
-	operatorv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
+	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -61,8 +61,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// Watch for changes to primary resource LegacyHeader
-	err = c.Watch(&source.Kind{Type: &operatorv1alpha1.LegacyHeader{}}, &handler.EnqueueRequestForObject{})
+	// Watch for changes to primary resource LegacyHeaderService
+	err = c.Watch(&source.Kind{Type: &operatorsv1alpha1.LegacyHeader{}}, &handler.EnqueueRequestForObject{})
 	if err != nil {
 		return err
 	}
@@ -71,7 +71,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Watch for changes to secondary resource Pods and requeue the owner LegacyHeader
 	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
-		OwnerType:    &operatorv1alpha1.LegacyHeader{},
+		OwnerType:    &operatorsv1alpha1.LegacyHeader{},
 	})
 	if err != nil {
 		return err
@@ -102,8 +102,8 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling LegacyHeaderService")
 
-	// Fetch the LegacyHeader instance
-	instance := &operatorv1alpha1.LegacyHeader{}
+	// Fetch the LegacyHeaderService instance
+	instance := &operatorsv1alpha1.LegacyHeader{}
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
@@ -146,7 +146,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 }
 
 // newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *operatorv1alpha1.LegacyHeader) *corev1.Pod {
+func newPodForCR(cr *operatorsv1alpha1.LegacyHeader) *corev1.Pod {
 	labels := map[string]string{
 		"app": cr.Name,
 	}

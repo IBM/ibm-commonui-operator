@@ -3,7 +3,7 @@ kind: CommonWebUI
 metadata:
   name: example-commonwebui
 spec:
-  commonWebUIConfig:
+  globalUIConfig:
     cloudPakVersion: 3.2.4
     authServiceURL: https://icp-management-ingress:443/idauth
     routerURL: https://icp-management-ingress:443
@@ -12,8 +12,8 @@ spec:
     defaultAdminUser: admin
     routerHTTPSPort: 443
     sessionPollingInterval: 5000
-  globalUIConfig:
-    ingressPath: /common-nav2
+  commonWebUIConfig:
+    ingressPath: /common-nav
     cpuLimits: 300m
     cpuMemory: 200Mi
     requestLimits: 300m
@@ -22,5 +22,3 @@ spec:
     imageTag: 1.1.0
     serviceName: common-web-ui
   operatorVersion: 1.1.0
-
-  
