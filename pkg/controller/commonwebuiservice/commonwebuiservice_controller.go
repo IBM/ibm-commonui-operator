@@ -307,8 +307,9 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	commonVolume := append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 
-	var nodeSelector map[string]string = make(map[string]string)
-	nodeSelector["master"] = "true"
+	var nodeSelector = map[string]string{
+		"master": "true",
+	}
 
 	commonwebuiContainer := res.CommonWebUIContainer
 	commonwebuiContainer.Image = image
