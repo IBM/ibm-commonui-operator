@@ -3,7 +3,7 @@ kind: LegacyHeader
 metadata:
   name: example-legacyheaderservice
 spec:
-  globalUIConfig:
+  legacyGlobalUIConfig:
     cloudPakVersion: 3.2.4
     authServiceURL: https://icp-management-ingress:443/idauth
     routerURL: https://icp-management-ingress:443

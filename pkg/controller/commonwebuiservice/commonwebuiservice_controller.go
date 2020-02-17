@@ -1,3 +1,18 @@
+//
+// Copyright 2020 IBM Corporation
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+// http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+//
 package commonwebuiservice
 
 import (
@@ -47,13 +62,13 @@ func Add(mgr manager.Manager) error {
 
 // newReconciler returns a new reconcile.Reconciler
 func newReconciler(mgr manager.Manager) reconcile.Reconciler {
-	return &ReconcileCommonWebUIService{client: mgr.GetClient(), scheme: mgr.GetScheme()}
+	return &ReconcileCommonWebUI{client: mgr.GetClient(), scheme: mgr.GetScheme()}
 }
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	// Create a new controller
-	c, err := controller.New("commonwebuiservice-controller", mgr, controller.Options{Reconciler: r})
+	c, err := controller.New("commonwebui-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
 		return err
 	}
@@ -65,7 +80,7 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource Pods and requeue the owner CommonWebUIService
+	// Watch for changes to secondary resource Pods and requeue the owner CommonWebUI
 	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &operatorsv1alpha1.CommonWebUI{},
@@ -115,11 +130,11 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	return nil
 }
 
-// blank assignment to verify that ReconcileCommonWebUIService implements reconcile.Reconciler
-var _ reconcile.Reconciler = &ReconcileCommonWebUIService{}
+// blank assignment to verify that ReconcileCommonWebUI implements reconcile.Reconciler
+var _ reconcile.Reconciler = &ReconcileCommonWebUI{}
 
-// ReconcileCommonWebUIService reconciles a CommonWebUIService object
-type ReconcileCommonWebUIService struct {
+// ReconcileCommonWebUI reconciles a CommonWebUIService object
+type ReconcileCommonWebUI struct {
 	// This client, initialized using mgr.Client() above, is a split client
 	// that reads objects from the cache and writes to the apiserver
 	client client.Client
@@ -133,9 +148,9 @@ type ReconcileCommonWebUIService struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling CommonWebUIService")
+	reqLogger.Info("Reconciling CommonWebUI")
 
 	// if we need to create several resources, set a flag so we just requeue one time instead of after each create.
 	needToRequeue := false
@@ -207,7 +222,7 @@ func (r *ReconcileCommonWebUIService) Reconcile(request reconcile.Request) (reco
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileCommonWebUIService) reconcileConfigMaps(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking log4js config map Service")
@@ -273,7 +288,7 @@ func (r *ReconcileCommonWebUIService) reconcileConfigMaps(instance *operatorsv1a
 
 }
 
-func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) *appsv1.DaemonSet {
+func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) *appsv1.DaemonSet {
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
@@ -304,7 +319,6 @@ func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alp
 	commonwebuiContainer.Env[7].Value = instance.Spec.GlobalUIConfig.CloudPakVersion
 	commonwebuiContainer.Env[8].Value = instance.Spec.GlobalUIConfig.DefaultAdminUser
 	commonwebuiContainer.Env[9].Value = instance.Spec.GlobalUIConfig.ClusterName
-	// commonwebuiContainer.Env[10].Value = string(instance.Spec.GlobalUIConfig.SessionPollingInterval)
 
 	daemon := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -380,7 +394,7 @@ func (r *ReconcileCommonWebUIService) newDaemonSetForCR(instance *operatorsv1alp
 
 // Check if the Common web ui Service already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileCommonWebUIService) reconcileService(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUI) reconcileService(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileService", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking common web ui Service")
@@ -418,28 +432,28 @@ func (r *ReconcileCommonWebUIService) reconcileService(instance *operatorsv1alph
 
 // Check if the common web ui Ingresses already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileCommonWebUIService) reconcileIngresses(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileIngresses", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking  common web ui api ingress")
 	// Check if the common web ui api ingress already exists, if not create a new one
-	apiIngress := &netv1.Ingress{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.ApiIngress, Namespace: instance.Namespace}, apiIngress)
+	APIIngress := &netv1.Ingress{}
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.APIIngress, Namespace: instance.Namespace}, APIIngress)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new Ingress
-		newApiIngress := res.ApiIngressForCommonWebUI(instance)
+		newAPIIngress := res.APIIngressForCommonWebUI(instance)
 
 		// Set instance as the owner and controller of the ingress
-		err := controllerutil.SetControllerReference(instance, newApiIngress, r.scheme)
+		err := controllerutil.SetControllerReference(instance, newAPIIngress, r.scheme)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set owner for api ingress")
 			return nil
 		}
 
-		reqLogger.Info("Creating a new common web ui api Ingress", "Ingress.Namespace", newApiIngress.Namespace, "Ingress.Name", newApiIngress.Name)
-		err = r.client.Create(context.TODO(), newApiIngress)
+		reqLogger.Info("Creating a new common web ui api Ingress", "Ingress.Namespace", newAPIIngress.Namespace, "Ingress.Name", newAPIIngress.Name)
+		err = r.client.Create(context.TODO(), newAPIIngress)
 		if err != nil {
-			reqLogger.Error(err, "Failed to create new common web ui api Ingress", "Ingress.Namespace", newApiIngress.Namespace, "Ingress.Name", newApiIngress.Name)
+			reqLogger.Error(err, "Failed to create new common web ui api Ingress", "Ingress.Namespace", newAPIIngress.Namespace, "Ingress.Name", newAPIIngress.Name)
 			return err
 		}
 		// Ingress created successfully - return and requeue
@@ -466,6 +480,7 @@ func (r *ReconcileCommonWebUIService) reconcileIngresses(instance *operatorsv1al
 
 		reqLogger.Info("Creating a new common web ui callback Ingress", "Ingress.Namespace", newCallbackIngress.Namespace, "Ingress.Name", newCallbackIngress.Name)
 		err = r.client.Create(context.TODO(), newCallbackIngress)
+		//nolint
 		if err != nil {
 			reqLogger.Error(err, "Failed to create new common web ui callback Ingress", "Ingress.Namespace", newCallbackIngress.Namespace, "Ingress.Name", newCallbackIngress.Name)
 			return err

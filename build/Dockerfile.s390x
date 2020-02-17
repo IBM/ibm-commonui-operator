@@ -14,6 +14,12 @@
 # limitations under the License.
 #
 
+FROM alpine as builder
+
+RUN wget -O /qemu-s390x-static https://github.com/multiarch/qemu-user-static/releases/latest/download/qemu-s390x-static
+
+RUN chmod +x /qemu-s390x-static
+
 FROM registry.access.redhat.com/ubi8/ubi-minimal:8.1-398
 
 ARG IMAGE_NAME
@@ -48,14 +54,15 @@ LABEL org.label-schema.vendor="$IMAGE_VENDOR" \
       io.k8s.description="$IMAGE_DESCRIPTION" \
       io.openshift.tags="$IMAGE_OPENSHIFT_TAGS"
 
-ENV BINARY=/usr/local/bin/ibm-commonui-operator \
+ENV OPERATOR=/usr/local/bin/ibm-commonui-operator \
   DEPLOY_DIR=/deploy \
   USER_UID=1001 \
   USER_NAME=ibm-commonui-operator
 
+COPY --from=builder /qemu-s390x-static /usr/bin/
 
-# install the binary
-COPY build/_output/bin/ibm-commonui-operator ${BINARY}
+# install operator binary
+COPY build/_output/bin/ibm-commonui-operator-s390x ${OPERATOR}
 COPY deploy/crds ${DEPLOY_DIR}
 
 COPY build/bin /usr/local/bin
