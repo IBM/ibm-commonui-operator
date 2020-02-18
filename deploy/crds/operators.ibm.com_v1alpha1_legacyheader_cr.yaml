@@ -13,7 +13,7 @@ spec:
     routerHTTPSPort: 443
     sessionPollingInterval: 5000
   legacyConfig:
-    ingressPath: /header2
+    ingressPath: /header
     cpuLimits: 300m
     cpuMemory: 200Mi
     requestLimits: 300m

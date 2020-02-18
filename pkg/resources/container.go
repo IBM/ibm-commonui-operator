@@ -30,6 +30,10 @@ const DefaultImageRegistry = "hyc-cloud-private-edge-docker-local.artifactory.sw
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.1.0"
 
+const LegacyImageRegistry = "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64"
+const LegacyImageName = "icp-platform-header"
+const LegacyImageTag = "3.2.4"
+
 var TrueVar = true
 var FalseVar = false
 var Replica1 int32 = 1
@@ -96,7 +100,7 @@ var commonSecurityContext = corev1.SecurityContext{
 	},
 }
 
-var CommonWebUIContainer = corev1.Container{
+var CommonContainer = corev1.Container{
 	Image: "common-web-ui",
 	//CS??? Image: "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64/metering-data-manager:3.3.1",
 	Name:            "common-web-ui",
