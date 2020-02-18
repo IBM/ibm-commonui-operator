@@ -20,6 +20,7 @@ BUILD_LOCALLY ?= 1
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-commonui-operator
 REGISTRY ?= quay.io/opencloudio
+CSV_VERSION ?= $(VERSION)
 
 # Github host to use for checking the source tree;
 # Override this variable ue with your own value if you're working on forked repo.
@@ -207,5 +208,11 @@ multiarch-image:
 ############################################################
 clean:
 	rm -rf build/_output
+
+############################################################
+# CSV section
+############################################################
+csv: ## Push CSV package to the catalog
+	@RELEASE=${CSV_VERSION} common/scripts/push-csv.sh
 
 .PHONY: all work build check lint test coverage images multiarch-image
