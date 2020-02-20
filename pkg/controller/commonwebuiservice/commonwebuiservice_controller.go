@@ -255,35 +255,6 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 
 	reqLogger.Info("got log4js config map")
 
-	// Check if the common config map already exists, if not create a new one
-	currentConfigMap = &corev1.ConfigMap{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.CommonConfigMap, Namespace: instance.Namespace}, currentConfigMap)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new ConfigMap
-		newConfigMap := res.CommonConfigMapUI(instance)
-
-		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)
-		if err != nil {
-			reqLogger.Error(err, "Failed to set owner for common config map", "Namespace", newConfigMap.Namespace,
-				"Name", newConfigMap.Name)
-			return err
-		}
-
-		reqLogger.Info("Creating a common config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
-		err = r.client.Create(context.TODO(), newConfigMap)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create a config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
-			return err
-		}
-		// Service created successfully - return and requeue
-		*needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get common config map")
-		return err
-	}
-
-	reqLogger.Info("got common config map")
-
 	return nil
 
 }
@@ -311,7 +282,7 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 		"master": "true",
 	}
 
-	commonwebuiContainer := res.CommonWebUIContainer
+	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
 	commonwebuiContainer.Name = res.DaemonSetName
 	commonwebuiContainer.Env[1].Value = instance.Spec.GlobalUIConfig.RouterURL

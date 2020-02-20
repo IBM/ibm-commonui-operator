@@ -17,6 +17,8 @@
 package resources
 
 import (
+	"encoding/json"
+
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
@@ -37,6 +39,9 @@ const APIIngress = "common-web-ui-api"
 const CallbackIngress = "common-web-ui-callback"
 const NavIngress = "common-web-ui"
 const commonwebuiserviceCrType = "commonwebuiservice_cr"
+
+const LegacyReleaseName = "platform-header"
+const legacyheaderCrType = "legacyheader_cr"
 
 const ChartName = "webui-nav"
 const ChartVersion = "1.0.2"
@@ -59,7 +64,7 @@ var CallbackIngressAnnotations = map[string]string{
 	"icp.management.ibm.com/upstream-uri": "/auth/liberty/callback",
 }
 
-var NavIngressAnnotations = map[string]string{
+var CommonIngressAnnotations = map[string]string{
 	"kubernetes.io/ingress.class":      "ibm-icp-management",
 	"icp.management.ibm.com/auth-type": "access-token",
 	"icp.management.ibm.com/app-root":  "/common-nav?root=true",
@@ -104,31 +109,6 @@ var Log4jsData = map[string]string{
 	  }`,
 }
 
-var CommonData = map[string]string{
-	"ui-config.json": `    {
-		"icpText": "IBM CLOUD PAK",
-		"loginDialog": {
-		  "enable": "false",
-		  "headerText": "jnsdkdns",
-		  "dialogText": "jkdfnkjdsnf",
-		  "acceptText": "fnjdsfjh"
-		},
-		"login": {
-		  "path": "/common-nav/api/graphics/logincloudpak.svg",
-		  "width": "190px",
-		  "height": "47px"
-		},
-		"about": {
-		  "path": "IBM cloud pak"
-		},
-		"header": {
-		  "path": "/common-nav/graphics/ibm-cloudpack-logo.svg",
-		  "width": "355px",
-		  "height": "18px"
-		}
-	  }`,
-}
-
 // returns the labels associated with the resource being created
 func LabelsForMetadata(deploymentName string) map[string]string {
 	return map[string]string{"app": deploymentName, "chart": ChartName, "version": ChartVersion,
@@ -161,23 +141,6 @@ func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMa
 			Labels:    metaLabels,
 		},
 		Data: Log4jsData,
-	}
-
-	return configmap
-}
-
-func CommonConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "commonConfigMap", "Name", instance.Name)
-	reqLogger.Info("CS??? Entry")
-	metaLabels := LabelsForMetadata(CommonConfigMap)
-
-	configmap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      CommonConfigMap,
-			Namespace: instance.Namespace,
-			Labels:    metaLabels,
-		},
-		Data: CommonData,
 	}
 
 	return configmap
@@ -311,7 +274,7 @@ func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 	reqLogger := log.WithValues("func", "navIngressForCommonWebUI", "Ingress.Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(NavIngress)
-	Annotations := NavIngressAnnotations
+	Annotations := CommonIngressAnnotations
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        NavIngress,
@@ -329,6 +292,123 @@ func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 									Path: instance.Spec.CommonWebUIConfig.IngressPath,
 									Backend: netv1.IngressBackend{
 										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
+										ServicePort: intstr.IntOrString{
+											Type:   intstr.Int,
+											IntVal: 3000,
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	return ingress
+}
+
+func CommonConfigMapUI(instance *operatorsv1alpha1.LegacyHeader) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "commonConfigMap", "Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(CommonConfigMap)
+	data := map[string]interface{}{
+		"ui-config.json": map[string]interface{}{
+			"icpText": instance.Spec.LegacyConfig.LegacyLogoAltText,
+			"loginDialog": map[string]interface{}{
+				"enable":     false,
+				"headerText": "Header text here",
+				"dialogText": "You must set your dialog for this environment",
+				"acceptText": "Your acceptance text here",
+			},
+			"login": map[string]interface{}{
+				"path":   "/common-nav/api/graphics/logincloudpak.svg",
+				"width":  "190px",
+				"height": "47px",
+			},
+			"about": map[string]interface{}{
+				"path": instance.Spec.LegacyConfig.LegacyLogoAltText,
+				"text": instance.Spec.LegacyConfig.LegacyLogoAltText,
+			},
+			"header": map[string]interface{}{
+				"path":   instance.Spec.LegacyConfig.LegacyLogoPath,
+				"width":  instance.Spec.LegacyConfig.LegacyLogoWidth,
+				"height": instance.Spec.LegacyConfig.LegacyLogoHeight,
+			},
+		},
+	}
+	jsonData, _ := json.Marshal(data["ui-config.json"])
+
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      CommonConfigMap,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Data: map[string]string{
+			"uiconfig.json": string(jsonData),
+		},
+	}
+
+	return configmap
+}
+
+// serviceForLegacyUI returns a legacy header Service object
+func ServiceForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *corev1.Service {
+	reqLogger := log.WithValues("func", "serviceForLegacyUI", "instance.Name", instance.Name)
+	metaLabels := LabelsForMetadata(ServiceName)
+	metaLabels["kubernetes.io/cluster-service"] = "true"
+	metaLabels["kubernetes.io/name"] = instance.Spec.LegacyConfig.ServiceName
+	metaLabels["app"] = instance.Spec.LegacyConfig.ServiceName
+	selectorLabels := LabelsForSelector(ServiceName, legacyheaderCrType, instance.Name)
+
+	reqLogger.Info("CS??? Entry")
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Spec.LegacyConfig.ServiceName,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: instance.Spec.LegacyConfig.ServiceName,
+					Port: 3000,
+					TargetPort: intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: 3000,
+					},
+				},
+			},
+			Selector: selectorLabels,
+		},
+	}
+	return service
+}
+
+func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress {
+	reqLogger := log.WithValues("func", "IngressForLegacyUI", "Ingress.Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(NavIngress)
+	Annotations := CommonIngressAnnotations
+	delete(Annotations, "icp.management.ibm.com/app-root")
+	ingress := &netv1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        LegacyReleaseName,
+			Annotations: Annotations,
+			Labels:      metaLabels,
+			Namespace:   instance.Namespace,
+		},
+		Spec: netv1.IngressSpec{
+			Rules: []netv1.IngressRule{
+				{
+					IngressRuleValue: netv1.IngressRuleValue{
+						HTTP: &netv1.HTTPIngressRuleValue{
+							Paths: []netv1.HTTPIngressPath{
+								{
+									Path: instance.Spec.LegacyConfig.IngressPath,
+									Backend: netv1.IngressBackend{
+										ServiceName: instance.Spec.LegacyConfig.ServiceName,
 										ServicePort: intstr.IntOrString{
 											Type:   intstr.Int,
 											IntVal: 3000,
