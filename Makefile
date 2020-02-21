@@ -215,4 +215,10 @@ clean:
 csv: ## Push CSV package to the catalog
 	@RELEASE=${CSV_VERSION} common/scripts/push-csv.sh
 
+############################################################
+# CSV section
+############################################################
+delete-csv: ## Delete CSV package to the catalog
+	@RELEASE=${CSV_VERSION} common/scripts/delete-csv.sh
+
 .PHONY: all work build check lint test coverage images multiarch-image

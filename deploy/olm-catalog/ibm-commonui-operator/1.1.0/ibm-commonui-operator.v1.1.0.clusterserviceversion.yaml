@@ -342,18 +342,21 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: CommonWebUI is the Schema for the commonwebuis API
-      kind: CommonWebUI
-      name: commonwebuis.operators.ibm.com
-      version: v1alpha1
-    - description: LegacyHeader is the Schema for the legacyHeader API
-      kind: LegacyHeader
-      name: legacyheaders.operators.ibm.com
-      version: v1alpha1
-    - description: NavConfiguration for the CommonWebUI service which returns custom nav configurations
-      kind: NavConfiguration
-      name: navconfiguration.foundation.ibm.com
-      version: v1
+      - description: CommonWebUI is the Schema for the commonwebuis API
+        kind: CommonWebUI
+        name: commonwebuis.operators.ibm.com
+        version: v1alpha1
+        displayName: CommonWebUI service
+      - description: LegacyHeader is the Schema for the legacyHeader API
+        kind: LegacyHeader
+        name: legacyheaders.operators.ibm.com
+        version: v1alpha1
+        displayName: LegacyHeader service
+      - description: NavConfiguration for the CommonWebUI service which returns custom nav configurations
+        kind: NavConfiguration
+        name: navconfiguration.foundation.ibm.com
+        version: v1
+        displayName: NavConfiguration service
   description: Placeholder description
   displayName: Ibm Commonui Operator
   install:
