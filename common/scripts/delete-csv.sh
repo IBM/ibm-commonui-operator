@@ -14,16 +14,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 #
-
 set -e
 QUAY_NAMESPACE=${QUAY_NAMESPACE:-opencloudio}
 QUAY_REPOSITORY=${QUAY_REPOSITORY:-ibm-commonui-operator-app}
-BUNDLE_DIR=${BUNDLE_DIR:-deploy/olm-catalog/ibm-commonui-operator}
-
 [[ "X$QUAY_USERNAME" == "X" ]] && read -rp "Enter username quay.io: " QUAY_USERNAME
 [[ "X$QUAY_PASSWORD" == "X" ]] && read -rsp "Enter password quay.io: " QUAY_PASSWORD && echo
 [[ "X$RELEASE" == "X" ]] && read -rp "Enter Version/Release of operator: " RELEASE
-
 # Fetch authentication token used to push to Quay.io
 AUTH_TOKEN=$(curl -sH "Content-Type: application/json" -XPOST https://quay.io/cnr/api/v1/users/login -d '
 {
@@ -32,27 +28,8 @@ AUTH_TOKEN=$(curl -sH "Content-Type: application/json" -XPOST https://quay.io/cn
         "password": "'"${QUAY_PASSWORD}"'"
     }
 }' | awk -F'"' '{print $4}')
-
-function cleanup() {
-    rm -f bundle.tar.gz
-}
-trap cleanup EXIT
-
-tar czf bundle.tar.gz "${BUNDLE_DIR}"
-
-if [[ "${OSTYPE}" == "darwin"* ]]; then
-  BLOB=$(base64 -b0 < bundle.tar.gz)
-else
-  BLOB=$(base64 -w0 < bundle.tar.gz)
-fi
-
-# Push application to repository
+# Delete application release in repository
 echo "Push package ${QUAY_REPOSITORY} into namespace ${QUAY_NAMESPACE}"
 curl -H "Content-Type: application/json" \
      -H "Authorization: ${AUTH_TOKEN}" \
-     -XPOST https://quay.io/cnr/api/v1/packages/"${QUAY_NAMESPACE}"/"${QUAY_REPOSITORY}" -d '
-{
-    "blob": "'"${BLOB}"'",
-    "release": "'"${RELEASE}"'",
-    "media_type": "helm"
-}'
+     -XDELETE https://quay.io/cnr/api/v1/packages/"${QUAY_NAMESPACE}"/"${QUAY_REPOSITORY}"/"${RELEASE}"/helm
