@@ -1,24 +1,24 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: common-webui
+  name: ibm-commonui-operator
 spec:
   replicas: 1
   selector:
     matchLabels:
-      name: common-webui
+      name: ibm-commonui-operator
   template:
     metadata:
       labels:
-        name: common-webui
+        name: ibm-commonui-operator
     spec:
-      serviceAccountName: common-webui
+      serviceAccountName: ibm-commonui-operator
       containers:
-        - name: common-webui
+        - name: ibm-commonui-operator
           # Replace this with the built image name
-          image: REPLACE_IMAGE
+          image: quay.io/opencloudio/ibm-commonui-operator
           command:
-          - common-webui
+          - ibm-commonui-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -30,4 +30,4 @@ spec:
                 fieldRef:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
-              value: "common-webui"
+              value: "ibm-commonui-operator"
