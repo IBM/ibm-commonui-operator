@@ -9,8 +9,10 @@ metadata:
           "kind": "NavConfiguration",
           "metadata": {
             "labels": {
-              "default": "true"
-            }
+              "default": "true",
+              "name": "common-web-ui-config"
+            },
+            "name": "common-web-ui-config"
           },
           "spec": {
             "about": {
@@ -101,7 +103,7 @@ metadata:
             "login": {
               "loginDialog": {
                 "acceptText": "Your acceptance text here",
-                "dialogText": "You must set your dialog for this environment. To set the dialog: SSH into your boot/master node and run the following command: 'kubectl edit configmap platform-ui-config -n kube-system'. In the ConfigMap, locate the 'ui-config.json' parameter and find the 'loginDialog' \u003e 'dialogText' key. Replace the default text with your dialog text, then save your changes.",
+                "dialogText": "You must set your dialog for this environment",
                 "enable": false,
                 "headerText": "Header text here"
               },
@@ -276,16 +278,6 @@ metadata:
           },
           "spec": {
             "commonWebUIConfig": {
-              "authServiceURL": "https://icp-management-ingress:443/idauth",
-              "cloudPakVersion": "3.2.4",
-              "clusterName": "mycluster",
-              "defaultAdminUser": "admin",
-              "identityProviderURL": "https://icp-management-ingress:443/idprovider",
-              "routerHTTPSPort": 443,
-              "routerURL": "https://icp-management-ingress:443",
-              "sessionPollingInterval": 5000
-            },
-            "globalUIConfig": {
               "cpuLimits": "300m",
               "cpuMemory": "200Mi",
               "imageRegistry": "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64",
@@ -294,6 +286,16 @@ metadata:
               "requestLimits": "300m",
               "requestMemory": "200Mi",
               "serviceName": "common-web-ui"
+            },
+            "globalUIConfig": {
+              "authServiceURL": "https://icp-management-ingress:443/idauth",
+              "cloudPakVersion": "3.2.4",
+              "clusterName": "mycluster",
+              "defaultAdminUser": "admin",
+              "identityProviderURL": "https://icp-management-ingress:443/idprovider",
+              "routerHTTPSPort": 443,
+              "routerURL": "https://icp-management-ingress:443",
+              "sessionPollingInterval": 5000
             },
             "operatorVersion": "1.1.0"
           }
@@ -305,7 +307,23 @@ metadata:
             "name": "example-legacyheaderservice"
           },
           "spec": {
-            "globalUIConfig": {
+            "legacyConfig": {
+              "cpuLimits": "300m",
+              "cpuMemory": "200Mi",
+              "imageRegistry": "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64",
+              "imageTag": "1.1.0",
+              "ingressPath": "/header",
+              "legacyDocURL": "/header/api/v1/doc",
+              "legacyLogoAltText": "IBM Cloud Pak",
+              "legacyLogoHeight": "355px",
+              "legacyLogoPath": "/common-nav/graphics/ibm-cloudpack-logo.svg",
+              "legacyLogoWidth": "18px",
+              "legacySupportURL": "/path/to/support.html",
+              "requestLimits": "300m",
+              "requestMemory": "200Mi",
+              "serviceName": "platform-header"
+            },
+            "legacyGlobalUIConfig": {
               "authServiceURL": "https://icp-management-ingress:443/idauth",
               "cloudPakVersion": "3.2.4",
               "clusterName": "mycluster",
@@ -314,22 +332,6 @@ metadata:
               "routerHTTPSPort": 443,
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000
-            },
-            "legacyConfig": {
-              "cpuLimits": "300m",
-              "cpuMemory": "200Mi",
-              "imageRegistry": "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64",
-              "imageTag": "1.1.0",
-              "ingressPath": "/header",
-              "legacyDocUrl": "/header/api/v1/doc",
-              "legacyLogoAltText": "IBM Cloud Pak",
-              "legacyLogoHeight": "355px",
-              "legacyLogoPath": "/common-nav/graphics/ibm-cloudpack-logo.svg",
-              "legacyLogoWidth": "18px",
-              "legacySupportUrl": "/path/to/support.html",
-              "requestLimits": "300m",
-              "requestMemory": "200Mi",
-              "serviceName": "platform-header"
             },
             "operatorVersion": "1.1.0"
           }
@@ -342,41 +344,34 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-      - description: CommonWebUI is the Schema for the commonwebuis API
-        kind: CommonWebUI
-        name: commonwebuis.operators.ibm.com
-        version: v1alpha1
-        displayName: CommonWebUI service
-      - description: LegacyHeader is the Schema for the legacyHeader API
-        kind: LegacyHeader
-        name: legacyheaders.operators.ibm.com
-        version: v1alpha1
-        displayName: LegacyHeader service
-      - description: NavConfiguration for the CommonWebUI service which returns custom nav configurations
-        kind: NavConfiguration
-        name: navconfigurations.foundation.ibm.com
-        version: v1
-        displayName: NavConfiguration service
+    - description: CommonWebUI is the Schema for the commonwebuis API
+      kind: CommonWebUI
+      name: commonwebuis.operators.ibm.com
+      version: v1alpha1
+    - description: LegacyHeader is the Schema for the legacyHeader API
+      kind: LegacyHeader
+      name: legacyheaders.operators.ibm.com
+      version: v1alpha1
   description: Placeholder description
-  displayName: Ibm Commonui Operator
+  displayName: IBM Commonui Operator
   install:
     spec:
       deployments:
-      - name: common-webui
+      - name: ibm-commonui-operator
         spec:
           replicas: 1
           selector:
             matchLabels:
-              name: common-webui
+              name: ibm-commonui-operator
           strategy: {}
           template:
             metadata:
               labels:
-                name: common-webui
+                name: ibm-commonui-operator
             spec:
               containers:
               - command:
-                - common-webui
+                - ibm-commonui-operator
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
@@ -387,12 +382,12 @@ spec:
                     fieldRef:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
-                  value: common-webui
-                image: REPLACE_IMAGE
+                  value: ibm-commonui-operator
+                image: quay.io/opencloudio/ibm-commonui-operator
                 imagePullPolicy: Always
-                name: common-webui
+                name: ibm-commonui-operator
                 resources: {}
-              serviceAccountName: common-webui
+              serviceAccountName: ibm-commonui-operator
       permissions:
       - rules:
         - apiGroups:
@@ -401,9 +396,6 @@ spec:
           - pods
           - services
           - services/finalizers
-          - endpoints
-          - persistentvolumeclaims
-          - events
           - configmaps
           - secrets
           verbs:
@@ -413,8 +405,6 @@ spec:
           resources:
           - deployments
           - daemonsets
-          - replicasets
-          - statefulsets
           verbs:
           - '*'
         - apiGroups:
@@ -448,11 +438,11 @@ spec:
         - apiGroups:
           - operators.ibm.com
           resources:
-          - commonwebuiservices
-          - legacyheaderservices
+          - commonwebuis
+          - legacyheaders
           verbs:
           - '*'
-        serviceAccountName: common-webui
+        serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:
   - supported: true
