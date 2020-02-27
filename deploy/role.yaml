@@ -10,9 +10,6 @@ rules:
   - pods
   - services
   - services/finalizers
-  - endpoints
-  - persistentvolumeclaims
-  - events
   - configmaps
   - secrets
   verbs:
@@ -22,8 +19,6 @@ rules:
   resources:
   - deployments
   - daemonsets
-  - replicasets
-  - statefulsets
   verbs:
   - '*'
 - apiGroups:
@@ -57,7 +52,7 @@ rules:
 - apiGroups:
   - operators.ibm.com
   resources:
-  - commonwebuiservices 
-  - legacyheaderservices
+  - commonwebuis
+  - legacyheaders
   verbs:
   - '*'
