@@ -48,7 +48,6 @@ const ChartVersion = "1.0.2"
 
 var DeamonSetAnnotations = map[string]string{
 	"scheduler.alpha.kubernetes.io/critical-pod": "",
-	"seccomp.security.alpha.kubernetes.io/pod":   "docker/default",
 }
 
 var APIIngressAnnotations = map[string]string{

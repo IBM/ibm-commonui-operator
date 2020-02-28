@@ -19,7 +19,7 @@ spec:
     requestLimits: 300m
     requestMemory: 200Mi
     imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64
-    imageTag: 1.1.0
+    imageTag: 3.2.4
     serviceName: platform-header
     legacyDocURL: /header/api/v1/doc
     legacyLogoAltText: IBM Cloud Pak
