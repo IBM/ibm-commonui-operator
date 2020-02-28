@@ -2,7 +2,7 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
   creationTimestamp: null
-  name: common-webui
+  name: ibm-commonui-operator
 rules:
 - apiGroups:
   - ""
@@ -54,5 +54,7 @@ rules:
   resources:
   - commonwebuis
   - legacyheaders
+  - commonwebuis/finalizers
+  - legacyheaders/finalizers
   verbs:
   - '*'
