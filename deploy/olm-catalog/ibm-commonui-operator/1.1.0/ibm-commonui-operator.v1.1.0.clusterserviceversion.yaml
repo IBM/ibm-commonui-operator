@@ -359,6 +359,11 @@ spec:
       name: navconfigurations.foundation.ibm.com
       version: v1
       displayName: NavConfiguration service
+    - description: CloudPakSwitcher for the CommonWebUI service which displays Cloud Paks installed across namespaces.
+      kind: CloudPakSwitcher
+      name: cloudpakswitchers.operators.ibm.com
+      version: v1alpha1
+      displayName: CloudPakSwitcher service
   description: Placeholder description
   displayName: IBM Commonui Operator
   install:
