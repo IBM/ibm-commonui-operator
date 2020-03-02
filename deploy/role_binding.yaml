@@ -1,11 +1,11 @@
 kind: RoleBinding
 apiVersion: rbac.authorization.k8s.io/v1
 metadata:
-  name: common-webui
+  name: ibm-commonui-operator
 subjects:
 - kind: ServiceAccount
-  name: common-webui
+  name: ibm-commonui-operator
 roleRef:
   kind: Role
-  name: common-webui
+  name: ibm-commonui-operator
   apiGroup: rbac.authorization.k8s.io

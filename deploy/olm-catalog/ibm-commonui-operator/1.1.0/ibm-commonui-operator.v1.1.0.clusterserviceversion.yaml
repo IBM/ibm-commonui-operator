@@ -311,7 +311,7 @@ metadata:
               "cpuLimits": "300m",
               "cpuMemory": "200Mi",
               "imageRegistry": "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64",
-              "imageTag": "1.1.0",
+              "imageTag": "3.2.4",
               "ingressPath": "/header",
               "legacyDocURL": "/header/api/v1/doc",
               "legacyLogoAltText": "IBM Cloud Pak",
@@ -348,14 +348,17 @@ spec:
       kind: CommonWebUI
       name: commonwebuis.operators.ibm.com
       version: v1alpha1
+      displayName: CommonWebUI service
     - description: LegacyHeader is the Schema for the legacyHeader API
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
       version: v1alpha1
-    - description: NavConfigration Schema for the navconfigurations API
+      displayName: LegacyHeader service
+    - description: NavConfiguration for the CommonWebUI service which returns custom nav configurations
       kind: NavConfiguration
       name: navconfigurations.foundation.ibm.com
       version: v1
+      displayName: NavConfiguration service
   description: Placeholder description
   displayName: IBM Commonui Operator
   install:
@@ -444,6 +447,8 @@ spec:
           resources:
           - commonwebuis
           - legacyheaders
+          - commonwebuis/finalizers
+          - legacyheaders/finalizers
           verbs:
           - '*'
         serviceAccountName: ibm-commonui-operator
@@ -458,6 +463,7 @@ spec:
   - supported: true
     type: AllNamespaces
   maturity: alpha
-  provider: {}
+  provider:
+    name: IBM
   replaces: ibm-commonui-operator.v0.0.0
   version: 1.1.0
