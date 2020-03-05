@@ -48,6 +48,9 @@ const ChartVersion = "1.0.2"
 
 var DeamonSetAnnotations = map[string]string{
 	"scheduler.alpha.kubernetes.io/critical-pod": "",
+	"productName":    "IBM Cloud Platform Common Services",
+	"productID":      "TBD",
+	"productVersion": "TBD",
 }
 
 var APIIngressAnnotations = map[string]string{
