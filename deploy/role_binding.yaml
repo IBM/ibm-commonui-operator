@@ -9,3 +9,16 @@ roleRef:
   kind: Role
   name: ibm-commonui-operator
   apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ibm-commonui-operator
+subjects:
+- kind: ServiceAccount
+  name: default
+  namespace: ibm-common-services
+roleRef:
+  kind: ClusterRole
+  name: ibm-commonui-operator
+  apiGroup: rbac.authorization.k8s.io

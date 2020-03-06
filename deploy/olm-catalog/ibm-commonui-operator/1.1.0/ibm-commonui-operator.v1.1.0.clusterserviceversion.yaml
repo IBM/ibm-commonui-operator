@@ -363,6 +363,16 @@ spec:
   displayName: IBM Commonui Operator
   install:
     spec:
+      clusterPermissions:
+      - rules:
+        - apiGroups:
+          - '*'
+          resources:
+          - '*'
+          verbs:
+          - get
+          - list
+        serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
         spec:
