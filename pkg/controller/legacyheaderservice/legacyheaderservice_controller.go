@@ -181,7 +181,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 
 	// Check if the DaemonSet already exists, if not create a new one
 	currentDaemonSet := &appsv1.DaemonSet{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.DaemonSetName, Namespace: instance.Namespace}, currentDaemonSet)
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.LegacyReleaseName, Namespace: instance.Namespace}, currentDaemonSet)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new DaemonSet
 		newDaemonSet := r.newDaemonSetForCR(instance)
@@ -278,10 +278,6 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 	commonVolume := append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 
-	var nodeSelector = map[string]string{
-		"master": "true",
-	}
-
 	legacyContainer := res.CommonContainer
 	legacyContainer.Image = image
 	legacyContainer.Name = res.LegacyReleaseName
@@ -336,7 +332,6 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 					},
 					Volumes:                       commonVolumes,
 					TerminationGracePeriodSeconds: &res.Seconds60,
-					NodeSelector:                  nodeSelector,
 					Tolerations: []corev1.Toleration{
 						{
 							Key:      "dedicated",
