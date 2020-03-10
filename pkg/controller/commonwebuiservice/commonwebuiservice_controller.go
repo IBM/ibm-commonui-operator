@@ -278,10 +278,6 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	commonVolume := append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 
-	var nodeSelector = map[string]string{
-		"master": "true",
-	}
-
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
 	commonwebuiContainer.Name = res.DaemonSetName
@@ -336,7 +332,6 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 					},
 					Volumes:                       commonVolumes,
 					TerminationGracePeriodSeconds: &res.Seconds60,
-					NodeSelector:                  nodeSelector,
 					Tolerations: []corev1.Toleration{
 						{
 							Key:      "dedicated",

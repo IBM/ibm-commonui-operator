@@ -48,6 +48,10 @@ const ChartVersion = "1.0.2"
 
 var DeamonSetAnnotations = map[string]string{
 	"scheduler.alpha.kubernetes.io/critical-pod": "",
+	"productName":    "IBM Cloud Platform Common Services",
+	"productID":      "068a62892a1e4db39641342e592daa25",
+	"productVersion": "3.3.0",
+	"productMetric":  "FREE",
 }
 
 var APIIngressAnnotations = map[string]string{
@@ -110,7 +114,7 @@ var Log4jsData = map[string]string{
 
 // returns the labels associated with the resource being created
 func LabelsForMetadata(deploymentName string) map[string]string {
-	return map[string]string{"app": deploymentName, "chart": ChartName, "version": ChartVersion,
+	return map[string]string{"app.kubernetes.io/instance": deploymentName, "chart": ChartName, "version": ChartVersion,
 		"heritage": "operator", "release": ReleaseName}
 }
 
