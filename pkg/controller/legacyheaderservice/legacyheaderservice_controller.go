@@ -181,7 +181,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 
 	// Check if the DaemonSet already exists, if not create a new one
 	currentDaemonSet := &appsv1.DaemonSet{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.DaemonSetName, Namespace: instance.Namespace}, currentDaemonSet)
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.LegacyReleaseName, Namespace: instance.Namespace}, currentDaemonSet)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new DaemonSet
 		newDaemonSet := r.newDaemonSetForCR(instance)
