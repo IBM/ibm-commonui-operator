@@ -372,7 +372,7 @@ spec:
           verbs:
           - get
           - list
-        serviceAccountName: ibm-commonui-operator
+        serviceAccountName: default
       deployments:
       - name: ibm-commonui-operator
         spec:
