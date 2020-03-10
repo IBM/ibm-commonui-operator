@@ -68,7 +68,7 @@ var ClusterCaVolume = corev1.Volume{
 	Name: ClusterCaVolumeName,
 	VolumeSource: corev1.VolumeSource{
 		Secret: &corev1.SecretVolumeSource{
-			SecretName: "cluster-ca-cert",
+			SecretName: "cs-ca-certificate-secret",
 			Items: []corev1.KeyToPath{
 				{
 					Key:  "tls.key",
