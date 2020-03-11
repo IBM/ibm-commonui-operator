@@ -294,6 +294,10 @@ metadata:
               "defaultAdminUser": "admin",
               "identityProviderURL": "https://icp-management-ingress:443/idprovider",
               "routerHTTPSPort": 443,
+              "defaultAuth": ''
+              "osAuth": ''
+              "enterpriseLDAP": ''
+              "enterpriseSAML": ''
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000
             },
@@ -329,6 +333,10 @@ metadata:
               "clusterName": "mycluster",
               "defaultAdminUser": "admin",
               "identityProviderURL": "https://icp-management-ingress:443/idprovider",
+              "enterpriseLDAP": ''
+              "defaultAuth": ''
+              "enterpriseSAML": ''
+              "osAuth": ''
               "routerHTTPSPort": 443,
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000

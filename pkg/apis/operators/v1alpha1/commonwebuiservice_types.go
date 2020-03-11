@@ -50,6 +50,10 @@ type GlobalUIConfig struct {
 	AuthServiceURL         string `json:"authServiceURL,omitempty"`
 	CloudPakVersion        string `json:"cloudPakVersion,omitempty"`
 	DefaultAdminUser       string `json:"defaultAdminUser,omitempty"`
+        DefaultAuth            string `json:"defaultAuth,omitempty"`
+        OSAuth                 string `json:"osAuth,omitempty"`
+        EnterpriseLDAP         string `json:"enterpriseLDAP,omitempty"`
+        EnterpriseSAML         string `json:"enterpriseSAML,omitempty"`
 	RouterHTTPSPort        int32  `json:"routerHTTPSPort,omitempty"`
 	ClusterName            string `json:"clusterName,omitempty"`
 	SessionPollingInterval int32  `json:"sessionPollingInterval,omitempty"`

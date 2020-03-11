@@ -59,6 +59,10 @@ type LegacyGlobalUIConfig struct {
 	PullSecret             string `json:"pullSecret,omitempty"`
 	RouterURL              string `json:"routerURL,omitempty"`
 	IdentityProviderURL    string `json:"identityProviderURL,omitempty"`
+        DefaultAuth            string `json:"defaultAuth,omitempty"`
+        OSAuth                 string `json:"osAuth,omitempty"`
+        EnterpriseLDAP         string `json:"enterpriseLDAP,omitempty"`
+        EnterpriseSAML         string `json:"enterpriseSAML,omitempty"`
 	AuthServiceURL         string `json:"authServiceURL,omitempty"`
 	CloudPakVersion        string `json:"cloudPakVersion,omitempty"`
 	DefaultAdminUser       string `json:"defaultAdminUser,omitempty"`

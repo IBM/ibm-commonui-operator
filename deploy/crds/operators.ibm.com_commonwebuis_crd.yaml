@@ -64,6 +64,14 @@ spec:
                   type: string
                 identityProviderURL:
                   type: string
+                osAuth:
+                  type: string
+                defaultAuth:
+                  type: string
+                enterpriseLDAP:
+                  type: string
+                enterpriseSAML: 
+                  type: string
                 pullSecret:
                   type: string
                 routerHTTPSPort:
