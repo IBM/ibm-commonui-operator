@@ -291,10 +291,10 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 	legacyContainer.Env[7].Value = instance.Spec.LegacyGlobalUIConfig.CloudPakVersion
 	legacyContainer.Env[8].Value = instance.Spec.LegacyGlobalUIConfig.DefaultAdminUser
 	legacyContainer.Env[9].Value = instance.Spec.LegacyGlobalUIConfig.ClusterName
-        legacyContainer.Env[10].Value = instance.Spec.LegacyGlobalUIConfig.DefaultAuth
-        legacyContainer.Env[11].Value = instance.Spec.LegacyGlobalUIConfig.EnterpriseLDAP
-        legacyContainer.Env[12].Value = instance.Spec.LegacyGlobalUIConfig.EnterpriseSAML
-        legacyContainer.Env[13].Value = instance.Spec.LegacyGlobalUIConfig.OSAuth
+	legacyContainer.Env[10].Value = instance.Spec.LegacyGlobalUIConfig.DefaultAuth
+	legacyContainer.Env[11].Value = instance.Spec.LegacyGlobalUIConfig.EnterpriseLDAP
+	legacyContainer.Env[12].Value = instance.Spec.LegacyGlobalUIConfig.EnterpriseSAML
+	legacyContainer.Env[13].Value = instance.Spec.LegacyGlobalUIConfig.OSAuth
 
 	daemon := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
