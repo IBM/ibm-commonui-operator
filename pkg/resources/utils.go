@@ -67,14 +67,23 @@ var CallbackIngressAnnotations = map[string]string{
 	"icp.management.ibm.com/upstream-uri": "/auth/liberty/callback",
 }
 
-var CommonIngressAnnotations = map[string]string{
+var CommonUIIngressAnnotations = map[string]string{
 	"kubernetes.io/ingress.class":      "ibm-icp-management",
 	"icp.management.ibm.com/auth-type": "access-token",
 	"icp.management.ibm.com/app-root":  "/common-nav?root=true",
 	//nolint
 	"icp.management.ibm.com/configuration-snippet": `
 		add_header 'X-XSS-Protection' '1' always;
-        add_header Content-Security-Policy "default-src 'none'; font-src 'unsafe-inline' 'self'; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com";`,
+        add_header Content-Security-Policy "default-src 'none'; font-src * 'unsafe-inline' 'self' data:; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com";`,
+}
+
+var CommonLegacyIngressAnnotations = map[string]string{
+	"kubernetes.io/ingress.class":      "ibm-icp-management",
+	"icp.management.ibm.com/auth-type": "access-token",
+	//nolint
+	"icp.management.ibm.com/configuration-snippet": `
+		add_header 'X-XSS-Protection' '1' always;
+        add_header Content-Security-Policy "default-src 'none'; font-src * 'unsafe-inline' 'self' data:; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com";`,
 }
 
 var Log4jsData = map[string]string{
@@ -277,7 +286,7 @@ func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 	reqLogger := log.WithValues("func", "navIngressForCommonWebUI", "Ingress.Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(NavIngress)
-	Annotations := CommonIngressAnnotations
+	Annotations := CommonUIIngressAnnotations
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        NavIngress,
@@ -393,8 +402,7 @@ func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress
 	reqLogger := log.WithValues("func", "IngressForLegacyUI", "Ingress.Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(NavIngress)
-	Annotations := CommonIngressAnnotations
-	delete(Annotations, "icp.management.ibm.com/app-root")
+	Annotations := CommonLegacyIngressAnnotations
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        LegacyReleaseName,
