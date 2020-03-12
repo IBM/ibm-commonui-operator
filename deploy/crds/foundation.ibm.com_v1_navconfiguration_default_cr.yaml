@@ -7,8 +7,8 @@ metadata:
   name: common-web-ui-config
 spec:
   login:
-    logoAltText: /common-nav/api/graphics/logincloudpak.svg
-    logoUrl: IBM Cloud Pak
+    logoAltText: IBM Cloud Pak
+    logoUrl: /common-nav/api/graphics/logincloudpak.svg
     logoWidth: 190px
     logoHeight: 47px
     loginDialog:
@@ -17,7 +17,7 @@ spec:
       dialogText: You must set your dialog for this environment
       acceptText: Your acceptance text here
   header:
-    logoUrl: /common-nav/api/graphics/logincloudpak.svg
+    logoUrl: /common-nav/graphics/ibm-cloudpack-logo.svg
     logoWidth: 190px
     logoHeight: 47px
     logoAltText: IBM Cloud Pak
