@@ -291,6 +291,10 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	commonwebuiContainer.Env[7].Value = instance.Spec.GlobalUIConfig.CloudPakVersion
 	commonwebuiContainer.Env[8].Value = instance.Spec.GlobalUIConfig.DefaultAdminUser
 	commonwebuiContainer.Env[9].Value = instance.Spec.GlobalUIConfig.ClusterName
+        commonwebuiContainer.Env[10].Value = instance.Spec.GlobalUIConfig.DefaultAuth
+        commonwebuiContainer.Env[11].Value = instance.Spec.GlobalUIConfig.EnterpriseLDAP
+        commonwebuiContainer.Env[12].Value = instance.Spec.GlobalUIConfig.EnterpriseSAML
+        commonwebuiContainer.Env[13].Value = instance.Spec.GlobalUIConfig.OSAuth
 
 	daemon := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
