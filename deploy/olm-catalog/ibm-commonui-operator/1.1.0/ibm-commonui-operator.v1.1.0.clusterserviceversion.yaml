@@ -361,6 +361,7 @@ spec:
       kind: CommonWebUI
       name: commonwebuis.operators.ibm.com
       version: v1alpha1
+      displayName: CommonWebUI service
     - description: LegacyHeader is the Schema for the legacyHeader API
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
