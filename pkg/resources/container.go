@@ -180,22 +180,6 @@ var CommonContainer = corev1.Container{
 			Value: "https://icp-management-ingress:443/idprovider",
 		},
 		{
-			Name:  "osAuth",
-			Value: "",
-		},
-		{
-			Name:  "enterpriseSAML",
-			Value: "",
-		},
-		{
-			Name:  "enterpriseLDAP",
-			Value: "",
-		},
-		{
-			Name:  "defaultAuth",
-			Value: "",
-		},
-		{
 			Name:  "PLATFORM_AUTH_SERVICE_URL",
 			Value: "https://icp-management-ingress:443/idauth",
 		},
@@ -225,6 +209,22 @@ var CommonContainer = corev1.Container{
 		{
 			Name:  "CLUSTER_NAME",
 			Value: "mycluster",
+		},
+		{
+			Name:  "defaultAuth",
+			Value: "",
+		},
+		{
+			Name:  "enterpriseLDAP",
+			Value: "",
+		},
+		{
+			Name:  "enterpriseSAML",
+			Value: "",
+		},
+		{
+			Name:  "osAuth",
+			Value: "",
 		},
 		{
 			Name:  "SESSION_POLLING_INTERVAL",
