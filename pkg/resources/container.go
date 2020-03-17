@@ -211,6 +211,22 @@ var CommonContainer = corev1.Container{
 			Value: "mycluster",
 		},
 		{
+			Name:  "defaultAuth",
+			Value: "",
+		},
+		{
+			Name:  "enterpriseLDAP",
+			Value: "",
+		},
+		{
+			Name:  "enterpriseSAML",
+			Value: "",
+		},
+		{
+			Name:  "osAuth",
+			Value: "",
+		},
+		{
 			Name:  "SESSION_POLLING_INTERVAL",
 			Value: "300",
 		},

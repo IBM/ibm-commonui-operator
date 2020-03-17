@@ -305,7 +305,11 @@ metadata:
               "cloudPakVersion": "3.2.4",
               "clusterName": "mycluster",
               "defaultAdminUser": "admin",
+              "defaultAuth": "",
+              "enterpriseLDAP": "",
+              "enterpriseSAML": "",
               "identityProviderURL": "https://icp-management-ingress:443/idprovider",
+              "osAuth": "",
               "routerHTTPSPort": 443,
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000

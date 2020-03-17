@@ -12,6 +12,10 @@ spec:
     defaultAdminUser: admin
     routerHTTPSPort: 443
     sessionPollingInterval: 5000
+    enterpriseLDAP: ''
+    defaultAuth: ''
+    enterpriseSAML: ''
+    osAuth: ''
   commonWebUIConfig:
     ingressPath: /common-nav
     cpuLimits: 300m
