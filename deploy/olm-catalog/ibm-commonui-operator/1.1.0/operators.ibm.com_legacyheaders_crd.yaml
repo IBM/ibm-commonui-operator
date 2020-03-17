@@ -77,14 +77,6 @@ spec:
                   type: string
                 defaultAdminUser:
                   type: string
-                osAuth:
-                  type: string
-                defaultAuth:
-                  type: string
-                enterpriseLDAP:
-                  type: string
-                enterpriseSAML: 
-                  type: string
                 identityProviderURL:
                   type: string
                 pullSecret:
