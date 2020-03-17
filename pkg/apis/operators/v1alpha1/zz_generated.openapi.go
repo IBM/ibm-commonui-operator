@@ -418,30 +418,6 @@ func schema_pkg_apis_operators_v1alpha1_LegacyGlobalUIConfig(ref common.Referenc
 							Format: "",
 						},
 					},
-					"defaultAuth": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"osAuth": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"enterpriseLDAP": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-					"enterpriseSAML": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
 					"authServiceURL": {
 						SchemaProps: spec.SchemaProps{
 							Type:   []string{"string"},

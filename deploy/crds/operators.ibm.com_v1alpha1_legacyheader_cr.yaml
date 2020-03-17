@@ -10,10 +10,6 @@ spec:
     identityProviderURL: https://icp-management-ingress:443/idprovider
     clusterName: mycluster
     defaultAdminUser: admin
-    enterpriseLDAP: ''
-    defaultAuth: ''
-    enterpriseSAML: ''
-    osAuth: ''
     routerHTTPSPort: 443
     sessionPollingInterval: 5000
   legacyConfig:
