@@ -292,12 +292,12 @@ metadata:
               "cloudPakVersion": "3.2.4",
               "clusterName": "mycluster",
               "defaultAdminUser": "admin",
+              "defaultAuth": "",
+              "enterpriseLDAP": "",
+              "enterpriseSAML": "",
               "identityProviderURL": "https://icp-management-ingress:443/idprovider",
+              "osAuth": "",
               "routerHTTPSPort": 443,
-              "defaultAuth": ''
-              "osAuth": ''
-              "enterpriseLDAP": ''
-              "enterpriseSAML": ''
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000
             },
@@ -332,11 +332,11 @@ metadata:
               "cloudPakVersion": "3.2.4",
               "clusterName": "mycluster",
               "defaultAdminUser": "admin",
+              "defaultAuth": "",
+              "enterpriseLDAP": "",
+              "enterpriseSAML": "",
               "identityProviderURL": "https://icp-management-ingress:443/idprovider",
-              "enterpriseLDAP": ''
-              "defaultAuth": ''
-              "enterpriseSAML": ''
-              "osAuth": ''
+              "osAuth": "",
               "routerHTTPSPort": 443,
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000
@@ -356,17 +356,10 @@ spec:
       kind: CommonWebUI
       name: commonwebuis.operators.ibm.com
       version: v1alpha1
-      displayName: CommonWebUI service
     - description: LegacyHeader is the Schema for the legacyHeader API
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
       version: v1alpha1
-      displayName: LegacyHeader service
-    - description: NavConfiguration for the CommonWebUI service which returns custom nav configurations
-      kind: NavConfiguration
-      name: navconfigurations.foundation.ibm.com
-      version: v1
-      displayName: NavConfiguration service
   description: Placeholder description
   displayName: IBM Commonui Operator
   install:
