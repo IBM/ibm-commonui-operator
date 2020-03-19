@@ -38,7 +38,6 @@ const ServiceName = "common-web-ui"
 const APIIngress = "common-web-ui-api"
 const CallbackIngress = "common-web-ui-callback"
 const NavIngress = "common-web-ui"
-const commonwebuiserviceCrType = "commonwebuiservice_cr"
 
 const LegacyReleaseName = "platform-header"
 const legacyheaderCrType = "legacyheader_cr"
@@ -156,39 +155,6 @@ func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMa
 	}
 
 	return configmap
-}
-
-// serviceForCommonWebUI returns a common web ui Service object
-func ServiceForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.Service {
-	reqLogger := log.WithValues("func", "serviceForCommonWebUI", "instance.Name", instance.Name)
-	metaLabels := LabelsForMetadata(ServiceName)
-	metaLabels["kubernetes.io/cluster-service"] = "true"
-	metaLabels["kubernetes.io/name"] = instance.Spec.CommonWebUIConfig.ServiceName
-	metaLabels["app"] = instance.Spec.CommonWebUIConfig.ServiceName
-	selectorLabels := LabelsForSelector(ServiceName, commonwebuiserviceCrType, instance.Name)
-
-	reqLogger.Info("CS??? Entry")
-	service := &corev1.Service{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      instance.Spec.CommonWebUIConfig.ServiceName,
-			Namespace: instance.Namespace,
-			Labels:    metaLabels,
-		},
-		Spec: corev1.ServiceSpec{
-			Ports: []corev1.ServicePort{
-				{
-					Name: instance.Spec.CommonWebUIConfig.ServiceName,
-					Port: 3000,
-					TargetPort: intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 3000,
-					},
-				},
-			},
-			Selector: selectorLabels,
-		},
-	}
-	return service
 }
 
 func APIIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.Ingress {

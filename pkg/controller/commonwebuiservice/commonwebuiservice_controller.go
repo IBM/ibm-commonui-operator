@@ -180,30 +180,25 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	}
 
 	// Check if the DaemonSet already exists, if not create a new one
-	currentDaemonSet := &appsv1.DaemonSet{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.DaemonSetName, Namespace: instance.Namespace}, currentDaemonSet)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new DaemonSet
-		newDaemonSet := r.newDaemonSetForCR(instance)
-		reqLogger.Info("Creating a new Common web ui DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace, "DaemonSet.Name", newDaemonSet.Name)
-		err = r.client.Create(context.TODO(), newDaemonSet)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create new Common web ui DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace,
-				"DaemonSet.Name", newDaemonSet.Name)
-			return reconcile.Result{}, err
-		}
-		// DaemonSet created successfully - return and requeue
-		needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get Common web ui DaemonSet")
+	newDaemonSet, err := r.newDaemonSetForCR(instance)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	err = res.ReconcileDaemonSet(r.client, instance.Namespace, res.DaemonSetName, newDaemonSet, &needToRequeue)
+	if err != nil {
 		return reconcile.Result{}, err
 	}
 
 	// Check if the common web ui Service already exist. If not, create a new one.
-	err = r.reconcileService(instance, &needToRequeue)
+	newService, err := r.serviceForUI(instance)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
+	err = res.ReconcileService(r.client, instance.Namespace, res.ServiceName, newService, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
 	// Check if the common web ui Ingresses already exist. If not, create a new one.
 	err = r.reconcileIngresses(instance, &needToRequeue)
 	if err != nil {
@@ -259,7 +254,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 
 }
 
-func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) *appsv1.DaemonSet {
+func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.DaemonSet, error) {
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
@@ -357,48 +352,50 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	// Set Commonsvcsuiservice instance as the owner and controller of the DaemonSet
 	err := controllerutil.SetControllerReference(instance, daemon, r.scheme)
 	if err != nil {
-		reqLogger.Error(err, "Failed to set owner for Rdr DaemonSet")
-		return nil
+		reqLogger.Error(err, "Failed to set owner for common ui DaemonSet")
+		return nil, err
 	}
-	return daemon
+	return daemon, nil
 }
 
 // Check if the Common web ui Service already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileCommonWebUI) reconcileService(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
-	reqLogger := log.WithValues("func", "reconcileService", "instance.Name", instance.Name)
+func (r *ReconcileCommonWebUI) serviceForUI(instance *operatorsv1alpha1.CommonWebUI) (*corev1.Service, error) {
+	reqLogger := log.WithValues("func", "serviceForCommonWebUI", "instance.Name", instance.Name)
+	metaLabels := res.LabelsForMetadata(res.ServiceName)
+	metaLabels["kubernetes.io/cluster-service"] = "true"
+	metaLabels["kubernetes.io/name"] = instance.Spec.CommonWebUIConfig.ServiceName
+	metaLabels["app"] = instance.Spec.CommonWebUIConfig.ServiceName
+	selectorLabels := res.LabelsForSelector(res.ServiceName, commonwebuiserviceCrType, instance.Name)
 
-	reqLogger.Info("checking common web ui Service")
-	// Check if the Common web ui Service already exists, if not create a new one
-	currentService := &corev1.Service{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.ServiceName, Namespace: instance.Namespace}, currentService)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new Service
-		newService := res.ServiceForCommonWebUI(instance)
-
-		// Set Commonsvcsuiservice instance as the owner and controller of the Service
-		err := controllerutil.SetControllerReference(instance, newService, r.scheme)
-		if err != nil {
-			reqLogger.Error(err, "Failed to set owner for common web ui Service")
-			return nil
-		}
-
-		reqLogger.Info("Creating a new common web ui Service", "Service.Namespace", newService.Namespace, "Service.Name", newService.Name)
-		err = r.client.Create(context.TODO(), newService)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create new common web ui Service", "Service.Namespace", newService.Namespace, "Service.Name", newService.Name)
-			return err
-		}
-		// Service created successfully - return and requeue
-		*needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get common web ui Service")
-		return err
+	reqLogger.Info("CS??? Entry")
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Spec.CommonWebUIConfig.ServiceName,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: instance.Spec.CommonWebUIConfig.ServiceName,
+					Port: 3000,
+					TargetPort: intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: 3000,
+					},
+				},
+			},
+			Selector: selectorLabels,
+		},
 	}
-
-	reqLogger.Info("got common web ui Service")
-
-	return nil
+	// Set Commonsvcsuiservice instance as the owner and controller of the DaemonSet
+	err := controllerutil.SetControllerReference(instance, service, r.scheme)
+	if err != nil {
+		reqLogger.Error(err, "Failed to set owner service")
+		return nil, err
+	}
+	return service, nil
 }
 
 // Check if the common web ui Ingresses already exist. If not, create a new one.
@@ -407,86 +404,44 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.Co
 	reqLogger := log.WithValues("func", "reconcileIngresses", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking  common web ui api ingress")
-	// Check if the common web ui api ingress already exists, if not create a new one
-	APIIngress := &netv1.Ingress{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.APIIngress, Namespace: instance.Namespace}, APIIngress)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new Ingress
-		newAPIIngress := res.APIIngressForCommonWebUI(instance)
-
-		// Set instance as the owner and controller of the ingress
-		err := controllerutil.SetControllerReference(instance, newAPIIngress, r.scheme)
-		if err != nil {
-			reqLogger.Error(err, "Failed to set owner for api ingress")
-			return nil
-		}
-
-		reqLogger.Info("Creating a new common web ui api Ingress", "Ingress.Namespace", newAPIIngress.Namespace, "Ingress.Name", newAPIIngress.Name)
-		err = r.client.Create(context.TODO(), newAPIIngress)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create new common web ui api Ingress", "Ingress.Namespace", newAPIIngress.Namespace, "Ingress.Name", newAPIIngress.Name)
-			return err
-		}
-		// Ingress created successfully - return and requeue
-		*needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get common web ui api Ingress")
+	// Define a new Ingress
+	newAPIIngress := res.APIIngressForCommonWebUI(instance)
+	// Set instance as the owner and controller of the ingress
+	err := controllerutil.SetControllerReference(instance, newAPIIngress, r.scheme)
+	if err != nil {
+		reqLogger.Error(err, "Failed to set owner for api ingress")
+		return nil
+	}
+	err = res.ReconcileIngress(r.client, instance.Namespace, res.APIIngress, newAPIIngress, needToRequeue)
+	if err != nil {
 		return err
 	}
 	reqLogger.Info("got common web ui api Ingress, checking common web ui callback Ingress")
 
-	// Check if the common web ui api ingress already exists, if not create a new one
-	callbackIngress := &netv1.Ingress{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.CallbackIngress, Namespace: instance.Namespace}, callbackIngress)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new Ingress
-		newCallbackIngress := res.CallbackIngressForCommonWebUI(instance)
-
-		// Set instance as the owner and controller of the ingress
-		err := controllerutil.SetControllerReference(instance, newCallbackIngress, r.scheme)
-		if err != nil {
-			reqLogger.Error(err, "Failed to set owner for callback ingress")
-			return nil
-		}
-
-		reqLogger.Info("Creating a new common web ui callback Ingress", "Ingress.Namespace", newCallbackIngress.Namespace, "Ingress.Name", newCallbackIngress.Name)
-		err = r.client.Create(context.TODO(), newCallbackIngress)
-		//nolint
-		if err != nil {
-			reqLogger.Error(err, "Failed to create new common web ui callback Ingress", "Ingress.Namespace", newCallbackIngress.Namespace, "Ingress.Name", newCallbackIngress.Name)
-			return err
-		}
-		// Ingress created successfully - return and requeue
-		*needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get common web ui callback Ingress")
+	// Define a new Ingress
+	newCallbackIngress := res.CallbackIngressForCommonWebUI(instance)
+	// Set instance as the owner and controller of the ingress
+	callbackErr := controllerutil.SetControllerReference(instance, newCallbackIngress, r.scheme)
+	if callbackErr != nil {
+		reqLogger.Error(callbackErr, "Failed to set owner for callback ingress")
+		return nil
+	}
+	callbackErr = res.ReconcileIngress(r.client, instance.Namespace, res.CallbackIngress, newCallbackIngress, needToRequeue)
+	if callbackErr != nil {
 		return err
 	}
 	reqLogger.Info("got common web ui callback Ingress, checking common web ui nav Ingress")
 
-	navIngress := &netv1.Ingress{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.NavIngress, Namespace: instance.Namespace}, navIngress)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new Ingress
-		newNavIngress := res.NavIngressForCommonWebUI(instance)
-
-		// Set instance as the owner and controller of the ingress
-		err := controllerutil.SetControllerReference(instance, newNavIngress, r.scheme)
-		if err != nil {
-			reqLogger.Error(err, "Failed to set owner for Nav ingress")
-			return nil
-		}
-
-		reqLogger.Info("Creating a new common web ui nav Ingress", "Ingress.Namespace", newNavIngress.Namespace, "Ingress.Name", newNavIngress.Name)
-		err = r.client.Create(context.TODO(), newNavIngress)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create new common web ui nav Ingress", "Ingress.Namespace", newNavIngress.Namespace, "Ingress.Name", newNavIngress.Name)
-			return err
-		}
-		// Ingress created successfully - return and requeue
-		*needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get common web ui callback Ingress")
+	// Define a new Ingress
+	newNavIngress := res.NavIngressForCommonWebUI(instance)
+	// Set instance as the owner and controller of the ingress
+	navErr := controllerutil.SetControllerReference(instance, newNavIngress, r.scheme)
+	if navErr != nil {
+		reqLogger.Error(err, "Failed to set owner for Nav ingress")
+		return nil
+	}
+	navErr = res.ReconcileIngress(r.client, instance.Namespace, res.NavIngress, newNavIngress, needToRequeue)
+	if navErr != nil {
 		return err
 	}
 	reqLogger.Info("got common web ui nav Ingress")
