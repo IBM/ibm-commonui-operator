@@ -121,7 +121,7 @@ spec:
       label: "Monitoring"
       url: "/grafana"
       namespace: "ibm-common-services"
-      serviceName: "monitoring-prometheus"
+      serviceName: "ibm-monitoring-grafana"
       serviceId: "monitoring-ui"
       parentId: "monitor-health"
       target: "_blank"
