@@ -141,7 +141,7 @@ metadata:
                 "namespace": "ibm-common-services",
                 "parentId": "monitor-health",
                 "serviceId": "monitoring-ui",
-                "serviceName": "monitoring-prometheus",
+                "serviceName": "ibm-monitoring-grafana",
                 "target": "_blank",
                 "url": "/grafana"
               },
@@ -233,7 +233,7 @@ metadata:
                 "namespace": "ibm-common-services",
                 "parentId": "administer",
                 "serviceId": "monitoring-ui",
-                "serviceName": "monitoring-prometheus",
+                "serviceName": "ibm-monitoring-grafana",
                 "target": "_blank",
                 "url": "/grafana"
               },
