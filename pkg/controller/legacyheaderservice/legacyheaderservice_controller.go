@@ -80,16 +80,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	}
 
 	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource Pods and requeue the owner LegacyHeader
-	err = c.Watch(&source.Kind{Type: &corev1.Pod{}}, &handler.EnqueueRequestForOwner{
-		IsController: true,
-		OwnerType:    &operatorsv1alpha1.LegacyHeader{},
-	})
-	if err != nil {
-		return err
-	}
-
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
 	// Watch for changes to secondary resource ConfigMap and requeue the owner LegacyHeader
 	err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
@@ -180,27 +170,21 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	}
 
 	// Check if the DaemonSet already exists, if not create a new one
-	currentDaemonSet := &appsv1.DaemonSet{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: res.LegacyReleaseName, Namespace: instance.Namespace}, currentDaemonSet)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new DaemonSet
-		newDaemonSet := r.newDaemonSetForCR(instance)
-		reqLogger.Info("Creating a new legacy header DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace, "DaemonSet.Name", newDaemonSet.Name)
-		err = r.client.Create(context.TODO(), newDaemonSet)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create new legacy header DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace,
-				"DaemonSet.Name", newDaemonSet.Name)
-			return reconcile.Result{}, err
-		}
-		// DaemonSet created successfully - return and requeue
-		needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get legacy header DaemonSet")
+	newDaemonSet, err := r.newDaemonSetForCR(instance)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	err = res.ReconcileDaemonSet(r.client, instance.Namespace, res.DaemonSetName, newDaemonSet, &needToRequeue)
+	if err != nil {
 		return reconcile.Result{}, err
 	}
 
 	// Check if the platform header Service already exist. If not, create a new one.
-	err = r.reconcileService(instance, &needToRequeue)
+	newService, err := r.serviceForUI(instance)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+	err = res.ReconcileService(r.client, instance.Namespace, res.ServiceName, newService, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -259,7 +243,7 @@ func (r *ReconcileLegacyHeader) reconcileConfigMaps(instance *operatorsv1alpha1.
 
 }
 
-func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.LegacyHeader) *appsv1.DaemonSet {
+func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.LegacyHeader) (*appsv1.DaemonSet, error) {
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.LegacyReleaseName)
 	selectorLabels := res.LabelsForSelector(res.LegacyReleaseName, legacyheaderCrType, instance.Name)
@@ -354,77 +338,64 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 	err := controllerutil.SetControllerReference(instance, daemon, r.scheme)
 	if err != nil {
 		reqLogger.Error(err, "Failed to set owner for legacy DaemonSet")
-		return nil
+		return nil, err
 	}
-	return daemon
+	return daemon, nil
 }
 
 // Check if the Common web ui Service already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileLegacyHeader) reconcileService(instance *operatorsv1alpha1.LegacyHeader, needToRequeue *bool) error {
-	reqLogger := log.WithValues("func", "reconcileService", "instance.Name", instance.Name)
+func (r *ReconcileLegacyHeader) serviceForUI(instance *operatorsv1alpha1.LegacyHeader) (*corev1.Service, error) {
+	reqLogger := log.WithValues("func", "serviceForLegacyUI", "instance.Name", instance.Name)
+	metaLabels := res.LabelsForMetadata(res.LegacyReleaseName)
+	metaLabels["kubernetes.io/cluster-service"] = "true"
+	metaLabels["kubernetes.io/name"] = instance.Spec.LegacyConfig.ServiceName
+	metaLabels["app"] = instance.Spec.LegacyConfig.ServiceName
+	selectorLabels := res.LabelsForSelector(res.LegacyReleaseName, legacyheaderCrType, instance.Name)
 
-	reqLogger.Info("checking legacy header Service")
-	// Check if the Common web ui Service already exists, if not create a new one
-	currentService := &corev1.Service{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.LegacyReleaseName, Namespace: instance.Namespace}, currentService)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new Service
-		newService := res.ServiceForLegacyUI(instance)
-
-		// Set Commonsvcsuiservice instance as the owner and controller of the Service
-		err := controllerutil.SetControllerReference(instance, newService, r.scheme)
-		if err != nil {
-			reqLogger.Error(err, "Failed to set owner for Legacy header Service")
-			return nil
-		}
-
-		reqLogger.Info("Creating a new Legacy header Service", "Service.Namespace", newService.Namespace, "Service.Name", newService.Name)
-		err = r.client.Create(context.TODO(), newService)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create new legacy header Service", "Service.Namespace", newService.Namespace, "Service.Name", newService.Name)
-			return err
-		}
-		// Service created successfully - return and requeue
-		*needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get legacy header Service")
-		return err
+	reqLogger.Info("CS??? Entry")
+	service := &corev1.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      instance.Spec.LegacyConfig.ServiceName,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Spec: corev1.ServiceSpec{
+			Ports: []corev1.ServicePort{
+				{
+					Name: instance.Spec.LegacyConfig.ServiceName,
+					Port: 3000,
+					TargetPort: intstr.IntOrString{
+						Type:   intstr.Int,
+						IntVal: 3000,
+					},
+				},
+			},
+			Selector: selectorLabels,
+		},
 	}
-
-	reqLogger.Info("got legacy header Service")
-
-	return nil
+	err := controllerutil.SetControllerReference(instance, service, r.scheme)
+	if err != nil {
+		reqLogger.Error(err, "Failed to set owner service")
+		return nil, err
+	}
+	return service, nil
 }
 
 // Check if the lagacy header Ingresses already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
 func (r *ReconcileLegacyHeader) reconcileIngress(instance *operatorsv1alpha1.LegacyHeader, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileIngress", "instance.Name", instance.Name)
-
-	navIngress := &netv1.Ingress{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.LegacyReleaseName, Namespace: instance.Namespace}, navIngress)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new Ingress
-		newNavIngress := res.IngressForLegacyUI(instance)
-
-		// Set instance as the owner and controller of the ingress
-		err := controllerutil.SetControllerReference(instance, newNavIngress, r.scheme)
-		if err != nil {
-			reqLogger.Error(err, "Failed to set owner for Nav ingress")
-			return nil
-		}
-
-		reqLogger.Info("Creating a new legacy header Ingress", "Ingress.Namespace", newNavIngress.Namespace, "Ingress.Name", newNavIngress.Name)
-		err = r.client.Create(context.TODO(), newNavIngress)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create legacy header Ingress", "Ingress.Namespace", newNavIngress.Namespace, "Ingress.Name", newNavIngress.Name)
-			return err
-		}
-		// Ingress created successfully - return and requeue
-		*needToRequeue = true
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get legacy header Ingress")
+	// Define a new Ingress
+	newNavIngress := res.IngressForLegacyUI(instance)
+	// Set instance as the owner and controller of the ingress
+	err := controllerutil.SetControllerReference(instance, newNavIngress, r.scheme)
+	if err != nil {
+		reqLogger.Error(err, "Failed to set owner for Nav ingress")
+		return nil
+	}
+	err = res.ReconcileIngress(r.client, instance.Namespace, res.LegacyReleaseName, newNavIngress, needToRequeue)
+	if err != nil {
 		return err
 	}
 	reqLogger.Info("got legacy header Ingress")
