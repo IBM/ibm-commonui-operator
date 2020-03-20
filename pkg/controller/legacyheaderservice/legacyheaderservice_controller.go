@@ -174,7 +174,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = res.ReconcileDaemonSet(r.client, instance.Namespace, res.DaemonSetName, newDaemonSet, &needToRequeue)
+	err = res.ReconcileDaemonSet(r.client, instance.Namespace, res.LegacyReleaseName, newDaemonSet, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
