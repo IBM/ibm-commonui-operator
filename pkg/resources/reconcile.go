@@ -184,7 +184,225 @@ func IsDaemonSetEqual(oldDaemonSet, newDaemonSet *appsv1.DaemonSet) bool {
 		return false
 	}
 
+	oldPodTemplate := oldDaemonSet.Spec.Template
+	newPodTemplate := newDaemonSet.Spec.Template
+	if !isPodTemplateEqual(oldPodTemplate, newPodTemplate) {
+		return false
+	}
+
 	logger.Info("DaemonSets are equal", "DaemonSet.Name", oldDaemonSet.ObjectMeta.Name)
+
+	return true
+}
+
+// Use DeepEqual to determine if 2 pod templates are equal.
+// Check pod template labels, service account names, volumes,
+// containers, init containers, image name, volume mounts, env vars, liveness, readiness.
+// If there are any differences, return false. Otherwise, return true.
+func isPodTemplateEqual(oldPodTemplate, newPodTemplate corev1.PodTemplateSpec) bool {
+	logger := log.WithValues("func", "isPodTemplateEqual")
+
+	if !reflect.DeepEqual(oldPodTemplate.ObjectMeta.Labels, newPodTemplate.ObjectMeta.Labels) {
+		logger.Info("Pod labels not equal",
+			"old", fmt.Sprintf("%v", oldPodTemplate.ObjectMeta.Labels),
+			"new", fmt.Sprintf("%v", newPodTemplate.ObjectMeta.Labels))
+		return false
+	}
+
+	if !reflect.DeepEqual(oldPodTemplate.Spec.ServiceAccountName, newPodTemplate.Spec.ServiceAccountName) {
+		logger.Info("Service account names not equal",
+			"old", oldPodTemplate.Spec.ServiceAccountName,
+			"new", newPodTemplate.Spec.ServiceAccountName)
+		return false
+	}
+
+	oldVolumes := oldPodTemplate.Spec.Volumes
+	newVolumes := newPodTemplate.Spec.Volumes
+	if len(oldVolumes) == len(newVolumes) {
+		if len(oldVolumes) > 0 {
+			for i := range oldVolumes {
+				oldVolume := oldVolumes[i]
+				newVolume := newVolumes[i]
+				if !reflect.DeepEqual(oldVolume.Name, newVolume.Name) {
+					logger.Info("Pod volume names not equal", "volume num", i,
+						"old", oldVolume.Name, "new", newVolume.Name)
+					return false
+				}
+				if !reflect.DeepEqual(oldVolume.VolumeSource, newVolume.VolumeSource) {
+					logger.Info("Pod volume sources not equal", "volume num", i,
+						"old", fmt.Sprintf("%+v", oldVolume.VolumeSource), "new", fmt.Sprintf("%+v", newVolume.VolumeSource))
+					return false
+				}
+			}
+		}
+	} else {
+		logger.Info("Volume lengths not equal")
+		return false
+	}
+
+	// check containers
+	oldContainers := oldPodTemplate.Spec.Containers
+	newContainers := newPodTemplate.Spec.Containers
+	if !isContainerEqual(oldContainers, newContainers, false) {
+		return false
+	}
+
+	// check init containers
+	oldInitContainers := oldPodTemplate.Spec.InitContainers
+	newInitContainers := newPodTemplate.Spec.InitContainers
+	if !isContainerEqual(oldInitContainers, newInitContainers, true) {
+		return false
+	}
+
+	logger.Info("Pod templates are equal")
+	return true
+}
+
+// Use DeepEqual to determine if 2 container lists are equal.
+// Check count, name, image name, image pull policy, env vars, volume mounts.
+// If there are any differences, return false. Otherwise, return true.
+// Set isInitContainer to true when checking init containers.
+func isContainerEqual(oldContainers, newContainers []corev1.Container, isInitContainer bool) bool {
+	logger := log.WithValues("func", "isContainerEqual")
+
+	var containerType string
+	if isInitContainer {
+		containerType = "Init Container"
+	} else {
+		containerType = "Container"
+	}
+
+	if len(oldContainers) == len(newContainers) {
+		if len(oldContainers) > 0 {
+			for i := range oldContainers {
+				oldContainer := oldContainers[i]
+				newContainer := newContainers[i]
+				logger.Info("Checking "+containerType, "old", oldContainer.Name)
+				if !reflect.DeepEqual(oldContainer.Name, newContainer.Name) {
+					logger.Info(containerType+" names not equal", "container num", i, "old", oldContainer.Name, "new", newContainer.Name)
+					return false
+				}
+
+				if !reflect.DeepEqual(oldContainer.Image, newContainer.Image) {
+					logger.Info(containerType+" images not equal", "container num", i, "old", oldContainer.Image, "new", newContainer.Image)
+					return false
+				}
+
+				if !reflect.DeepEqual(oldContainer.ImagePullPolicy, newContainer.ImagePullPolicy) {
+					logger.Info(containerType+" image pull policies not equal", "container num", i,
+						"old", oldContainer.ImagePullPolicy, "new", newContainer.ImagePullPolicy)
+					return false
+				}
+
+				oldEnvVars := oldContainer.Env
+				newEnvVars := newContainer.Env
+				if len(oldEnvVars) != len(newEnvVars) {
+					logger.Info("Env var length not equal", "container num", i)
+					return false
+				} else if len(oldEnvVars) > 0 {
+					for j := range oldEnvVars {
+						oldEnvVar := oldEnvVars[j]
+						newEnvVar := newEnvVars[j]
+						if !reflect.DeepEqual(oldEnvVar.Name, newEnvVar.Name) {
+							logger.Info("Env var names not equal", "container num", i, "old", oldEnvVar.Name, "new", newEnvVar.Name)
+							return false
+						}
+						if !reflect.DeepEqual(oldEnvVar.Value, newEnvVar.Value) {
+							logger.Info("Env var values not equal", "container num", i, "var", oldEnvVar.Name,
+								"old", oldEnvVar.Value, "new", newEnvVar.Value)
+							return false
+						}
+						if oldEnvVar.ValueFrom != nil && newEnvVar.ValueFrom != nil {
+							if !reflect.DeepEqual(oldEnvVar.ValueFrom, newEnvVar.ValueFrom) {
+								logger.Info("Env var ValueFrom not equal", "container num", i, "var", oldEnvVar.Name,
+									"old", fmt.Sprintf("%+v", oldEnvVar.ValueFrom), "new", fmt.Sprintf("%+v", newEnvVar.ValueFrom))
+								return false
+							}
+						} else if !(oldEnvVar.ValueFrom == nil && newEnvVar.ValueFrom == nil) {
+							logger.Info("One of the env var's ValueFrom is nil", "container num", i, "var", oldEnvVar.Name)
+							return false
+						}
+					}
+				}
+
+				oldVolumeMounts := oldContainer.VolumeMounts
+				newVolumeMounts := newContainer.VolumeMounts
+				if len(oldVolumeMounts) == len(newVolumeMounts) {
+					if len(oldVolumeMounts) > 0 {
+						for i := range oldVolumeMounts {
+							oldVolumeMount := oldVolumeMounts[i]
+							newVolumeMount := newVolumeMounts[i]
+							if !reflect.DeepEqual(oldVolumeMount, newVolumeMount) {
+								logger.Info("Volume mounts not equal", "mount num", i, "container num", i,
+									"old", fmt.Sprintf("%+v", oldVolumeMount), "new", fmt.Sprintf("%+v", newVolumeMount))
+								return false
+							}
+						}
+					}
+				} else {
+					logger.Info("Volume mount lengths not equal", "container num", i)
+					return false
+				}
+
+				if !isInitContainer {
+					// check liveness and readiness probes
+					oldLiveness := oldContainer.LivenessProbe
+					newLiveness := newContainer.LivenessProbe
+					if !isProbeEqual(oldLiveness, newLiveness, "Liveness") {
+						return false
+					}
+					oldReadiness := oldContainer.ReadinessProbe
+					newReadiness := newContainer.ReadinessProbe
+					if !isProbeEqual(oldReadiness, newReadiness, "Readiness") {
+						return false
+					}
+				}
+			}
+		}
+	} else {
+		logger.Info(containerType+" numbers not equal",
+			"old", len(oldContainers), "new", len(newContainers))
+		return false
+	}
+	return true
+}
+
+// Use DeepEqual to determine if 2 probes are equal.
+// Check Handler, InitialDelaySeconds, TimeoutSeconds, PeriodSeconds.
+// If there are any differences, return false. Otherwise, return true.
+func isProbeEqual(oldProbe, newProbe *corev1.Probe, probeType string) bool {
+	logger := log.WithValues("func", "isProbeEqual")
+	logger.Info("Checking " + probeType + " probe")
+
+	if oldProbe != nil && newProbe != nil {
+		if !reflect.DeepEqual(oldProbe.Handler, newProbe.Handler) {
+			logger.Info(probeType+" probe Handler not equal",
+				"old", fmt.Sprintf("%+v", oldProbe.Handler), "new", fmt.Sprintf("%+v", newProbe.Handler))
+			return false
+		}
+
+		if !reflect.DeepEqual(oldProbe.InitialDelaySeconds, newProbe.InitialDelaySeconds) {
+			logger.Info(probeType+" probe Initial delay seconds not equal",
+				"old", oldProbe.InitialDelaySeconds, "new", newProbe.InitialDelaySeconds)
+			return false
+		}
+
+		if !reflect.DeepEqual(oldProbe.TimeoutSeconds, newProbe.TimeoutSeconds) {
+			logger.Info(probeType+" probe Timeout seconds not equal",
+				"old", oldProbe.TimeoutSeconds, "new", newProbe.TimeoutSeconds)
+			return false
+		}
+
+		if !reflect.DeepEqual(oldProbe.PeriodSeconds, newProbe.PeriodSeconds) {
+			logger.Info(probeType+" probe Period seconds not equal",
+				"old", oldProbe.PeriodSeconds, "new", newProbe.PeriodSeconds)
+			return false
+		}
+	} else if !(oldProbe == nil && newProbe == nil) {
+		logger.Info("One "+probeType+" probe is nil",
+			"old", fmt.Sprintf("%+v", oldProbe), "new", fmt.Sprintf("%+v", newProbe))
+		return false
+	}
 
 	return true
 }
