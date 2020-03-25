@@ -69,6 +69,8 @@ rules:
   - legacyheaders
   - commonwebuis/finalizers
   - legacyheaders/finalizers
+  - legacyheaders/status
+  - commonwebuis/status
   verbs:
   - '*'
 ---

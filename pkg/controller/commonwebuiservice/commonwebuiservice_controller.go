@@ -27,6 +27,9 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
+
+	"reflect"
 
 	netv1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -163,6 +166,21 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	opVersion := instance.Spec.OperatorVersion
 	reqLogger.Info("got CommonWebUIService instance, version=" + opVersion)
 
+	// set a default Status value
+	if len(instance.Status.PodNames) == 0 {
+		instance.Status.PodNames = res.DefaultStatusForCR
+		err = r.client.Status().Update(context.TODO(), instance)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set CommonWebUI default status")
+			return reconcile.Result{}, err
+		}
+	}
+
+	navConfigCRD := &apiextv1beta.CustomResourceDefinition{}
+	recResult, err := r.handleCRD(instance, navConfigCRD)
+	if err != nil {
+		return recResult, err
+	}
 	// Check if the config maps already exist. If not, create a new one.
 	err = r.reconcileConfigMaps(instance, &needToRequeue)
 	if err != nil {
@@ -203,6 +221,30 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 
 	reqLogger.Info("got Services, checking Certificates")
 	// Resources exists - don't requeue
+
+	reqLogger.Info("Updating CommonWebUI staus")
+
+	podList := &corev1.PodList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.Namespace),
+		client.MatchingLabels(res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)),
+	}
+	if err = r.client.List(context.TODO(), podList, listOpts...); err != nil {
+		reqLogger.Error(err, "Failed to list pods", "CommonWebUI.Namespace", instance.Namespace, "CommonWebUI.Name", res.DaemonSetName)
+		return reconcile.Result{}, err
+	}
+	podNames := res.GetPodNames(podList.Items)
+
+	//update status.podNames if needed
+	if !reflect.DeepEqual(podNames, instance.Status.PodNames) {
+		instance.Status.PodNames = podNames
+		err := r.client.Status().Update(context.TODO(), instance)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update CommonWebUI status")
+			return reconcile.Result{}, err
+		}
+	}
+
 	reqLogger.Info("CS??? all done")
 	return reconcile.Result{}, nil
 }
@@ -437,4 +479,243 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.Co
 	reqLogger.Info("got common web ui nav Ingress")
 
 	return nil
+}
+
+func (r *ReconcileCommonWebUI) handleCRD(instance *operatorsv1alpha1.CommonWebUI, currentCRD *apiextv1beta.CustomResourceDefinition) (reconcile.Result, error) {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "navconfiguration.foundation.ibm.com", Namespace: ""}, currentCRD)
+	if err != nil && errors.IsNotFound(err) {
+		// Define CRD
+		newCRD := r.newNavconfgCRD()
+		reqLogger.Info("Creating a new CRD", "CRD.Namespace", instance.Namespace, "CRD.Name", "clients.oidc.security.ibm.com")
+		err = r.client.Create(context.TODO(), newCRD)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new CRD", "CRD.Namespace", instance.Namespace, "CRD.Name", "clients.oidc.security.ibm.com")
+			return reconcile.Result{}, err
+		}
+		// new CRD created successfully - return and requeue
+		return reconcile.Result{Requeue: true}, nil
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get CRD")
+		return reconcile.Result{}, err
+	}
+	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileCommonWebUI) newNavconfgCRD() *apiextv1beta.CustomResourceDefinition {
+	newCRD := &apiextv1beta.CustomResourceDefinition{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "CustomResourceDefinition",
+			APIVersion: "apiextensions.k8s.io/v1beta1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "navconfigurations.foundation.ibm.com",
+			Labels:    res.LabelsForMetadata(res.DaemonSetName),
+			Namespace: "ibm-common-services",
+		},
+		Spec: apiextv1beta.CustomResourceDefinitionSpec{
+			Scope:   "Namespaced",
+			Group:   "foundation.ibm.com",
+			Version: "v1",
+			Names: apiextv1beta.CustomResourceDefinitionNames{
+				Kind:       "NavConfiguration",
+				Singular:   "navconfiguration",
+				Plural:     "navconfigurations",
+				ShortNames: []string{"navconfig"},
+			},
+			Validation: &apiextv1beta.CustomResourceValidation{
+				OpenAPIV3Schema: &apiextv1beta.JSONSchemaProps{
+					Properties: map[string]apiextv1beta.JSONSchemaProps{
+						"logoutRedirects": {
+							Description: "A list a URLs we make requests to logout the users of all applications within the cloudpack.",
+							Type:        "array",
+							Items: &apiextv1beta.JSONSchemaPropsOrArray{
+								Schema: &apiextv1beta.JSONSchemaProps{
+									Type: "string",
+								},
+							},
+						},
+						"header": {
+							Type: "object",
+							Properties: map[string]apiextv1beta.JSONSchemaProps{
+								"disabledItems": {
+									Type: "array",
+									//nolint
+									Description: "An array of header items that should be disabled when running within this CR context.Valid values are 'catalog', 'createResource', 'bookmark'",
+									Items: &apiextv1beta.JSONSchemaPropsOrArray{
+										Schema: &apiextv1beta.JSONSchemaProps{
+											Type: "string",
+										},
+									},
+								},
+								"logoUrl": {
+									Type:        "string",
+									Description: "The URL that provides the login page logo. Must be an unprotected URL.",
+								},
+								"logoWidth": {
+									Type:        "string",
+									Description: "Width of the logo for the login page in pixels",
+								},
+								"logoHeight": {
+									Type:        "string",
+									Description: "Height of the logo for the login page in pixels",
+								},
+								"docUrlMapping": {
+									Type:        "string",
+									Description: "URL of the Knowledge center page for the cloud pak",
+								},
+								"supportUrl": {
+									Type:        "string",
+									Description: "URL of the Support page for the cloud pak",
+								},
+								"gettingStartedUrl": {
+									Type:        "string",
+									Description: "URL of the Getting started page for the cloud pak",
+								},
+							},
+						},
+						"about": {
+							Type: "object",
+							Properties: map[string]apiextv1beta.JSONSchemaProps{
+								"logoUrl": {
+									Type:        "string",
+									Description: "URL of the Logo on the About page for the cloud pak",
+								},
+								"licenses": {
+									Type:        "array",
+									Description: "List of licenses we ship with the cloud pak",
+									Items: &apiextv1beta.JSONSchemaPropsOrArray{
+										Schema: &apiextv1beta.JSONSchemaProps{
+											Type: "string",
+										},
+									},
+								},
+								"copyright": {
+									Type:        "string",
+									Description: "Copyright string for the cloud pak",
+								},
+								"version": {
+									Type:        "string",
+									Description: "Version of the cloud pak",
+								},
+								"edition": {
+									Type:        "string",
+									Description: "Edition of the cloud pak",
+								},
+							},
+						},
+						"login": {
+							Type: "object",
+							Properties: map[string]apiextv1beta.JSONSchemaProps{
+								"logoUrl": {
+									Type:        "string",
+									Description: "URL of the Logo on the About page for the cloud pak",
+								},
+								"logoAltText": {
+									Type:        "string",
+									Description: "Alternate text of the shared header logo for cloud pak",
+								},
+								"loginDialog": {
+									Type:        "object",
+									Description: "FISMA dialog contents can be modified here",
+									Properties: map[string]apiextv1beta.JSONSchemaProps{
+										"enabled": {
+											Type:        "boolean",
+											Description: "This value is used to enable/disable the user acceptance dialog on the login page",
+										},
+										"dialogHeaderText": {
+											Type:        "string",
+											Description: "Text that will display as the title of the user acceptance dialog on the login page",
+										},
+										"dialogText": {
+											Type:        "string",
+											Description: "Text that will display as the content of the user acceptance dialog on the login page",
+										},
+										"acceptText": {
+											Type:        "string",
+											Description: "Text that will display as the accept button text",
+										},
+									},
+								},
+								"logoWidth": {
+									Type:        "string",
+									Description: "Width of the logo for the login page in pixels",
+								},
+								"logoHeight": {
+									Type:        "string",
+									Description: "Height of the logo for the login page in pixels",
+								},
+							},
+						},
+						"navItems": {
+							Type: "array",
+							Items: &apiextv1beta.JSONSchemaPropsOrArray{
+								Schema: &apiextv1beta.JSONSchemaProps{
+									Type: "object",
+									Properties: map[string]apiextv1beta.JSONSchemaProps{
+										"id": {
+											Type:        "string",
+											Description: "ID of the nav item, must be unique",
+										},
+										"label": {
+											Type:        "string",
+											Description: "Displayed label of the nav item",
+										},
+										"url": {
+											Type:        "string",
+											Description: "URL of the nav item. It can either but an FQDN or a relative path based on the ingress of the cluster",
+										},
+										"target": {
+											Type:        "string",
+											Description: "name of the tab or _blank where the navigation item will launch within the window",
+										},
+										"iconUrl": {
+											Type:        "string",
+											Description: "URL of the icon that will display for the top level parents.",
+										},
+										"parentId": {
+											Type:        "string",
+											Description: "ID of the parent this child item will be nested under",
+										},
+										"namespace": {
+											Type:        "string",
+											Description: "Namespace where the microservice associated with this item is running. Used with service detection",
+										},
+										"serviceName": {
+											Type:        "string",
+											Description: "Name of the service running in the namespace above tied to the deployment/daemonset. Used for service detection",
+										},
+										"serviceId": {
+											Type: "string",
+											//nolint
+											Description: "Must be unique from a different microservice link. But the service id should remain the same for all links running on the same microservice for rendering purposes.",
+										},
+										"detectionServiceName": {
+											Type:        "string",
+											Description: "Informs the shared web console detection service to use the serviceName for auto discovery. Value should be true or false string",
+										},
+										"detectionLabelSelector": {
+											Type:        "string",
+											Description: "The label selector for the microservice for detection.",
+										},
+										"isAuthorized": {
+											Type:        "array",
+											Description: "The label selector for the microservice for detection.",
+											Items: &apiextv1beta.JSONSchemaPropsOrArray{
+												Schema: &apiextv1beta.JSONSchemaProps{
+													Type: "string",
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+
+	return newCRD
 }

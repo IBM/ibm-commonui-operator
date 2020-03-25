@@ -26,11 +26,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-const DefaultImageRegistry = "https://quay.io/repository/opencloudio"
+const DefaultImageRegistry = "quay.io/opencloudio"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.1.0"
 
-const LegacyImageRegistry = "https://quay.io/repository/opencloudio"
+const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"
 const LegacyImageTag = "3.2.4"
 
@@ -98,10 +98,9 @@ var commonSecurityContext = corev1.SecurityContext{
 }
 
 var CommonContainer = corev1.Container{
-	Image: "common-web-ui",
-	//CS??? Image: "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64/metering-data-manager:3.3.1",
+	Image:           "common-web-ui",
 	Name:            "common-web-ui",
-	ImagePullPolicy: corev1.PullIfNotPresent,
+	ImagePullPolicy: corev1.PullAlways,
 
 	Resources: corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{

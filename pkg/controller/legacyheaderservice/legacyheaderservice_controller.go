@@ -27,6 +27,8 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
 
+	"reflect"
+
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -163,6 +165,15 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	opVersion := instance.Spec.OperatorVersion
 	reqLogger.Info("got LegacyHeaderService instance, version=" + opVersion)
 
+	// set a default Status value
+	if len(instance.Status.PodNames) == 0 {
+		instance.Status.PodNames = res.DefaultStatusForCR
+		err = r.client.Status().Update(context.TODO(), instance)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set LegacyHeader default status")
+			return reconcile.Result{}, err
+		}
+	}
 	// Check if the config maps already exist. If not, create a new one.
 	err = r.reconcileConfigMaps(instance, &needToRequeue)
 	if err != nil {
@@ -184,7 +195,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = res.ReconcileService(r.client, instance.Namespace, res.ServiceName, newService, &needToRequeue)
+	err = res.ReconcileService(r.client, instance.Namespace, res.LegacyReleaseName, newService, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -198,6 +209,29 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
 		return reconcile.Result{Requeue: true}, nil
+	}
+
+	reqLogger.Info("Updating LegacyHeader staus")
+
+	podList := &corev1.PodList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.Namespace),
+		client.MatchingLabels(res.LabelsForSelector(res.LegacyReleaseName, legacyheaderCrType, instance.Name)),
+	}
+	if err = r.client.List(context.TODO(), podList, listOpts...); err != nil {
+		reqLogger.Error(err, "Failed to list pods", "LegacyHeader.Namespace", instance.Namespace, "LegacyHeader.Name", res.LegacyReleaseName)
+		return reconcile.Result{}, err
+	}
+	podNames := res.GetPodNames(podList.Items)
+
+	//update status.podNames if needed
+	if !reflect.DeepEqual(podNames, instance.Status.PodNames) {
+		instance.Status.PodNames = podNames
+		err := r.client.Status().Update(context.TODO(), instance)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update LegacyHeader status")
+			return reconcile.Result{}, err
+		}
 	}
 
 	reqLogger.Info("got Services, checking Certificates")

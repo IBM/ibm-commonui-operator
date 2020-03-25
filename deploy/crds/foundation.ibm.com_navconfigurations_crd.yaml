@@ -2,7 +2,19 @@
   kind: CustomResourceDefinition
   metadata:
     name: navconfigurations.foundation.ibm.com
+  status:
+    description: NavConfigurationStatus defines the observed state of NavConfiguration
+    properties:
+      state:
+        description: PodNames will hold the names of the commonwebui's
+        type: string
+    required:
+    - state
+    type: object
   spec:
+    scope: Namespaced
+    subresources:
+      status: {}
     group: foundation.ibm.com
     names:
       plural: navconfigurations
@@ -24,6 +36,7 @@
             items:
               type: string
           header:
+            description: Customizations for the common web ui header
             type: object
             required: ["logoUrl"]
             properties:
@@ -51,6 +64,7 @@
                 description: URL of the Getting started page for the cloud pak
                 type: string
           about:
+            description: Customizations for the about modal
             type: object
             required: ["logoUrl"]
             properties:
@@ -72,6 +86,7 @@
                 description: Edition of the cloud pak
                 type: string
           login:
+            description: Customizations for the login page
             type: object
             required: ["logoAltText", "logoUrl"]
             properties:
@@ -103,6 +118,7 @@
                     description: Text that will display as the accept button text
                     type: string
           navItems:
+            description: Navigation items for the common web ui header as defined by the cloud paks
             type: array
             items:
               type: object
@@ -146,6 +162,5 @@
                   type: array
                   items:
                     type: string
-    scope: Namespaced
 
   

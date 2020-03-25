@@ -44,6 +44,8 @@ const LegacyReleaseName = "platform-header"
 const ChartName = "webui-nav"
 const ChartVersion = "1.0.2"
 
+var DefaultStatusForCR = []string{"none"}
+
 var DeamonSetAnnotations = map[string]string{
 	"scheduler.alpha.kubernetes.io/critical-pod": "",
 	"productName":    "IBM Cloud Platform Common Services",
@@ -121,8 +123,7 @@ var Log4jsData = map[string]string{
 
 // returns the labels associated with the resource being created
 func LabelsForMetadata(deploymentName string) map[string]string {
-	return map[string]string{"app.kubernetes.io/instance": deploymentName, "chart": ChartName, "version": ChartVersion,
-		"heritage": "operator", "release": ReleaseName}
+	return map[string]string{"app.kubernetes.io/instance": deploymentName}
 }
 
 // returns the labels for selecting the resources belonging to the given metering CR name
@@ -366,4 +367,15 @@ func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress
 		},
 	}
 	return ingress
+}
+
+// GetPodNames returns the pod names of the array of pods passed in
+func GetPodNames(pods []corev1.Pod) []string {
+	reqLogger := log.WithValues("func", "GetPodNames")
+	var podNames []string
+	for _, pod := range pods {
+		podNames = append(podNames, pod.Name)
+		reqLogger.Info("pod name=" + pod.Name)
+	}
+	return podNames
 }
