@@ -26,11 +26,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-const DefaultImageRegistry = "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64"
+const DefaultImageRegistry = "https://quay.io/repository/opencloudio"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.1.0"
 
-const LegacyImageRegistry = "hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64"
+const LegacyImageRegistry = "https://quay.io/repository/opencloudio"
 const LegacyImageName = "icp-platform-header"
 const LegacyImageTag = "3.2.4"
 

@@ -18,7 +18,7 @@ spec:
     cpuMemory: 200Mi
     requestLimits: 300m
     requestMemory: 200Mi
-    imageRegistry: hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/ibmcom-amd64
+    imageRegistry: https://quay.io/repository/opencloudio
     imageTag: 3.2.4
     serviceName: platform-header
     legacyDocURL: /header/api/v1/doc
