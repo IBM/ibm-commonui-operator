@@ -26,11 +26,11 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-const DefaultImageRegistry = "https://quay.io/repository/opencloudio"
+const DefaultImageRegistry = "quay.io/opencloudio"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.1.0"
 
-const LegacyImageRegistry = "https://quay.io/repository/opencloudio"
+const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"
 const LegacyImageTag = "3.2.4"
 
