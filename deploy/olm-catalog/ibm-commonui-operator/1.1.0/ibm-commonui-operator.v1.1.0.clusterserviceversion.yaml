@@ -365,10 +365,17 @@ spec:
       kind: CommonWebUI
       name: commonwebuis.operators.ibm.com
       version: v1alpha1
+      displayName: CommonWebUI service
     - description: LegacyHeader is the Schema for the legacyHeader API
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
       version: v1alpha1
+      displayName: LegacyHeader service
+    - description: NavConfiguration for the CommonWebUI service which returns custom nav configurations
+      kind: NavConfiguration
+      name: navconfigurations.foundation.ibm.com
+      version: v1
+      displayName: NavConfiguration service
   description: Placeholder description
   displayName: IBM Commonui Operator
   install:
@@ -382,7 +389,7 @@ spec:
           verbs:
           - get
           - list
-        serviceAccountName: ibm-commonui-operator
+        serviceAccountName: default
       deployments:
       - name: ibm-commonui-operator
         spec:
