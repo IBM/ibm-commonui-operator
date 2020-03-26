@@ -422,7 +422,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
-                image: quay.io/opencloudio/ibm-commonui-operator
+                image: quay.io/opencloudio/ibm-commonui-operator:1.1.0
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources: {}
