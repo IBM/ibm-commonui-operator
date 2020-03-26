@@ -184,7 +184,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = res.ReconcileService(r.client, instance.Namespace, res.ServiceName, newService, &needToRequeue)
+	err = res.ReconcileService(r.client, instance.Namespace, res.LegacyReleaseName, newService, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
