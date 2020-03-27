@@ -225,3 +225,35 @@ delete-csv: ## Delete CSV package to the catalog
 	@RELEASE=${CSV_VERSION} common/scripts/delete-csv.sh
 
 .PHONY: all work build check lint test coverage images multiarch-image
+
+############################################################
+# Install/uninstall
+############################################################
+
+install: ## Install all resources (CR/CRD's, RBCA and Operator)
+	@echo ....... Set environment variables ......
+	- export DEPLOY_DIR=deploy/crds
+	- export WATCH_NAMESPACE=${NAMESPACE}
+	@echo ....... Applying CRDS and Operator .......
+	- for crd in $(shell ls deploy/crds/*_crd.yaml); do kubectl apply -f $${crd}; done
+	@echo ....... Applying RBAC .......
+	- kubectl apply -f deploy/service_account.yaml -n ${NAMESPACE}
+	- kubectl apply -f deploy/role.yaml -n ${NAMESPACE}
+	- kubectl apply -f deploy/role_binding.yaml -n ${NAMESPACE}
+	@echo ....... Applying Operator .......
+	- kubectl apply -f deploy/olm-catalog/${BASE_DIR}/${CSV_VERSION}/${BASE_DIR}.v${CSV_VERSION}.clusterserviceversion.yaml -n ${NAMESPACE}
+	@echo ....... Creating the Instance .......
+	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl apply -f $${cr} -n ${NAMESPACE}; done
+
+uninstall: ## Uninstall all that all performed in the $ make install
+	@echo ....... Uninstalling .......
+	@echo ....... Deleting CR .......
+	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl delete -f $${cr} -n ${NAMESPACE}; done
+	@echo ....... Deleting Operator .......
+	- kubectl delete -f deploy/olm-catalog/${BASE_DIR}/${CSV_VERSION}/${BASE_DIR}.v${CSV_VERSION}.clusterserviceversion.yaml -n ${NAMESPACE}
+	@echo ....... Deleting CRDs.......
+	- for crd in $(shell ls deploy/crds/*_crd.yaml); do kubectl delete -f $${crd}; done
+	@echo ....... Deleting Rules and Service Account .......
+	- kubectl delete -f deploy/role_binding.yaml -n ${NAMESPACE}
+	- kubectl delete -f deploy/service_account.yaml -n ${NAMESPACE}
+	- kubectl delete -f deploy/role.yaml -n ${NAMESPACE}
