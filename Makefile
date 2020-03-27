@@ -22,7 +22,7 @@ IMG ?= ibm-commonui-operator
 REGISTRY ?= quay.io/opencloudio
 REGISTRY_DEV ?= quay.io/ericabr
 CSV_VERSION ?= $(VERSION)
-
+NAMESPACE=ibm-common-services
 # Github host to use for checking the source tree;
 # Override this variable ue with your own value if you're working on forked repo.
 GIT_HOST ?= github.com/IBM

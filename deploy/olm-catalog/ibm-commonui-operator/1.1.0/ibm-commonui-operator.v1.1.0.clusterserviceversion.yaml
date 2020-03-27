@@ -356,7 +356,7 @@ metadata:
       ]
     capabilities: Basic Install
   name: ibm-commonui-operator.v1.1.0
-  namespace: placeholder
+  namespace: ibm-common-services
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -429,7 +429,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
-                image: quay.io/opencloudio/ibm-commonui-operator:1.1.0
+                image: quay.io/ericabr/ibm-commonui-operator:yum
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources: {}
