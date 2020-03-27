@@ -24,12 +24,11 @@ import (
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 
-	appsv1 "k8s.io/api/apps/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
-
 	"reflect"
 
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
+	netv1 "k8s.io/api/networking/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -168,6 +167,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	// set a default Status value
 	if len(instance.Status.PodNames) == 0 {
 		instance.Status.PodNames = res.DefaultStatusForCR
+		instance.Status.Nodes = res.DefaultStatusForCR
 		err = r.client.Status().Update(context.TODO(), instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set LegacyHeader default status")
@@ -227,6 +227,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	//update status.podNames if needed
 	if !reflect.DeepEqual(podNames, instance.Status.PodNames) {
 		instance.Status.PodNames = podNames
+		instance.Status.Nodes = res.DefaultStatusForCR
 		err := r.client.Status().Update(context.TODO(), instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update LegacyHeader status")

@@ -126,6 +126,11 @@ func (in *CommonWebUIStatus) DeepCopyInto(out *CommonWebUIStatus) {
 		*out = make([]string, len(*in))
 		copy(*out, *in)
 	}
+	if in.Nodes != nil {
+		in, out := &in.Nodes, &out.Nodes
+		*out = make([]string, len(*in))
+		copy(*out, *in)
+	}
 	return
 }
 

@@ -89,12 +89,17 @@ spec:
         status:
           description: CommonWebUIStatus defines the observed state of CommonWebUI
           properties:
+            nodes:
+              items:
+                type: string
+              type: array
             podNames:
               description: PodNames will hold the names of the commonwebui's
               items:
                 type: string
               type: array
           required:
+          - nodes
           - podNames
           type: object
       type: object

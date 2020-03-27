@@ -20,6 +20,7 @@ BUILD_LOCALLY ?= 1
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-commonui-operator
 REGISTRY ?= quay.io/opencloudio
+REGISTRY_DEV ?= quay.io/ericabr
 CSV_VERSION ?= $(VERSION)
 
 # Github host to use for checking the source tree;
@@ -170,7 +171,9 @@ ifeq ($(BUILD_LOCALLY),0)
 config-docker:
 endif
 
-
+image-dev: build-image-amd64
+	docker tag $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(REGISTRY_DEV)/$(IMG):1.1.0
+	docker push $(REGISTRY_DEV)/$(IMG):1.1.0
 build-image-amd64: build-amd64
 	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-amd64" -f build/Dockerfile .
 

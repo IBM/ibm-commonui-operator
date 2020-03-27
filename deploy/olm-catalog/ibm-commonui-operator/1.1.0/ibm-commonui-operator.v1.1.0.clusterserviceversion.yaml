@@ -365,61 +365,10 @@ spec:
       kind: CommonWebUI
       name: commonwebuis.operators.ibm.com
       version: v1alpha1
-      displayName: CommonWebUI service
-      resources:
-      - kind: Service
-        name: 'common-web-ui'
-        version: 'v1'
-      - kind: ConfigMap
-        name: 'common-web-ui-log4js'
-        version: v1
-      specDescriptors:
-      - description: Common web ui specific configuration parameters
-        displayName: commonWebUIConfig
-      - description: Cluster specific configuration parameters
-        displayName: globalUIConfig
-      - description: Version of the operator
-        displayName: operatorVersion
-      statusDescriptors:
-      - description: The names of the pods for the common web ui service
-        displayName: podNames
     - description: LegacyHeader is the Schema for the legacyHeader API
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
       version: v1alpha1
-      displayName: LegacyHeader service
-      resources:
-      - kind: Service
-        name: 'platform-header'
-        version: 'v1'
-      - kind: ConfigMap
-        name: 'common-web-ui-config'
-        version: v1
-      specDescriptors:
-      - description: LegacyHeader specific configuration parameters
-        displayName: legacyConfig
-      - description: Cluster specific configuration parameters
-        displayName: legacyGlobalUIConfig
-      - description: Version of the operator
-        displayName: operatorVersion
-      statusDescriptors:
-      - description: The names of the pods for the legacy header service
-        displayName: podNames
-    required:
-    - description: NavConfiguration for the CommonWebUI service which returns custom nav configurations
-      kind: NavConfiguration
-      name: navconfigurations.foundation.ibm.com
-      version: v1
-      displayName: NavConfiguration service
-      # specDescriptors:
-      # - description: The common web ui navigation items for the cloud Pak
-      #   displayName: navItems
-      # - description: Customizations for the common web ui header links
-      #   displayName: header
-      # - description: Customizations for the common web ui about modal for the cloud Pak
-      #   displayName: header
-      # - description: Customizations for the common web ui login page for the cloud Pak
-      #   displayName: login
   description: Placeholder description
   displayName: IBM Commonui Operator
   install:
@@ -433,7 +382,7 @@ spec:
           verbs:
           - get
           - list
-        serviceAccountName: default
+        serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
         spec:

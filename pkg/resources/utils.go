@@ -24,6 +24,7 @@ import (
 	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
+	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
@@ -378,4 +379,206 @@ func GetPodNames(pods []corev1.Pod) []string {
 		reqLogger.Info("pod name=" + pod.Name)
 	}
 	return podNames
+}
+
+// GetNavConfigContent returns all nav config crd content
+func GetNavConfigContent() map[string]apiextv1beta.JSONSchemaProps {
+	return map[string]apiextv1beta.JSONSchemaProps{
+		"logoutRedirects": apiextv1beta.JSONSchemaProps{
+			Description: `A list a URLs we make requests to logout the users of all applications within the cloudpack.`,
+			Type:        "array",
+			Items: &apiextv1beta.JSONSchemaPropsOrArray{
+				Schema: &apiextv1beta.JSONSchemaProps{
+					Type: "string",
+				},
+			},
+		},
+
+		"header": apiextv1beta.JSONSchemaProps{
+			Type:        "object",
+			Description: "Customized common web ui header items",
+			Properties: map[string]apiextv1beta.JSONSchemaProps{
+				"disabledItems": apiextv1beta.JSONSchemaProps{
+					Type: "array",
+					// nolint
+					Description: "An array of header items that should be disabled when running within this CR context. Valid values are 'catalog', 'createResource', 'bookmark'",
+					Items: &apiextv1beta.JSONSchemaPropsOrArray{
+						Schema: &apiextv1beta.JSONSchemaProps{
+							Type: "string",
+						},
+					},
+				},
+				"header": apiextv1beta.JSONSchemaProps{
+					Type: "object",
+					Properties: map[string]apiextv1beta.JSONSchemaProps{
+						"logoUrl": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "The URL that provides the login page logo. Must be an unprotected URL.",
+						},
+						"logoWidth": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Width of the logo for the login page in pixels",
+						},
+						"logoHeight": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Height of the logo for the login page in pixels",
+						},
+						"docUrlMapping": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "URL of the Knowledge center page for the cloud pak",
+						},
+						"supportUrl": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "URL of the Support page for the cloud pak",
+						},
+						"gettingStartedUrl": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "URL of the Getting started page for the cloud pak",
+						},
+					},
+				},
+			},
+		},
+		"about": apiextv1beta.JSONSchemaProps{
+			Type: "object",
+			Properties: map[string]apiextv1beta.JSONSchemaProps{
+				"logoUrl": apiextv1beta.JSONSchemaProps{
+					Type:        "string",
+					Description: "URL of the Logo on the About page for the cloud pak",
+				},
+				"licenses": apiextv1beta.JSONSchemaProps{
+					Type:        "array",
+					Description: "List of licenses we ship with the cloud pak",
+					Items: &apiextv1beta.JSONSchemaPropsOrArray{
+						Schema: &apiextv1beta.JSONSchemaProps{
+							Type: "string",
+						},
+					},
+				},
+				"copyright": apiextv1beta.JSONSchemaProps{
+					Type:        "string",
+					Description: "Copyright string for the cloud pak",
+				},
+				"version": apiextv1beta.JSONSchemaProps{
+					Type:        "string",
+					Description: "Version of the cloud pak",
+				},
+				"edition": apiextv1beta.JSONSchemaProps{
+					Type:        "string",
+					Description: "Edition of the cloud pak",
+				},
+			},
+		},
+		"login": apiextv1beta.JSONSchemaProps{
+			Type: "object",
+			Properties: map[string]apiextv1beta.JSONSchemaProps{
+				"logoUrl": apiextv1beta.JSONSchemaProps{
+					Type:        "string",
+					Description: "URL of the Logo on the About page for the cloud pak",
+				},
+				"logoAltText": apiextv1beta.JSONSchemaProps{
+					Type:        "string",
+					Description: "Alternate text of the shared header logo for cloud pak",
+				},
+				"loginDialog": apiextv1beta.JSONSchemaProps{
+					Type:        "object",
+					Description: "FISMA dialog contents can be modified here",
+					Properties: map[string]apiextv1beta.JSONSchemaProps{
+						"enabled": apiextv1beta.JSONSchemaProps{
+							Type:        "boolean",
+							Description: "This value is used to enable/disable the user acceptance dialog on the login page",
+						},
+						"dialogHeaderText": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Text that will display as the title of the user acceptance dialog on the login page",
+						},
+						"dialogText": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Text that will display as the content of the user acceptance dialog on the login page",
+						},
+						"acceptText": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Text that will display as the accept button text",
+						},
+					},
+				},
+				"logoWidth": apiextv1beta.JSONSchemaProps{
+					Type:        "string",
+					Description: "Width of the logo for the login page in pixels",
+				},
+				"logoHeight": apiextv1beta.JSONSchemaProps{
+					Type:        "string",
+					Description: "Height of the logo for the login page in pixels",
+				},
+			},
+		},
+
+		"navItems": apiextv1beta.JSONSchemaProps{
+			Description: "Navigation items for the left hand nav within common ui header for the cloud pak",
+			Type:        "array",
+			Items: &apiextv1beta.JSONSchemaPropsOrArray{
+
+				Schema: &apiextv1beta.JSONSchemaProps{
+
+					Type: "object",
+					Properties: map[string]apiextv1beta.JSONSchemaProps{
+						"id": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "ID of the nav item, must be unique",
+						},
+						"label": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Displayed label of the nav item",
+						},
+						"url": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "URL of the nav item. It can either but an FQDN or a relative path based on the ingress of the cluster",
+						},
+						"target": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "name of the tab or _blank where the navigation item will launch within the window",
+						},
+						"iconUrl": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "URL of the icon that will display for the top level parents.",
+						},
+						"parentId": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "ID of the parent this child item will be nested under",
+						},
+						"namespace": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Namespace where the microservice associated with this item is running. Used with service detection",
+						},
+						"serviceName": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Name of the service running in the namespace above tied to the deployment/daemonset. Used for service detection",
+						},
+						"serviceId": apiextv1beta.JSONSchemaProps{
+							Type: "string",
+							// nolint
+							Description: "Must be unique from a different microservice link. But the service id should remain the same for all links running on the same microservice for rendering purposes.",
+						},
+						"detectionServiceName": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "Informs the shared web console detection service to use the serviceName for auto discovery. Value should be true or false string",
+						},
+						"detectionLabelSelector": apiextv1beta.JSONSchemaProps{
+							Type:        "string",
+							Description: "The label selector for the microservice for detection.",
+						},
+						"isAuthorized": apiextv1beta.JSONSchemaProps{
+							Type:        "array",
+							Description: "The label selector for the microservice for detection.",
+							Items: &apiextv1beta.JSONSchemaPropsOrArray{
+								Schema: &apiextv1beta.JSONSchemaProps{
+									Type: "string",
+								},
+							},
+						},
+					},
+				},
+			},
+		}, // navitems
+	}
 }

@@ -198,8 +198,21 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUIStatus(ref common.ReferenceCa
 							},
 						},
 					},
+					"nodes": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"podNames"},
+				Required: []string{"podNames", "nodes"},
 			},
 		},
 	}
@@ -557,8 +570,21 @@ func schema_pkg_apis_operators_v1alpha1_LegacyHeaderStatus(ref common.ReferenceC
 							},
 						},
 					},
+					"nodes": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
 				},
-				Required: []string{"podNames"},
+				Required: []string{"podNames", "nodes"},
 			},
 		},
 	}
