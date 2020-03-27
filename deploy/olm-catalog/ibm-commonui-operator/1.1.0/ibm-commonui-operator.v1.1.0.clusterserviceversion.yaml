@@ -491,7 +491,7 @@ spec:
           - commonwebuis/status
           verbs:
           - '*'
-        serviceAccountName: ibm-commonui-operator
+        serviceAccountName: default
     strategy: deployment
   installModes:
   - supported: true
