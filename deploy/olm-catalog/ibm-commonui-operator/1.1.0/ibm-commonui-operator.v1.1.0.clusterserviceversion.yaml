@@ -87,11 +87,87 @@ spec:
       name: commonwebuis.operators.ibm.com
       version: v1alpha1
       displayName: CommonWebUI service
+      resources:
+      - kind: Service
+        name: ''
+        version: v1
+      - kind: Ingress
+        name: ''
+        version: v1
+      - kind: Daemonset
+        name: ''
+        version: v1
+      - kind: Pod
+        name: ''
+        version: v1
+      - kind: ConfigMap
+        name: ''
+        version: v1
+      - kind: LegacyHeader
+        name: ''
+        version: 'v1alpha1'
+      - kind: ReplicaSet
+        name: ''
+        version: v1
+      - kind: CommonWebUI
+        name: ''
+        version: 'v1alpha1'
+      - kind: Deployment
+        name: ''
+        version: v1
+      specDescriptors:
+        - description: Configuration parameters for common web ui specific to the service
+          displayName: Common Web UI Configuration
+          path: commonWebUIConfig
+        - description: Configuration parameters the service will consume particular to the cluster
+          displayName: Cluster configuration parameters
+          path: globalUIConfig
+        - description: Version for the installed operator
+          displayName: Operator Version 
+          path: operatorVersion
     - description: LegacyHeader is the Schema for the legacyHeader API
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
       version: v1alpha1
       displayName: LegacyHeader service
+      resources:
+        - kind: Service
+          name: ''
+          version: v1
+        - kind: Ingress
+          name: ''
+          version: v1
+        - kind: Daemonset
+          name: ''
+          version: v1
+        - kind: Pod
+          name: ''
+          version: v1
+        - kind: ConfigMap
+          name: ''
+          version: v1
+        - kind: LegacyHeader
+          name: ''
+          version: 'v1alpha1'
+        - kind: ReplicaSet
+          name: ''
+          version: v1
+        - kind: CommonWebUI
+          name: ''
+          version: 'v1alpha1'
+        - kind: Deployment
+          name: ''
+          version: v1
+      specDescriptors:
+        - description: Configuration parameters for the legacy header service
+          displayName: Legacy header configuration parameters
+          path: legacyConfig
+        - description: Configuration parameters the service will consume particular to the cluster
+          displayName: Cluster configuration parameters
+          path: legacyGlobalUIConfig
+        - description: Version for the installed operator
+          displayName: Operator Version 
+          path: operatorVersion
   description: Placeholder description
   displayName: IBM Commonui Operator
   install:
@@ -150,7 +226,7 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
-                image: quay.io/ericabr/ibm-commonui-operator:yum
+                image: quay.io/opencloudio/ibm-commonui-operator:1.1.0
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources: {}

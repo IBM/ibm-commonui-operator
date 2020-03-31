@@ -99,7 +99,6 @@ spec:
                 type: string
               type: array
           required:
-          - nodes
           - podNames
           type: object
       type: object
