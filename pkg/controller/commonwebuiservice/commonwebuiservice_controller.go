@@ -166,11 +166,10 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 
 	opVersion := instance.Spec.OperatorVersion
 	reqLogger.Info("got CommonWebUIService instance, version=" + opVersion)
-	reqLogger.Info("ABOUT TO SET STATUS SHOULD BE PODNAMES FOR COMMONWEBUI")
+
 	// set a default Status value
-	if len(instance.Status.PodNames) == 0 {
+	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR
-		instance.Status.PodNames = res.DefaultStatusForCR
 		err = r.client.Status().Update(context.TODO(), instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set CommonWebUI default status")
@@ -231,10 +230,9 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	}
 	podNames := res.GetPodNames(podList.Items)
 
-	//update status.podNames if needed
-	if !reflect.DeepEqual(podNames, instance.Status.PodNames) {
+	//update status.Nodes if needed
+	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
 		instance.Status.Nodes = podNames
-		instance.Status.PodNames = podNames
 		err := r.client.Status().Update(context.TODO(), instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update CommonWebUI status")

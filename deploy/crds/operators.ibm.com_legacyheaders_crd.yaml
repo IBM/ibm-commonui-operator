@@ -97,16 +97,12 @@ spec:
           description: LegacyHeaderStatus defines the observed state of LegacyHeaderService
           properties:
             nodes:
-              items:
-                type: string
-              type: array
-            podNames:
               description: PodNames will hold the names of the legacyheader's
               items:
                 type: string
               type: array
           required:
-          - podNames
+          - nodes
           type: object
       type: object
   version: v1alpha1

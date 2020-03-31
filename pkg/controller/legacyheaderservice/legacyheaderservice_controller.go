@@ -165,8 +165,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	reqLogger.Info("got LegacyHeaderService instance, version=" + opVersion)
 
 	// set a default Status value
-	if len(instance.Status.PodNames) == 0 {
-		instance.Status.PodNames = res.DefaultStatusForCR
+	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR
 		err = r.client.Status().Update(context.TODO(), instance)
 		if err != nil {
@@ -225,9 +224,8 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	podNames := res.GetPodNames(podList.Items)
 
 	//update status.podNames if needed
-	if !reflect.DeepEqual(podNames, instance.Status.PodNames) {
-		instance.Status.PodNames = podNames
-		instance.Status.Nodes = res.DefaultStatusForCR
+	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
+		instance.Status.Nodes = podNames
 		err := r.client.Status().Update(context.TODO(), instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update LegacyHeader status")

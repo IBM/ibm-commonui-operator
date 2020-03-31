@@ -71,7 +71,6 @@ type LegacyGlobalUIConfig struct {
 // +k8s:openapi-gen=true
 type LegacyHeaderStatus struct {
 	// PodNames will hold the names of the legacyheader's
-	PodNames []string `json:"podNames"`
 	Nodes    []string `json:"nodes"`
 }
 

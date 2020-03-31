@@ -184,7 +184,7 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUIStatus(ref common.ReferenceCa
 				Description: "CommonWebUIStatus defines the observed state of CommonWebUI",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"podNames": {
+					"nodes": {
 						SchemaProps: spec.SchemaProps{
 							Description: "PodNames will hold the names of the commonwebui's",
 							Type:        []string{"array"},
@@ -198,21 +198,8 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUIStatus(ref common.ReferenceCa
 							},
 						},
 					},
-					"nodes": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
 				},
-				Required: []string{"podNames", "nodes"},
+				Required: []string{"nodes"},
 			},
 		},
 	}
@@ -556,7 +543,7 @@ func schema_pkg_apis_operators_v1alpha1_LegacyHeaderStatus(ref common.ReferenceC
 				Description: "LegacyHeaderStatus defines the observed state of LegacyHeaderService",
 				Type:        []string{"object"},
 				Properties: map[string]spec.Schema{
-					"podNames": {
+					"nodes": {
 						SchemaProps: spec.SchemaProps{
 							Description: "PodNames will hold the names of the legacyheader's",
 							Type:        []string{"array"},
@@ -570,21 +557,8 @@ func schema_pkg_apis_operators_v1alpha1_LegacyHeaderStatus(ref common.ReferenceC
 							},
 						},
 					},
-					"nodes": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Type:   []string{"string"},
-										Format: "",
-									},
-								},
-							},
-						},
-					},
 				},
-				Required: []string{"podNames", "nodes"},
+				Required: []string{"nodes"},
 			},
 		},
 	}
