@@ -1,5 +1,5 @@
 channels:
 - currentCSV: ibm-commonui-operator.v1.1.0
-  name: alpha
-defaultChannel: alpha
+  name: stable-v1
+defaultChannel: stable-v1
 packageName: ibm-commonui-operator-app
