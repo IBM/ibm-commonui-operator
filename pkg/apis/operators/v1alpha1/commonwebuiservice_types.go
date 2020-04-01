@@ -62,9 +62,7 @@ type GlobalUIConfig struct {
 // CommonWebUIStatus defines the observed state of CommonWebUI
 // +k8s:openapi-gen=true
 type CommonWebUIStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	// PodNames will hold the names of the commonwebui's
 	Nodes []string `json:"nodes"`
 }
 

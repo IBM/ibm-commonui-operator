@@ -97,10 +97,7 @@ spec:
           description: LegacyHeaderStatus defines the observed state of LegacyHeaderService
           properties:
             nodes:
-              description: 'INSERT ADDITIONAL STATUS FIELD - define observed state
-                of cluster Important: Run "operator-sdk generate k8s" to regenerate
-                code after modifying this file Add custom validation using kubebuilder
-                tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
+              description: PodNames will hold the names of the legacyheader's
               items:
                 type: string
               type: array

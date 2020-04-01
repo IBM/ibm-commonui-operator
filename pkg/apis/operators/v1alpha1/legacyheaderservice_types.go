@@ -70,9 +70,7 @@ type LegacyGlobalUIConfig struct {
 // LegacyHeaderStatus defines the observed state of LegacyHeaderService
 // +k8s:openapi-gen=true
 type LegacyHeaderStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	// PodNames will hold the names of the legacyheader's
 	Nodes []string `json:"nodes"`
 }
 

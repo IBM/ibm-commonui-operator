@@ -17,6 +17,7 @@ package commonwebuiservice
 
 import (
 	"context"
+	"encoding/json"
 	gorun "runtime"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
@@ -25,12 +26,15 @@ import (
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 
+	"reflect"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-
 	netv1 "k8s.io/api/networking/v1beta1"
+	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -163,6 +167,15 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	opVersion := instance.Spec.OperatorVersion
 	reqLogger.Info("got CommonWebUIService instance, version=" + opVersion)
 
+	// set a default Status value
+	if len(instance.Status.Nodes) == 0 {
+		instance.Status.Nodes = res.DefaultStatusForCR
+		err = r.client.Status().Update(context.TODO(), instance)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set CommonWebUI default status")
+			return reconcile.Result{}, err
+		}
+	}
 	// Check if the config maps already exist. If not, create a new one.
 	err = r.reconcileConfigMaps(instance, &needToRequeue)
 	if err != nil {
@@ -203,6 +216,41 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 
 	reqLogger.Info("got Services, checking Certificates")
 	// Resources exists - don't requeue
+
+	reqLogger.Info("Updating CommonWebUI staus")
+
+	podList := &corev1.PodList{}
+	listOpts := []client.ListOption{
+		client.InNamespace(instance.Namespace),
+		client.MatchingLabels(res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)),
+	}
+	if err = r.client.List(context.TODO(), podList, listOpts...); err != nil {
+		reqLogger.Error(err, "Failed to list pods", "CommonWebUI.Namespace", instance.Namespace, "CommonWebUI.Name", res.DaemonSetName)
+		return reconcile.Result{}, err
+	}
+	podNames := res.GetPodNames(podList.Items)
+
+	//update status.Nodes if needed
+	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
+		instance.Status.Nodes = podNames
+		err := r.client.Status().Update(context.TODO(), instance)
+		if err != nil {
+			reqLogger.Error(err, "Failed to update CommonWebUI status")
+			return reconcile.Result{}, err
+		}
+	}
+
+	navConfigCRD := &apiextv1beta.CustomResourceDefinition{}
+	recResult, err := r.handleCRD(instance, navConfigCRD)
+	if err != nil {
+		return recResult, err
+	}
+
+	err = r.reconcileCr(instance)
+	if err != nil {
+		reqLogger.Error(err, "Error creating custom resource")
+	}
+
 	reqLogger.Info("CS??? all done")
 	return reconcile.Result{}, nil
 }
@@ -436,5 +484,110 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.Co
 	}
 	reqLogger.Info("got common web ui nav Ingress")
 
+	return nil
+}
+
+func (r *ReconcileCommonWebUI) handleCRD(instance *operatorsv1alpha1.CommonWebUI, currentCRD *apiextv1beta.CustomResourceDefinition) (reconcile.Result, error) {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("ABOUT TO HANDLE THIS CRD")
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "navconfigurations.foundation.ibm.com", Namespace: ""}, currentCRD)
+	if err != nil && errors.IsNotFound(err) {
+		// Define CRD
+		newCRD := r.newNavconfgCRD()
+		reqLogger.Info("Creating a new CRD", "CRD.Namespace", instance.Namespace, "CRD.Name", "clients.oidc.security.ibm.com")
+		err = r.client.Create(context.TODO(), newCRD)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new CRD", "CRD.Namespace", instance.Namespace, "CRD.Name", "clients.oidc.security.ibm.com")
+			return reconcile.Result{}, err
+		}
+		// new CRD created successfully - return and requeue
+		return reconcile.Result{Requeue: true}, nil
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get CRD")
+		return reconcile.Result{}, err
+	}
+	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileCommonWebUI) newNavconfgCRD() *apiextv1beta.CustomResourceDefinition {
+	newCRD := &apiextv1beta.CustomResourceDefinition{
+		TypeMeta: metav1.TypeMeta{
+			Kind:       "CustomResourceDefinition",
+			APIVersion: "apiextensions.k8s.io/v1beta1",
+		},
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "navconfigurations.foundation.ibm.com",
+			Labels:    res.LabelsForMetadata(res.DaemonSetName),
+			Namespace: "ibm-common-services",
+		},
+		Spec: apiextv1beta.CustomResourceDefinitionSpec{
+			Scope:   "Namespaced",
+			Group:   "foundation.ibm.com",
+			Version: "v1",
+			Names: apiextv1beta.CustomResourceDefinitionNames{
+				Kind:       "NavConfiguration",
+				Singular:   "navconfiguration",
+				Plural:     "navconfigurations",
+				ShortNames: []string{"navconfig"},
+			},
+			Validation: &apiextv1beta.CustomResourceValidation{
+				OpenAPIV3Schema: &apiextv1beta.JSONSchemaProps{
+					Properties: res.GetNavConfigContent(),
+				},
+			},
+		},
+	}
+
+	return newCRD
+}
+
+func (r *ReconcileCommonWebUI) reconcileCr(instance *operatorsv1alpha1.CommonWebUI) error {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("RECONCILING CR")
+
+	namespace := instance.Namespace
+	// Empty interface of type Array to hold the crs
+	var crTemplates []map[string]interface{}
+	// Unmarshal or Decode the JSON to the interface.
+	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplates)
+	if crTemplatesErr != nil {
+		reqLogger.Info("Failed to unmarshall crTemplates")
+		return crTemplatesErr
+	}
+	for _, crTemplate := range crTemplates {
+		var unstruct unstructured.Unstructured
+		unstruct.Object = crTemplate
+		name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
+
+		getError := r.client.Get(context.TODO(), types.NamespacedName{
+			Name:      name,
+			Namespace: namespace,
+		}, &unstruct)
+
+		if getError != nil && !errors.IsNotFound(getError) {
+			reqLogger.Error(getError, "Failed to get the CR")
+			continue
+		} else if errors.IsNotFound(getError) {
+			// Create Custom resource
+			if createErr := r.createCustomResource(unstruct, name, namespace); createErr != nil {
+				reqLogger.Error(createErr, "Failed to create CR")
+				return createErr
+			}
+		} else {
+			reqLogger.Info("Skipping CR creation")
+		}
+	}
+	return nil
+}
+
+func (r *ReconcileCommonWebUI) createCustomResource(unstruct unstructured.Unstructured, name, namespace string) error {
+	reqLogger := log.WithValues("CR namespace", namespace, "CR name", name)
+	reqLogger.Info("creating a CR ", name)
+	unstruct.Object["metadata"].(map[string]interface{})["namespace"] = namespace
+	crCreateErr := r.client.Create(context.TODO(), &unstruct)
+	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
+		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
+		return crCreateErr
+	}
 	return nil
 }
