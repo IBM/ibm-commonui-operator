@@ -76,7 +76,7 @@ metadata:
         }
       ]
     capabilities: Basic Install
-    categories: Web Console
+    categories: Security
     certified: "false"
     containerImage: quay.io/opencloudio/ibm-commonui-operator:1.1.0
     createdAt: "2020-02-11T15:30:00Z"
@@ -135,6 +135,10 @@ spec:
         - description: Version for the installed operator
           displayName: Operator Version 
           path: operatorVersion
+      statusDescriptors:
+        - description: Displays names of pods associated with the Common Web UI service
+          displayName: Pod Names
+          path: nodes
     - description: LegacyHeader is the Schema for the legacyHeader API
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
@@ -178,6 +182,10 @@ spec:
         - description: Version for the installed operator
           displayName: Operator Version 
           path: operatorVersion
+      statusDescriptors:
+        - description: Displays names of pods associated with the Legacy Header service
+          displayName: Pod Names
+          path: nodes
   description: Placeholder description
   displayName: IBM Commonui Operator
   install:
@@ -336,6 +344,19 @@ spec:
   - supported: true
     type: AllNamespaces
   maturity: alpha
+  keywords:
+    - IBM
+    - Cloud
+    - Web Console
+    - Common Services
+  labels:
+    name: ibm-commonui-operator
+  links:
+  - name: GitHub
+    url: https://github.com/IBM/ibm-commonui-operator
+  maintainers:
+  - email: ericabr@us.ibm.com
+    name: Erica Brown
   provider:
     name: IBM
   replaces: ibm-commonui-operator.v0.0.0
