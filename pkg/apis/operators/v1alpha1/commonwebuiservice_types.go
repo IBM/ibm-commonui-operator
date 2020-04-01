@@ -63,7 +63,7 @@ type GlobalUIConfig struct {
 // +k8s:openapi-gen=true
 type CommonWebUIStatus struct {
 	// PodNames will hold the names of the commonwebui's
-	Nodes    []string `json:"nodes"`
+	Nodes []string `json:"nodes"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
