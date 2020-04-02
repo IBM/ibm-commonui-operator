@@ -25,4 +25,4 @@ spec:
     imageRegistry: quay.io/opencloudio
     imageTag: 1.2.0
     serviceName: common-web-ui
-  operatorVersion: 1.1.0
+  operatorVersion: 1.2.0
