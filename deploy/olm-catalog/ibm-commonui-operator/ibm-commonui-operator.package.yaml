@@ -1,5 +1,7 @@
 channels:
 - currentCSV: ibm-commonui-operator.v1.1.0
   name: stable-v1
+- currentCSV: ibm-commonui-operator.v1.2.0
+  name: dev
 defaultChannel: stable-v1
 packageName: ibm-commonui-operator-app
