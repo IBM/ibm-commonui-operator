@@ -19,7 +19,7 @@ spec:
     requestLimits: 300m
     requestMemory: 200Mi
     imageRegistry: quay.io/opencloudio
-    imageTag: 3.2.4
+    imageTag: 3.2.5
     serviceName: platform-header
     legacyDocURL: /header/api/v1/doc
     legacyLogoAltText: IBM Cloud Pak
