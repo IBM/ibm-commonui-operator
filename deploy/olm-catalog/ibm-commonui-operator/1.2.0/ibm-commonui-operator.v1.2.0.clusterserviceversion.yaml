@@ -381,5 +381,5 @@ spec:
     name: Erica Brown
   provider:
     name: IBM
-  replaces: ibm-commonui-operator.v0.0.0
+  replaces: ibm-commonui-operator.v1.1.0
   version: 1.2.0
