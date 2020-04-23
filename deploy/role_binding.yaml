@@ -4,7 +4,7 @@ metadata:
   name: ibm-commonui-operator
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: ibm-commonui-operator
 roleRef:
   kind: Role
   name: ibm-commonui-operator
@@ -16,7 +16,7 @@ metadata:
   name: ibm-commonui-operator
 subjects:
 - kind: ServiceAccount
-  name: default
+  name: ibm-commonui-operator
   namespace: ibm-common-services
 roleRef:
   kind: ClusterRole

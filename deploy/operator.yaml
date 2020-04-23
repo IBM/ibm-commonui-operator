@@ -17,7 +17,7 @@ spec:
         productVersion: "3.3.0"
         productMetric: FREE
     spec:
-      serviceAccountName: default
+      serviceAccountName: ibm-commonui-operator
       containers:
         - name: ibm-commonui-operator
           # Replace this with the built image name
