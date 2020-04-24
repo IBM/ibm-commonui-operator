@@ -102,7 +102,8 @@ metadata:
     certified: "false"
     containerImage: quay.io/opencloudio/ibm-commonui-operator:1.2.0
     createdAt: "2020-02-11T15:30:00Z"
-    description: The IBM Common Web UI delivers the common header api and Identity and access pages for common services.
+    description: The IBM Common Web UI delivers the common header api and Identity
+      and access pages for common services.
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.2.0
@@ -233,7 +234,7 @@ spec:
           - patch
           - update
           - watch
-        serviceAccountName: default
+        serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
         spec:
@@ -270,7 +271,7 @@ spec:
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources: {}
-              serviceAccountName: default
+              serviceAccountName: ibm-commonui-operator
       permissions:
       - rules:
         - apiGroups:
@@ -354,7 +355,7 @@ spec:
           - patch
           - update
           - watch
-        serviceAccountName: default
+        serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:
   - supported: true

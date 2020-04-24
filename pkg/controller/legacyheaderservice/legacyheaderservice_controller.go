@@ -330,6 +330,7 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 					Annotations: Annotations,
 				},
 				Spec: corev1.PodSpec{
+					ServiceAccountName: res.GetServiceAccountName(),
 					Affinity: &corev1.Affinity{
 						NodeAffinity: &corev1.NodeAffinity{
 							RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
