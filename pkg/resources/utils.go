@@ -19,8 +19,6 @@ package resources
 import (
 	"encoding/json"
 
-	"os"
-
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
@@ -866,11 +864,6 @@ func GetNavConfigContent() map[string]apiextv1beta.JSONSchemaProps {
 // returns the service account name or default if it is not set in the environment
 func GetServiceAccountName() string {
 
-	sa := "default"
-
-	envSa := os.Getenv("SA_NAME")
-	if len(envSa) > 0 {
-		sa = envSa
-	}
+	sa := "ibm-commonui-operator"
 	return sa
 }
