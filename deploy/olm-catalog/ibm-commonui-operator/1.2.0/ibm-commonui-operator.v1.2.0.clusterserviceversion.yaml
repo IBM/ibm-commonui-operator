@@ -64,7 +64,6 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: quay.io/opencloudio/ibm-commonui-operator:1.2.0
-    createdAt: "2020-02-11T15:30:00Z"
     description: The IBM Common Web UI delivers the common header api and Identity
       and access pages for common services.
     repository: https://github.com/IBM/ibm-commonui-operator
