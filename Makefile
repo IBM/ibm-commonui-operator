@@ -172,8 +172,8 @@ config-docker:
 endif
 
 image-dev: build-image-amd64
-	docker tag $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(REGISTRY_DEV)/$(IMG):1.1.0
-	docker push $(REGISTRY_DEV)/$(IMG):1.1.0
+	docker tag $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(REGISTRY_DEV)/$(IMG):$(VERSION)
+	docker push $(REGISTRY_DEV)/$(IMG):$(VERSION)
 build-image-amd64: build-amd64
 	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-amd64" -f build/Dockerfile .
 

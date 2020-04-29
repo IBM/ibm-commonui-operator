@@ -37,64 +37,6 @@ metadata:
             },
             "operatorVersion": "1.2.0"
           }
-        },
-        {
-          "apiVersion": "operators.ibm.com/v1alpha1",
-          "kind": "LegacyHeader",
-          "metadata": {
-            "name": "example-legacyheaderservice"
-          },
-          "spec": {
-            "legacyConfig": {
-              "cpuLimits": "300m",
-              "cpuMemory": "200Mi",
-              "imageRegistry": "quay.io/opencloudio",
-              "imageTag": "3.2.4",
-              "ingressPath": "/header",
-              "legacyDocURL": "/header/api/v1/doc",
-              "legacyLogoAltText": "IBM Cloud Pak",
-              "legacyLogoHeight": "355px",
-              "legacyLogoPath": "/common-nav/graphics/ibm-cloudpack-logo.svg",
-              "legacyLogoWidth": "18px",
-              "legacySupportURL": "/path/to/support.html",
-              "requestLimits": "300m",
-              "requestMemory": "200Mi",
-              "serviceName": "platform-header"
-            },
-            "legacyGlobalUIConfig": {
-              "authServiceURL": "https://icp-management-ingress:443/idauth",
-              "cloudPakVersion": "3.2.4",
-              "clusterName": "mycluster",
-              "defaultAdminUser": "admin",
-              "identityProviderURL": "https://icp-management-ingress:443/idprovider",
-              "routerHTTPSPort": 443,
-              "routerURL": "https://icp-management-ingress:443",
-              "sessionPollingInterval": 5000
-            },
-            "operatorVersion": "1.2.0"
-          }
-        },
-        {
-          "apiVersion": "operator.ibm.com/v1alpha1",
-          "kind": "OperandRequest",
-          "metadata": {
-            "name": "ibm-commonui-request"
-          },
-          "spec": {
-            "requests": [
-              {
-                "operands": [
-                  {
-                    "name": "ibm-iam-operator"
-                  },
-                  {
-                    "name": "ibm-management-ingress-operator"
-                  }
-                ],
-                "registry": "common-service"
-              }
-            ]
-          }
         }
       ]
     capabilities: Seamless Upgrades
@@ -253,6 +195,17 @@ spec:
               labels:
                 name: ibm-commonui-operator
             spec:
+              affinity:
+                nodeAffinity:
+                  requiredDuringSchedulingIgnoredDuringExecution:
+                    nodeSelectorTerms:
+                    - matchExpressions:
+                      - key: beta.kubernetes.io/arch
+                        operator: In
+                        values:
+                        - amd64
+                        - ppc64le
+                        - s390x
               containers:
               - command:
                 - ibm-commonui-operator
@@ -270,7 +223,21 @@ spec:
                 image: quay.io/opencloudio/ibm-commonui-operator:1.2.0
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
-                resources: {}
+                resources:
+                  limits:
+                    cpu: 20m
+                    memory: 40Mi
+                  requests:
+                    cpu: 10m
+                    memory: 25Mi
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop:
+                    - ALL
+                  privileged: false
+                  readOnlyRootFilesystem: true
+                  runAsNonRoot: true
               serviceAccountName: ibm-commonui-operator
       permissions:
       - rules:
@@ -368,10 +335,10 @@ spec:
     type: AllNamespaces
   maturity: alpha
   keywords:
-    - IBM
-    - Cloud
-    - Web Console
-    - Common Services
+  - IBM
+  - Cloud
+  - Web Console
+  - Common Services
   labels:
     name: ibm-commonui-operator
   links:
