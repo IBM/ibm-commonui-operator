@@ -35,6 +35,62 @@ To install the operator with the IBM Common Services Operator follow the the ins
 - If you are using the operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
 - If you are using the operator with an IBM Containerized Software, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall).
 
+## SecurityContextConstraints Requirements
+
+The metering service supports running under the OpenShift Container Platform default restricted security context constraints.
+
+OCP 4.3 restricted SCC
+
+```yaml
+allowHostDirVolumePlugin: false
+allowHostIPC: false
+allowHostNetwork: false
+allowHostPID: false
+allowHostPorts: false
+allowPrivilegeEscalation: true
+allowPrivilegedContainer: false
+allowedCapabilities: null
+apiVersion: security.openshift.io/v1
+defaultAddCapabilities: null
+fsGroup:
+  type: MustRunAs
+groups:
+- system:authenticated
+kind: SecurityContextConstraints
+metadata:
+  annotations:
+    kubernetes.io/description: restricted denies access to all host features and requires
+      pods to be run with a UID, and SELinux context that are allocated to the namespace.  This
+      is the most restrictive SCC and it is used by default for authenticated users.
+  creationTimestamp: "2020-03-27T15:01:00Z"
+  generation: 1
+  name: restricted
+  resourceVersion: "6365"
+  selfLink: /apis/security.openshift.io/v1/securitycontextconstraints/restricted
+  uid: 6a77775c-a6d8-4341-b04c-bd826a67f67e
+priority: null
+readOnlyRootFilesystem: false
+requiredDropCapabilities:
+- KILL
+- MKNOD
+- SETUID
+- SETGID
+runAsUser:
+  type: MustRunAsRange
+seLinuxContext:
+  type: MustRunAs
+supplementalGroups:
+  type: RunAsAny
+users: []
+volumes:
+- configMap
+- downwardAPI
+- emptyDir
+- persistentVolumeClaim
+- projected
+- secret
+```
+
 ## (Optional) Developer guide
 
 If, as a developer, you are looking to build and test this operator to try out and learn more about the operator and its capabilities, you can use the following developer guide. This guide provides commands for a quick install and initial validation for running the operator. For information about accessing and using the console, see the IBM Cloud Platform Common Services Knowledge Center [Common Web UI documentation](http://ibm.biz/cpcs_opcwebui).
