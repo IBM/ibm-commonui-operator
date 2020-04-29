@@ -1,56 +1,134 @@
-<p align="center"><a href="http://35.227.205.240/?job=build_go-repo-template_postsubmit">
-<!-- prow build badge, godoc, and go report card-->
-<img alt="Build Status" src="http://35.227.205.240/badge.svg?jobs=build_go-repo-template_postsubmit">
-</a> <a href="https://godoc.org/github.com/IBM/go-repo-template"><img src="https://godoc.org/github.com/IBM/go-repo-template?status.svg"></a> <a href="https://goreportcard.com/report/github.com/IBM/go-repo-template"><img alt="Go Report Card" src="https://goreportcard.com/badge/github.com/IBM/go-repo-template" /></a> <a href="https://codecov.io/github/IBM/go-repo-template?branch=master"><img alt="Code Coverage" src="https://codecov.io/gh/IBM/go-repo-template/branch/master/graphs/badge.svg?branch=master" /></a> <a href="https://quay.io/repository/multicloudlab/go-repo-template-amd64"><img alt="Docker Repository on Quay" src="https://quay.io/repository/multicloudlab/go-repo-template-amd64/status" /></a></p>
-
-<!-- START doctoc generated TOC please keep comment here to allow auto update -->
-<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
-**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
-
-- [Top level title](#top-level-title)
-    - [What is the XXX](#what-is-the-xxx)
-    - [Community, discussion, contribution, and support](#community-discussion-contribution-and-support)
-    - [Getting Started](#getting-started)
-        - [Prerequisites](#prerequisites)
-        - [XXXXX](#xxxxx)
-        - [Trouble shooting](#trouble-shooting)
-    - [XXX References](#xxx-references)
-
-<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+Updated based on above debug commands and current ID template for the README.
+@ericabr please review for any missing content/improvements:
 
 # ibm-commonui-operator
 
-Operator used to install the common webui service
+You can use the ibm-commonui-operator to install the Common Web UI service for the IBM Cloud Platform Common Services and access the Common Web UI console.
 
-## What is the XXX
+You can use the Common Web UI console to access information and features from other IBM Cloud Platform Common Services or IBM Cloud Paks that you install.
 
-xxx...
+For more information about the available IBM Cloud Platform Common Services and IBM Cloud Paks, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs).
 
-## Community, discussion, contribution, and support
+## Supported platforms
 
-Check the [CONTRIBUTING Doc](CONTRIBUTING.md) for how to contribute to the repo.
+Red Hat OpenShift Container Platform 4.2 or newer installed on one of the following platforms:
+- Linux x86_64
+- Linux on Power (ppc64le)
+- Linux on IBM Z and LinuxONE
 
-You can reach the maintainers of this project at:
+## Operator versions
 
-- [#xxx on Slack](https://slack.com/signin?redir=%2Fmessages%2Fxxx)
+- 1.1.0
 
-------
+## Prerequisites
 
-## Getting Started
+The Common Web UI service depends on other IBM Cloud Platform Common Services. To install the Common Web UI operator (ibm-commonui-operator), you need to first install the operator dependencies and prerequisites:
 
-### Prerequisites
+- For the list of operator dependencies, see the IBM Knowledge Center [Common Services dependencies documentation](http://ibm.biz/cpcs_opdependencies).
 
-Check the [Development Doc](docs/development.md) for how to contribute to the repo.
+- For the list of prerequisites for installing the operator, see the IBM Knowledge Center [Preparing to install services documentation](http://ibm.biz/cpcs_opinstprereq).
 
-### XXXXX
+## SecurityContextConstraints Requirements
 
-xxx...
+## Documentation
 
-### Trouble shooting
+For installation and configuration instructions if you are using the operator alone or with other common services, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcsdocs).
 
-Please refer to [Trouble shooting documentation](docs/trouble_shooting.md) for further info.
+If you are using the operator within an IBM Cloud Pak, see the documentation for the specific IBM Cloud Pak [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks)
 
-## XXX References
+## Developer guide
 
-If you have any further question about xxx, please refer to
-[XXX help documentation](docs/xxx_help.md) for further information.
+The following developer guide is for a quick install and initial validation of running the operator. For information about accessing and using the console, see the IBM Cloud Platform Common Services Knowledge Center [Common Web UI documentation](http://ibm.biz/cpcs_opcwebui).
+
+### Quick start guide
+
+Use the following quick start commands for building and testing the operator:
+
+Prerequisite:
+
+- Git
+- Go programming version 1.12+
+- Linting Tools:
+
+      | Linting tool | Version |
+      | ------------ | ------- |
+      | [Haskell Dockerfile Linter (hadolint)](https://github.com/hadolint/hadolint#install) | [v1.17.2](https://github.com/hadolint/hadolint/releases/tag/v1.17.2) |
+      | [ShellCheck](https://github.com/koalaman/shellcheck#installing) | [v0.7.0](https://github.com/koalaman/shellcheck/releases/tag/v0.7.0) |
+      | [yamllint](https://github.com/adrienverge/yamllint#installation) | [v1.17.0](https://github.com/adrienverge/yamllint/releases/tag/v1.17.0)
+      | [Helm client](https://helm.sh/docs/using_helm/#install-helm) | [v2.10.0](https://github.com/helm/helm/releases/tag/v2.10.0) |
+      | [golangci-lint](https://github.com/golangci/golangci-lint#install) | [v1.18.0](https://github.com/golangci/golangci-lint/releases/tag/v1.18.0) |
+      | [autopep8](https://github.com/hhatto/autopep8#installation) | [v1.4.4](https://github.com/hhatto/autopep8/releases/tag/v1.4.4) |
+      | [Markdownlint (mdl)](https://github.com/markdownlint/markdownlint#installation) | [v0.5.0](https://github.com/markdownlint/markdownlint/releases/tag/v0.5.0) |
+      | [awesome_bot](https://github.com/dkhamsing/awesome_bot#installation) | [1.19.1](https://github.com/dkhamsing/awesome_bot/releases/tag/1.19.1) |
+      | [Sass-lint](https://github.com/sasstools/sass-lint#install) | [v1.13.1](https://github.com/sasstools/sass-lint/releases/tag/v1.13.1) |
+      | [Tslint](https://github.com/palantir/tslint#installation--usage) | [v5.18.0](https://github.com/palantir/tslint/releases/tag/5.18.0)
+      | [Prototool](https://github.com/uber/prototool/blob/dev/docs/install.md) | `7df3b95` |
+      | [goimports](https://godoc.org/golang.org/x/tools/cmd/goimports) | `3792095` |
+
+- Set up `GIT_HOST` to override the setting for your custom path:
+
+  ```bash
+  export GIT_HOST=github.com/<YOUR_GITHUB_ID>
+  ```
+
+- Run the `linter` and `test` before you build the binary:
+
+  ```bash
+  make check
+  make test
+  make build
+  ```
+
+- Build and push the docker image for local development:
+
+  ```bash
+  export IMG=<YOUR_CUSTOMIZED_IMAGE_NAME>
+  export REGISTRY=<YOUR_CUSTOMIZED_IMAGE_REGISTRY>
+  make build-push-images
+  ```
+
+  > **Note:** You need to log in the docker registry before you run the preceding command.
+
+### Debugging guide
+
+Use the following commands to debug the operator installation:
+
+- Check the CSV installation status:
+
+  ```bash
+  oc get csv
+  oc describe csv ibm-commonui-operator.v1.1.0
+  ```
+
+- Check the custom resource status:
+
+  ```bash
+  oc get commonwebuis.operators.ibm.com
+  oc describe commonwebuis.operators.ibm.com example-commonwebui
+  oc get commonwebuis.operators.ibm.com example-commonwebui -o yaml
+
+  oc get legacyheaders.operators.ibm.com
+  oc describe legacyheaders.operators.ibm.com example-legacyheaderservice
+  oc get legacyheaders.operators.ibm.com example-legacyheaderservice -o yaml
+  ```
+
+  If there are nodes for the `commonwebuis` or `legacyheaders` instances, the nodes are deployed successfully.
+
+  Additionally, you can check the logs for each of deployed container.
+
+- Check the logs for a deployed container:
+
+  ```bash
+  oc logs <status.nodeName>
+  ```
+
+- Check the operator status and log:
+
+  ```bash
+  oc describe po -l name=ibm-commonui-operator
+  oc logs -f $(oc get po -l name=ibm-commonui-operator -o name)
+  ```
+
+### End-to-End testing
+
+For more instructions on how to run end-to-end testing with the Operand Deployment Lifecycle Manager, see [ODLM guide](https://github.com/IBM/operand-deployment-lifecycle-manager/blob/master/docs/install/common-service-integration.md#end-to-end-test).
