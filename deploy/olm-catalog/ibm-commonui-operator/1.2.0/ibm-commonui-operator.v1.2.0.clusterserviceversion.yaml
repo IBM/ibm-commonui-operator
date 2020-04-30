@@ -24,7 +24,8 @@ metadata:
                 "registry": "common-service"
               }
             ]
-          },
+          }
+        },
         {
           "apiVersion": "operators.ibm.com/v1alpha1",
           "kind": "CommonWebUI",
