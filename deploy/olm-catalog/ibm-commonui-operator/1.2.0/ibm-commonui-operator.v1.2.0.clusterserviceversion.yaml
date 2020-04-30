@@ -64,8 +64,8 @@ metadata:
     categories: Security
     certified: "false"
     containerImage: quay.io/opencloudio/ibm-commonui-operator:1.2.0
-    description: The IBM Common Web UI delivers the common header api and Identity
-      and access pages for common services.
+    description: The IBM Common Web UI delivers the common header API and the
+      identity and access pages for IBM Cloud Platform Common Services.
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.2.0
@@ -188,7 +188,7 @@ spec:
      operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak, for a list of IBM Cloud Paks, see 
      [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks). \n- If you are using the operator with an IBM Containerized Software, 
      see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall)."
-  displayName: ibm-commonui-operator
+  displayName: IBM Common UI Operator
   install:
     spec:
       clusterPermissions:
