@@ -37,9 +37,9 @@ To install the operator with the IBM Common Services Operator follow the the ins
 
 ## SecurityContextConstraints Requirements
 
-The Common UI service supports running under the OpenShift Container Platform default restricted security context constraints.
+The Common UI service supports running with the OpenShift Container Platform 4.3 default restricted Security Context Constraints (SCCs).
 
-[OpenShift Container Platform restricted security context constraints:](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html)
+For more information about the OpenShift Container Platform Security Context Constraints, see [Managing Security Context Constraints.](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html)
 
 ## (Optional) Developer guide
 
