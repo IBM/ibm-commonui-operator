@@ -5,6 +5,24 @@ metadata:
     alm-examples: |-
       [
         {
+          "apiVersion": "odlm.ibm.com/v1alpha1",
+          "kind": "OperandBindInfo",
+          "metadata": {
+            "name": "commonuibinding",
+            "namespace": "ibm-common-services"
+          },
+          "spec": {
+            "operand": "ibm-commonui-operator",
+            "registry": "common-service",
+            "description": "Binding information that should be accessible to commonui adopters",
+            "bindings": {
+              "public": {
+                "configmap": "common-web-ui-config"
+              }
+            }
+          }
+        },
+        {
           "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "OperandRequest",
           "metadata": {
