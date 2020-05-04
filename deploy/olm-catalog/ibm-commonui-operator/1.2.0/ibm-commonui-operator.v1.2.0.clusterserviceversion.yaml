@@ -6,6 +6,23 @@ metadata:
       [
         {
           "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "OperandBindInfo",
+          "metadata": {
+            "name": "commonuibinding"
+          },
+          "spec": {
+            "operand": "ibm-commonui-operator",
+            "registry": "common-service",
+            "description": "Binding information that should be accessible to commonui adopters",
+            "bindings": {
+              "public": {
+                "configmap": "common-web-ui-config"
+              }
+            }
+          }
+        },
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "OperandRequest",
           "metadata": {
             "name": "ibm-commonui-request"
