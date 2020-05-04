@@ -5,11 +5,10 @@ metadata:
     alm-examples: |-
       [
         {
-          "apiVersion": "odlm.ibm.com/v1alpha1",
+          "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "OperandBindInfo",
           "metadata": {
-            "name": "commonuibinding",
-            "namespace": "ibm-common-services"
+            "name": "commonuibinding"
           },
           "spec": {
             "operand": "ibm-commonui-operator",
