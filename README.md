@@ -1,44 +1,51 @@
-Updated based on above debug commands and current ID template for the README.
-@ericabr please review for any missing content/improvements:
-
 # ibm-commonui-operator
 
-You can use the ibm-commonui-operator to install the Common Web UI service for the IBM Cloud Platform Common Services and access the Common Web UI console.
+> **Important:** Do not install this operator directly. Only install this operator using the IBM Common Services Operator. For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall).
+> If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
 
-You can use the Common Web UI console to access information and features from other IBM Cloud Platform Common Services or IBM Cloud Paks that you install.
+You can use the ibm-commonui-operator to install the Common Web UI service for the IBM Cloud Platform Common Services and access the Common Web UI console. You can use the Common Web UI console to access information and features from other IBM Cloud Platform Common Services or IBM Cloud Paks that you install.
 
-For more information about the available IBM Cloud Platform Common Services and IBM Cloud Paks, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs).
+For more information about the available IBM Cloud Platform Common Services, see the [IBM Knowledge Center](http://ibm.biz/cpcsdocs).
 
 ## Supported platforms
 
 Red Hat OpenShift Container Platform 4.2 or newer installed on one of the following platforms:
+
 - Linux x86_64
 - Linux on Power (ppc64le)
 - Linux on IBM Z and LinuxONE
 
 ## Operator versions
 
+- 1.2.0
 - 1.1.0
 
 ## Prerequisites
 
-The Common Web UI service depends on other IBM Cloud Platform Common Services. To install the Common Web UI operator (ibm-commonui-operator), you need to first install the operator dependencies and prerequisites:
+The Common Web UI service has dependencies on other IBM Cloud Platform Common Services. Before you install this operator, you need to first install the operator dependencies and prerequisites:
 
 - For the list of operator dependencies, see the IBM Knowledge Center [Common Services dependencies documentation](http://ibm.biz/cpcs_opdependencies).
 
 - For the list of prerequisites for installing the operator, see the IBM Knowledge Center [Preparing to install services documentation](http://ibm.biz/cpcs_opinstprereq).
 
-## SecurityContextConstraints Requirements
-
 ## Documentation
 
-For installation and configuration instructions if you are using the operator alone or with other common services, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcsdocs).
+To install the operator with the IBM Common Services Operator follow the the installation and configuration instructions within the IBM Knowledge Center.
 
-If you are using the operator within an IBM Cloud Pak, see the documentation for the specific IBM Cloud Pak [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks)
+- If you are using the operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).
+- If you are using the operator with an IBM Containerized Software, see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall).
 
-## Developer guide
+## SecurityContextConstraints Requirements
 
-The following developer guide is for a quick install and initial validation of running the operator. For information about accessing and using the console, see the IBM Cloud Platform Common Services Knowledge Center [Common Web UI documentation](http://ibm.biz/cpcs_opcwebui).
+The Common UI service supports running with the OpenShift Container Platform 4.3 default restricted Security Context Constraints (SCCs).
+
+For more information about the OpenShift Container Platform Security Context Constraints, see [Managing Security Context Constraints.](https://docs.openshift.com/container-platform/4.3/authentication/managing-security-context-constraints.html)
+
+## (Optional) Developer guide
+
+If, as a developer, you are looking to build and test this operator to try out and learn more about the operator and its capabilities, you can use the following developer guide. This guide provides commands for a quick install and initial validation for running the operator. For information about accessing and using the console, see the IBM Cloud Platform Common Services Knowledge Center [Common Web UI documentation](http://ibm.biz/cpcs_opcwebui).
+
+> **Important:** The following developer guide is provided as-is and only for trial and education purposes. IBM and IBM Support does not provide any support for the usage of the operator with this developer guide. For the official supported install and usage guide for the operator, see the the IBM Knowledge Center documentation for your IBM Cloud Pak or for IBM Cloud Platform Common Services.
 
 ### Quick start guide
 
@@ -97,7 +104,7 @@ Use the following commands to debug the operator installation:
 
   ```bash
   oc get csv
-  oc describe csv ibm-commonui-operator.v1.1.0
+  oc describe csv ibm-commonui-operator.v1.2.0
   ```
 
 - Check the custom resource status:
