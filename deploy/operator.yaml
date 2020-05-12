@@ -50,8 +50,8 @@ spec:
               value: "ibm-commonui-operator"
           resources:
             limits:
-              cpu: 20m
-              memory: 60Mi
+              cpu: 40m
+              memory: 100Mi
             requests:
               cpu: 10m
               memory: 25Mi

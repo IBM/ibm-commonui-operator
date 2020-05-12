@@ -6,23 +6,6 @@ metadata:
       [
         {
           "apiVersion": "operator.ibm.com/v1alpha1",
-          "kind": "OperandBindInfo",
-          "metadata": {
-            "name": "ibm-commonui-bindinfo"
-          },
-          "spec": {
-            "operand": "ibm-commonui-operator",
-            "registry": "common-service",
-            "description": "Binding information that should be accessible to commonui adopters",
-            "bindings": {
-              "public": {
-                "configmap": "common-web-ui-config"
-              }
-            }
-          }
-        },
-        {
-          "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "OperandRequest",
           "metadata": {
             "name": "ibm-commonui-request"
@@ -36,6 +19,9 @@ metadata:
                   },
                   {
                     "name": "ibm-management-ingress-operator"
+                  },
+                  {
+                    "name": "ibm-platform-api-operator"
                   }
                 ],
                 "registry": "common-service"
@@ -243,7 +229,7 @@ spec:
                 productID: 068a62892a1e4db39641342e592daa25
                 productMetric: FREE
                 productName: IBM Cloud Platform Common Services
-                productVersion: 3.3.0
+                productVersion: 3.4.0
               labels:
                 name: ibm-commonui-operator
             spec:
@@ -277,8 +263,8 @@ spec:
                 name: ibm-commonui-operator
                 resources:
                   limits:
-                    cpu: 20m
-                    memory: 60Mi
+                    cpu: 40m
+                    memory: 100Mi
                   requests:
                     cpu: 10m
                     memory: 25Mi
