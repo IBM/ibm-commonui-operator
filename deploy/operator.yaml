@@ -48,6 +48,10 @@ spec:
                   fieldPath: metadata.name
             - name: OPERATOR_NAME
               value: "ibm-commonui-operator"
+            - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
+              value: "1.2.0"
+            - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
+              value: "3.2.4"
           resources:
             limits:
               cpu: 40m
