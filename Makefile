@@ -23,6 +23,12 @@ REGISTRY ?= quay.io/opencloudio
 REGISTRY_DEV ?= quay.io/ericabr
 CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
+
+# Set the registry and tag for the operand/operator images
+OPERAND_REGISTRY ?= $(REGISTRY)
+COMMON_WEB_UI_OPERAND_TAG ?= 1.2.0
+LEGACY_HEADER_OPERAND_TAG ?= 3.2.4
+
 # Github host to use for checking the source tree;
 # Override this variable ue with your own value if you're working on forked repo.
 GIT_HOST ?= github.com/IBM
@@ -90,6 +96,23 @@ ifneq ("$(realpath $(DEST))", "$(realpath $(PWD))")
 endif
 
 include common/Makefile.common.mk
+############################################################
+# SHA section
+############################################################
+
+.PHONY: get-all-operand-image-sha
+get-all-operand-image-sha: get-common-web-ui-image-sha get-legacy-header-image-sha
+	@echo Got SHAs for all operand images
+
+.PHONY: get-common-web-ui-image-sh
+get-common-web-ui-image-sh:
+	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
+
+.PHONY: get-legacy-header-image-sha
+get-legacy-header-image-sha:
+	@echo Get SHA for platform-header:$(LEGACY_HEADER_OPERAND_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) platform-header $(LEGACY_HEADER_OPERAND_TAG) LEGACYHEADER_IMAGE_TAG_OR_SHA
 
 ############################################################
 # work section
