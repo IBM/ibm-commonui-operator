@@ -29,6 +29,7 @@ import (
 	"github.com/ibm/ibm-commonui-operator/pkg/apis"
 	"github.com/ibm/ibm-commonui-operator/pkg/controller"
 	"github.com/ibm/ibm-commonui-operator/version"
+	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 	extv1beta1 "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
@@ -127,6 +128,12 @@ func main() {
 
 	//IBMDEV
 	if err := extv1beta1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	// Setup Scheme for cert-manager
+	if err := certmgr.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
 		os.Exit(1)
 	}
