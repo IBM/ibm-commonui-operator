@@ -21,6 +21,8 @@ import (
 	"fmt"
 	"reflect"
 
+	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
@@ -153,11 +155,57 @@ func ReconcileIngress(client client.Client, instanceNamespace string, ingressNam
 			logger.Info("Updating Ingress", "Ingress.Name", currentIngress.Name)
 			currentIngress.ObjectMeta.Name = newIngress.ObjectMeta.Name
 			currentIngress.ObjectMeta.Labels = newIngress.ObjectMeta.Labels
+			currentIngress.ObjectMeta.Annotations = newIngress.ObjectMeta.Annotations
 			currentIngress.Spec = newIngress.Spec
 			err = client.Update(context.TODO(), currentIngress)
 			if err != nil {
 				logger.Error(err, "Failed to update Ingress",
 					"Ingress.Namespace", currentIngress.Namespace, "Ingress.Name", currentIngress.Name)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Check if the Certificates already exist, if not create new ones.
+func ReconcileCertificate(client client.Client, instanceNamespace, certificateName string,
+	newCertificate *certmgr.Certificate, needToRequeue *bool) error {
+	logger := log.WithValues("func", "ReconcileCertificate")
+
+	currentCertificate := &certmgr.Certificate{}
+	err := client.Get(context.TODO(), types.NamespacedName{Name: certificateName, Namespace: instanceNamespace}, currentCertificate)
+	if err != nil && errors.IsNotFound(err) {
+		// Create a new Certificate
+		logger.Info("Creating a new Certificate", "Certificate.Namespace", newCertificate.Namespace, "Certificate.Name", newCertificate.Name)
+		err = client.Create(context.TODO(), newCertificate)
+		if err != nil && errors.IsAlreadyExists(err) {
+			// Already exists from previous reconcile, requeue
+			logger.Info("Certificate already exists")
+			*needToRequeue = true
+		} else if err != nil {
+			logger.Error(err, "Failed to create new Certificate", "Certificate.Namespace", newCertificate.Namespace,
+				"Certificate.Name", newCertificate.Name)
+			return err
+		} else {
+			// Certificate created successfully - return and requeue
+			*needToRequeue = true
+		}
+	} else if err != nil {
+		logger.Error(err, "Failed to get Certificate", "Certificate.Name", certificateName)
+		return err
+	} else {
+		// Found Certificate, so determine if the resource has changed
+		logger.Info("Comparing Certificates")
+		if !IsCertificateEqual(currentCertificate, newCertificate) {
+			logger.Info("Updating Certificate", "Certificate.Name", currentCertificate.Name)
+			currentCertificate.ObjectMeta.Name = newCertificate.ObjectMeta.Name
+			currentCertificate.ObjectMeta.Labels = newCertificate.ObjectMeta.Labels
+			currentCertificate.Spec = newCertificate.Spec
+			err = client.Update(context.TODO(), currentCertificate)
+			if err != nil {
+				logger.Error(err, "Failed to update Certificate", "Certificate.Namespace", currentCertificate.Namespace,
+					"Certificate.Name", currentCertificate.Name)
 				return err
 			}
 		}
@@ -463,6 +511,13 @@ func IsIngressEqual(oldIngress, newIngress *netv1.Ingress) bool {
 		return false
 	}
 
+	if !reflect.DeepEqual(oldIngress.ObjectMeta.Annotations, newIngress.ObjectMeta.Annotations) {
+		logger.Info("Annotations not equal",
+			"old", fmt.Sprintf("%v", oldIngress.ObjectMeta.Annotations),
+			"new", fmt.Sprintf("%v", newIngress.ObjectMeta.Annotations))
+		return false
+	}
+
 	if !reflect.DeepEqual(oldIngress.Spec, newIngress.Spec) {
 		logger.Info("Specs not equal",
 			"old", fmt.Sprintf("%v", oldIngress.Spec),
@@ -471,6 +526,36 @@ func IsIngressEqual(oldIngress, newIngress *netv1.Ingress) bool {
 	}
 
 	logger.Info("Ingresses are equal", "Ingress.Name", oldIngress.ObjectMeta.Name)
+
+	return true
+}
+
+// Use DeepEqual to determine if 2 certificates are equal.
+// Check ObjectMeta and Spec.
+// If there are any differences, return false. Otherwise, return true.
+func IsCertificateEqual(oldCertificate, newCertificate *certmgr.Certificate) bool {
+	logger := log.WithValues("func", "IsCertificateEqual")
+
+	if !reflect.DeepEqual(oldCertificate.ObjectMeta.Name, newCertificate.ObjectMeta.Name) {
+		logger.Info("Names not equal", "old", oldCertificate.ObjectMeta.Name, "new", newCertificate.ObjectMeta.Name)
+		return false
+	}
+
+	if !reflect.DeepEqual(oldCertificate.ObjectMeta.Labels, newCertificate.ObjectMeta.Labels) {
+		logger.Info("Labels not equal",
+			"old", fmt.Sprintf("%v", oldCertificate.ObjectMeta.Labels),
+			"new", fmt.Sprintf("%v", newCertificate.ObjectMeta.Labels))
+		return false
+	}
+
+	if !reflect.DeepEqual(oldCertificate.Spec, newCertificate.Spec) {
+		logger.Info("Specs not equal",
+			"old", fmt.Sprintf("%v", oldCertificate.Spec),
+			"new", fmt.Sprintf("%v", newCertificate.Spec))
+		return false
+	}
+
+	logger.Info("Certificates are equal", "Certificate.Name", oldCertificate.ObjectMeta.Name)
 
 	return true
 }

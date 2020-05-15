@@ -25,6 +25,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
+	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 
 	"reflect"
 
@@ -71,6 +72,8 @@ func newReconciler(mgr manager.Manager) reconcile.Reconciler {
 
 // add adds a new Controller to mgr with r as the reconcile.Reconciler
 func add(mgr manager.Manager, r reconcile.Reconciler) error {
+	reqLogger := log.WithValues("func", "add")
+
 	// Create a new controller
 	c, err := controller.New("commonwebui-controller", mgr, controller.Options{Reconciler: r})
 	if err != nil {
@@ -119,6 +122,16 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	})
 	if err != nil {
 		return err
+	}
+
+	// Watch for changes to secondary resource "Certificate" and requeue the owner CommonWebUIService
+	err = c.Watch(&source.Kind{Type: &certmgr.Certificate{}}, &handler.EnqueueRequestForOwner{
+		IsController: true,
+		OwnerType:    &operatorsv1alpha1.CommonWebUI{},
+	})
+	if err != nil {
+		// Log error instead of failing because "cert-manager" might not be installed
+		reqLogger.Error(err, "Failed to watch Certificate")
 	}
 
 	return nil
@@ -208,14 +221,17 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
+	// Check if the Certificates already exist, if not create new ones
+	err = r.reconcileCertificates(instance, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
 		return reconcile.Result{Requeue: true}, nil
 	}
-
-	reqLogger.Info("got Services, checking Certificates")
-	// Resources exists - don't requeue
 
 	reqLogger.Info("Updating CommonWebUI staus")
 
@@ -310,6 +326,7 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 
 	commonVolume := append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
+	commonVolumes = append(commonVolumes, res.UICertVolume)
 
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
@@ -589,6 +606,31 @@ func (r *ReconcileCommonWebUI) createCustomResource(unstruct unstructured.Unstru
 	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
 		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
 		return crCreateErr
+	}
+	return nil
+}
+
+func (r *ReconcileCommonWebUI) reconcileCertificates(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+	reqLogger := log.WithValues("func", "reconcileCertificates", "instance.Name", instance.Name)
+
+	certificateList := []res.CertificateData{
+		res.UICertificateData,
+	}
+
+	for _, certData := range certificateList {
+		reqLogger.Info("Checking Certificate", "Certificate.Name", certData.Name)
+		newCertificate := res.BuildCertificate(instance.Namespace, "", certData)
+		// Set CommonWebUI instance as the owner and controller of the Certificate
+		err := controllerutil.SetControllerReference(instance, newCertificate, r.scheme)
+		if err != nil {
+			reqLogger.Error(err, "Failed to set owner for Certificate", "Certificate.Namespace", newCertificate.Namespace,
+				"Certificate.Name", newCertificate.Name)
+			return err
+		}
+		err = res.ReconcileCertificate(r.client, instance.Namespace, certData.Name, newCertificate, needToRequeue)
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
