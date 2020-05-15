@@ -75,8 +75,9 @@ var APIIngressAnnotations = map[string]string{
 }
 
 var CallbackIngressAnnotations = map[string]string{
-	"kubernetes.io/ingress.class":         "ibm-icp-management",
-	"icp.management.ibm.com/upstream-uri": "/auth/liberty/callback",
+	"kubernetes.io/ingress.class":            "ibm-icp-management",
+	"icp.management.ibm.com/upstream-uri":    "/auth/liberty/callback",
+	"icp.management.ibm.com/secure-backends": "true",
 }
 
 var CommonUIIngressAnnotations = map[string]string{
@@ -91,9 +92,8 @@ var CommonUIIngressAnnotations = map[string]string{
 }
 
 var CommonLegacyIngressAnnotations = map[string]string{
-	"kubernetes.io/ingress.class":            "ibm-icp-management",
-	"icp.management.ibm.com/auth-type":       "access-token",
-	"icp.management.ibm.com/secure-backends": "true",
+	"kubernetes.io/ingress.class":      "ibm-icp-management",
+	"icp.management.ibm.com/auth-type": "access-token",
 	//nolint
 	"icp.management.ibm.com/configuration-snippet": `
 		add_header 'X-XSS-Protection' '1' always;
