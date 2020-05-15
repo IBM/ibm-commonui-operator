@@ -85,17 +85,18 @@ rules:
   - patch
   - update
   - watch
-- apiGroup:
+- apiGroups:
   - certmanager.k8s.io
   resources:
+  - '*'
   - certificates
   verbs:
   - create
-  - get
-  - update
   - delete
-  - patch
+  - get
   - list
+  - patch
+  - update
   - watch
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -118,3 +119,9 @@ rules:
   - patch
   - update
   - watch
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - clusterissuers
+  verbs:
+  - use
