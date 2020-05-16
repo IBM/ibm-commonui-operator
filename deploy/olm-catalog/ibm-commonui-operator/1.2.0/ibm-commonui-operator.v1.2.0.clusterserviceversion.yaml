@@ -2,6 +2,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
+    olm.skipRange: '>=1.1.0 <1.2.0'
     alm-examples: |-
       [
         {
@@ -262,7 +263,7 @@ spec:
                   value: "1.2.0"
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: "3.2.4"
-                image: quay.io/opencloudio/ibm-commonui-operator:1.2.0
+                image: quay.io/opencloudio/ibm-commonui-operator@sha256:8490feaab4225f304194955cd73bd2c7d013615bc2ae9960e81381c7ff2b1c98
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
