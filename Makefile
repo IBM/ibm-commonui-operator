@@ -104,15 +104,15 @@ include common/Makefile.common.mk
 get-all-operand-image-sha: get-common-web-ui-image-sha get-legacy-header-image-sha
 	@echo Got SHAs for all operand images
 
-.PHONY: get-common-web-ui-image-sh
-get-common-web-ui-image-sh:
+.PHONY: get-common-web-ui-image-sha
+get-common-web-ui-image-sha:
 	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG)
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
 
 .PHONY: get-legacy-header-image-sha
 get-legacy-header-image-sha:
 	@echo Get SHA for platform-header:$(LEGACY_HEADER_OPERAND_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) platform-header $(LEGACY_HEADER_OPERAND_TAG) LEGACYHEADER_IMAGE_TAG_OR_SHA
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-platform-header $(LEGACY_HEADER_OPERAND_TAG) LEGACYHEADER_IMAGE_TAG_OR_SHA
 
 ############################################################
 # work section
