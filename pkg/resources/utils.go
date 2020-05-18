@@ -715,9 +715,6 @@ func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress
 	return ingress
 }
 
-// BuildCertificate returns a Certificate object.
-// Call controllerutil.SetControllerReference to set the owner and controller
-// for the Certificate object created by this function.
 func BuildCertificate(instanceNamespace, instanceClusterIssuer string, certData CertificateData) *certmgr.Certificate {
 	reqLogger := log.WithValues("func", "BuildCertificate")
 
