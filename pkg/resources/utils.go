@@ -18,6 +18,7 @@ package resources
 
 import (
 	"encoding/json"
+	"strings"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
@@ -25,6 +26,8 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+
+	"os"
 
 	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -56,6 +59,43 @@ const ChartName = "webui-nav"
 const ChartVersion = "1.0.2"
 
 var DefaultStatusForCR = []string{"none"}
+
+//GetImageID constructs image IDs for operands: either <IMAGE_NAME>:<IMAGE_TAG> or <IMAGE_NAME>@<IMAGE_SHA>
+func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, envVarName string) string {
+	reqLogger := log.WithValues("Func", "GetImageID")
+
+	var imageSuffix string
+
+	//Check if the env var exists, if yes, check whether it's a SHA or tag and use accordingly; if no, use the default image version
+	imageTagOrSHA := os.Getenv(envVarName)
+
+	if len(imageTagOrSHA) > 0 {
+		//check if it is a SHA or tag and prepend appropriately
+		if strings.HasPrefix(imageTagOrSHA, "sha256:") {
+			reqLogger.Info("Using SHA digest value from environment variable for image " + imageName)
+			imageSuffix = "@" + imageTagOrSHA
+		} else {
+			reqLogger.Info("Using tag value from environment variable for image " + imageName)
+			imageSuffix = ":" + imageTagOrSHA
+			if imagePostfix != "" {
+				imageSuffix += imagePostfix
+			}
+		}
+	} else {
+		//Use default value
+		reqLogger.Info("Using default tag value for image " + imageName)
+		imageSuffix = ":" + defaultImageVersion
+		if imagePostfix != "" {
+			imageSuffix += imagePostfix
+		}
+	}
+
+	imageID := imageRegistry + "/" + imageName + imageSuffix
+
+	reqLogger.Info("imageID: " + imageID)
+
+	return imageID
+}
 
 var DeamonSetAnnotations = map[string]string{
 	"scheduler.alpha.kubernetes.io/critical-pod": "",

@@ -315,14 +315,8 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	podLabels := res.LabelsForPodMetadata(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
 	Annotations := res.DeamonSetAnnotations
 
-	var image string
-	if instance.Spec.CommonWebUIConfig.ImageRegistry == "" {
-		image = res.DefaultImageRegistry + "/" + res.DefaultImageName + ":" + res.DefaultImageTag
-		reqLogger.Info("CS??? default Image=" + image)
-	} else {
-		image = instance.Spec.CommonWebUIConfig.ImageRegistry + "/" + res.DefaultImageName + ":" + instance.Spec.CommonWebUIConfig.ImageTag
-		reqLogger.Info("CS??? Image=" + image)
-	}
+	image := res.GetImageID(res.DefaultImageRegistry, res.DefaultImageName, res.DefaultImageTag, "", "COMMON_WEB_UI_IMAGE_TAG_OR_SHA")
+	reqLogger.Info("CS??? default Image=" + image)
 
 	commonVolume := append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)

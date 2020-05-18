@@ -2,25 +2,9 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
+    olm.skipRange: '>=1.1.0 <1.2.0'
     alm-examples: |-
       [
-        {
-          "apiVersion": "operator.ibm.com/v1alpha1",
-          "kind": "OperandBindInfo",
-          "metadata": {
-            "name": "ibm-commonui-bindinfo"
-          },
-          "spec": {
-            "operand": "ibm-commonui-operator",
-            "registry": "common-service",
-            "description": "Binding information that should be accessible to commonui adopters",
-            "bindings": {
-              "public": {
-                "configmap": "common-web-ui-config"
-              }
-            }
-          }
-        },
         {
           "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "OperandRequest",
@@ -36,6 +20,9 @@ metadata:
                   },
                   {
                     "name": "ibm-management-ingress-operator"
+                  },
+                  {
+                    "name": "ibm-platform-api-operator"
                   }
                 ],
                 "registry": "common-service"
@@ -54,7 +41,7 @@ metadata:
               "cpuLimits": "300m",
               "cpuMemory": "200Mi",
               "imageRegistry": "quay.io/opencloudio",
-              "imageTag": "1.1.0",
+              "imageTag": "1.2.0",
               "ingressPath": "/common-nav",
               "requestLimits": "300m",
               "requestMemory": "200Mi",
@@ -62,7 +49,7 @@ metadata:
             },
             "globalUIConfig": {
               "authServiceURL": "https://icp-management-ingress:443/idauth",
-              "cloudPakVersion": "3.2.4",
+              "cloudPakVersion": "3.4.0",
               "clusterName": "mycluster",
               "defaultAdminUser": "admin",
               "defaultAuth": "",
@@ -252,7 +239,7 @@ spec:
                 productID: 068a62892a1e4db39641342e592daa25
                 productMetric: FREE
                 productName: IBM Cloud Platform Common Services
-                productVersion: 3.3.0
+                productVersion: 3.4.0
               labels:
                 name: ibm-commonui-operator
             spec:
@@ -281,13 +268,17 @@ spec:
                       fieldPath: metadata.name
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
-                image: quay.io/opencloudio/ibm-commonui-operator:1.2.0
+                - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
+                  value: sha256:4ba3a0364529d3532a9bcae30d7bedc459d669a428710f071d254e623b8b4cae
+                - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
+                  value: sha256:35a27f3b01569b41668d7033999681a269d274d586a7948cfc3e2dc024a310e0
+                image: quay.io/opencloudio/ibm-commonui-operator@sha256:8490feaab4225f304194955cd73bd2c7d013615bc2ae9960e81381c7ff2b1c98
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
                   limits:
-                    cpu: 20m
-                    memory: 60Mi
+                    cpu: 40m
+                    memory: 100Mi
                   requests:
                     cpu: 10m
                     memory: 25Mi

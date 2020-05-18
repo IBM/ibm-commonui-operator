@@ -283,14 +283,8 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 	podLabels := res.LabelsForPodMetadata(res.LegacyReleaseName, legacyheaderCrType, instance.Name)
 	Annotations := res.DeamonSetAnnotations
 
-	var image string
-	if instance.Spec.LegacyConfig.ImageRegistry == "" {
-		image = res.LegacyImageRegistry + "/" + res.LegacyImageName + ":" + res.LegacyImageTag
-		reqLogger.Info("CS??? default Image=" + image)
-	} else {
-		image = instance.Spec.LegacyConfig.ImageRegistry + "/" + res.LegacyImageName + ":" + instance.Spec.LegacyConfig.ImageTag
-		reqLogger.Info("CS??? Image=" + image)
-	}
+	image := res.GetImageID(res.LegacyImageRegistry, res.LegacyImageName, res.LegacyImageTag, "", "LEGACYHEADER_IMAGE_TAG_OR_SHA")
+	reqLogger.Info("CS??? default Image=" + image)
 
 	commonVolume := append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
