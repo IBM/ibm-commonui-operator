@@ -49,9 +49,9 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-commonui-operator"
             - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-              value: sha256:4ba3a0364529d3532a9bcae30d7bedc459d669a428710f071d254e623b8b4cae
+              value: "1.2.1"
             - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
-              value: sha256:35a27f3b01569b41668d7033999681a269d274d586a7948cfc3e2dc024a310e0
+              value: "3.2.4"
           resources:
             limits:
               cpu: 40m
