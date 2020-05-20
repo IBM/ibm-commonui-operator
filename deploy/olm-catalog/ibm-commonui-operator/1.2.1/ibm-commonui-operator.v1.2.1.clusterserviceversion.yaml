@@ -2,7 +2,7 @@ apiVersion: operators.coreos.com/v1alpha1
 kind: ClusterServiceVersion
 metadata:
   annotations:
-    olm.skipRange: '>=1.1.0 <1.2.0'
+    olm.skipRange: '>=1.2.0 <1.2.1'
     alm-examples: |-
       [
         {
@@ -23,6 +23,9 @@ metadata:
                   },
                   {
                     "name": "ibm-platform-api-operator"
+                  },
+                  {
+                    "name": "ibm-cert-manager-operator"
                   }
                 ],
                 "registry": "common-service"
@@ -49,7 +52,7 @@ metadata:
             },
             "globalUIConfig": {
               "authServiceURL": "https://icp-management-ingress:443/idauth",
-              "cloudPakVersion": "3.4.0",
+              "cloudPakVersion": "3.2.4",
               "clusterName": "mycluster",
               "defaultAdminUser": "admin",
               "defaultAuth": "",
@@ -61,19 +64,19 @@ metadata:
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "1.2.0"
+            "operatorVersion": "1.2.1"
           }
-        }
+        },
       ]
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.2.0
+    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.2.1
     description: The IBM Common Web UI delivers the common header API and the
       identity and access pages for IBM Cloud Platform Common Services.
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
-  name: ibm-commonui-operator.v1.2.0
+  name: ibm-commonui-operator.v1.2.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -112,6 +115,9 @@ spec:
       - kind: Deployment
         name: ''
         version: v1
+      - kind: Certificate
+        name: ''
+        version: v1alpha1
       specDescriptors:
         - description: Configuration parameters for common web ui specific to the service
           displayName: Common Web UI Configuration
@@ -190,7 +196,7 @@ spec:
      operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak, for a list of IBM Cloud Paks, see 
      [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks). \n- If you are using the operator with an IBM Containerized Software, 
      see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall)."
-  displayName: IBM Common UI Operator
+  displayName: Ibm Common UI Operator
   install:
     spec:
       clusterPermissions:
@@ -214,6 +220,12 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - clusterissuers
+          verbs:
+          - use
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
@@ -260,10 +272,10 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-                  value: sha256:4ba3a0364529d3532a9bcae30d7bedc459d669a428710f071d254e623b8b4cae
+                  value: "1.2.1"
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
-                  value: sha256:35a27f3b01569b41668d7033999681a269d274d586a7948cfc3e2dc024a310e0
-                image: quay.io/opencloudio/ibm-commonui-operator@sha256:8490feaab4225f304194955cd73bd2c7d013615bc2ae9960e81381c7ff2b1c98
+                  value: "3.2.4"
+                image: quay.io/opencloudio/ibm-commonui-operator:1.2.1
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
@@ -365,6 +377,19 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - '*'
+          - certificates
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:
@@ -392,5 +417,5 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-commonui-operator.v1.1.0
-  version: 1.2.0
+  replaces: ibm-commonui-operator.v1.2.0
+  version: 1.2.1
