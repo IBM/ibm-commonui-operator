@@ -754,7 +754,14 @@ func BuildCertificate(instanceNamespace, instanceClusterIssuer string, certData 
 }
 
 func labelsForCertificateMeta(appName, componentName string) map[string]string {
-	return map[string]string{"app": appName, "component": componentName, "release": ReleaseName}
+	return map[string]string{
+		"app":                          appName,
+		"component":                    componentName,
+		"release":                      ReleaseName,
+		"app.kubernetes.io/instance":   "ibm-commonui-operator",
+		"app.kubernetes.io/managed-by": "ibm-commonui-operator",
+		"app.kubernetes.io/name":       UICertName,
+	}
 }
 
 // GetPodNames returns the pod names of the array of pods passed in

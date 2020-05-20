@@ -99,8 +99,7 @@ var UICertVolume = corev1.Volume{
 	VolumeSource: corev1.VolumeSource{
 		Secret: &corev1.SecretVolumeSource{
 			SecretName: UICertSecretName,
-			// DefaultMode: &DefaultMode,
-			Optional: &TrueVar,
+			Optional:   &TrueVar,
 		},
 	},
 }
