@@ -23,6 +23,9 @@ metadata:
                   },
                   {
                     "name": "ibm-platform-api-operator"
+                  },
+                  {
+                    "name": "ibm-cert-manager-operator"
                   }
                 ],
                 "registry": "common-service"
@@ -112,6 +115,9 @@ spec:
       - kind: Deployment
         name: ''
         version: v1
+      - kind: Certificate
+        name: ''
+        version: v1alpha1
       specDescriptors:
         - description: Configuration parameters for common web ui specific to the service
           displayName: Common Web UI Configuration
@@ -214,6 +220,12 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - clusterissuers
+          verbs:
+          - use
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
@@ -357,6 +369,19 @@ spec:
           - foundation.ibm.com
           resources:
           - navconfigurations
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - '*'
+          - certificates
           verbs:
           - create
           - delete
