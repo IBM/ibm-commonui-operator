@@ -28,7 +28,7 @@ if [[ $TAG == "" ]]
 then
    echo "Missing parm. Need image type, image name and image tag"
    echo "Examples:"
-   echo "   common-web-ui quay.io/opencloudio/common-web-ui 1.2.0"
+   echo "   common-web-ui quay.io/opencloudio/common-web-ui 1.2.1"
    echo "   platform-header quay.io/opencloudio/common-web-ui 3.2.4"
    exit 1
 fi

@@ -28,7 +28,7 @@ import (
 
 const DefaultImageRegistry = "quay.io/opencloudio"
 const DefaultImageName = "common-web-ui"
-const DefaultImageTag = "1.1.0"
+const DefaultImageTag = "1.2.1"
 
 const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"
