@@ -38,13 +38,13 @@ metadata:
           },
           "spec": {
             "commonWebUIConfig": {
-              "cpuLimits": "300m",
-              "cpuMemory": "200Mi",
+              "cpuLimits": 300,
+              "cpuMemory": 256,
               "imageRegistry": "quay.io/opencloudio",
               "imageTag": "1.2.0",
               "ingressPath": "/common-nav",
-              "requestLimits": "300m",
-              "requestMemory": "200Mi",
+              "requestLimits": 300,
+              "requestMemory": 256,
               "serviceName": "common-web-ui"
             },
             "globalUIConfig": {
@@ -68,13 +68,13 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.2.1
+    containerImage: quay.io/siddarthpatel/ibm-commonui-operator:latest
     description: The IBM Common Web UI delivers the common header API and the
       identity and access pages for IBM Cloud Platform Common Services.
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.2.1
-  namespace: placeholder
+  namespace: ibm-common-services
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -260,10 +260,10 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-                  value: "1.2.1"
+                  value: sha256:4ba3a0364529d3532a9bcae30d7bedc459d669a428710f071d254e623b8b4cae
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
-                  value: "3.2.4"
-                image: quay.io/opencloudio/ibm-commonui-operator:1.2.1
+                  value: sha256:35a27f3b01569b41668d7033999681a269d274d586a7948cfc3e2dc024a310e0
+                image: quay.io/siddarthpatel/ibm-commonui-operator:latest
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:

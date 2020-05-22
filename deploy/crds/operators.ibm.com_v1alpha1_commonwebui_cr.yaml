@@ -18,10 +18,10 @@ spec:
     osAuth: ''
   commonWebUIConfig:
     ingressPath: /common-nav
-    cpuLimits: 300m
-    cpuMemory: 200Mi
-    requestLimits: 300m
-    requestMemory: 200Mi
+    cpuLimits: 300
+    cpuMemory: 256
+    requestLimits: 300
+    requestMemory: 256
     imageRegistry: quay.io/opencloudio
     imageTag: 1.2.1
     serviceName: common-web-ui
