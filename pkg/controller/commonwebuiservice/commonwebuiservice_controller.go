@@ -34,6 +34,7 @@ import (
 	netv1 "k8s.io/api/networking/v1beta1"
 	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/api/errors"
+	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -314,6 +315,11 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
 	podLabels := res.LabelsForPodMetadata(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
 	Annotations := res.DeamonSetAnnotations
+	cpuLimits := instance.Spec.CommonWebUIConfig.CPULimits
+	cpuMemory := instance.Spec.CommonWebUIConfig.CPUMemory
+	reqLimits := instance.Spec.CommonWebUIConfig.RequestLimits
+	reqMemory := instance.Spec.CommonWebUIConfig.RequestMemory
+
 	imageRegistry := instance.Spec.CommonWebUIConfig.ImageRegistry
 	imageTag := instance.Spec.CommonWebUIConfig.ImageTag
 	if imageRegistry == "" {
@@ -342,6 +348,10 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	commonwebuiContainer.Env[11].Value = instance.Spec.GlobalUIConfig.EnterpriseLDAP
 	commonwebuiContainer.Env[12].Value = instance.Spec.GlobalUIConfig.EnterpriseSAML
 	commonwebuiContainer.Env[13].Value = instance.Spec.GlobalUIConfig.OSAuth
+	commonwebuiContainer.Resources.Limits["cpu"] = *resource.NewMilliQuantity(cpuLimits, resource.DecimalSI)
+	commonwebuiContainer.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
+	commonwebuiContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
+	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 
 	daemon := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
