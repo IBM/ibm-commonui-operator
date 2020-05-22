@@ -29,6 +29,7 @@ import (
 const DefaultImageRegistry = "quay.io/opencloudio"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.2.1"
+const DefaultClusterIssuer = "cs-ca-clusterissuer"
 
 const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"
@@ -85,6 +86,24 @@ var ClusterCaVolume = corev1.Volume{
 	},
 }
 
+// UI certificate definition
+const UICertName = "common-web-ui-ca-cert"
+const UICertCommonName = "common-web-ui"
+
+// use concatenation so linter won't complain about "Secret" vars
+const UICertSecretName = "common-web-ui-cert" + ""
+const UICertVolumeName = "common-web-ui-certs"
+
+var UICertVolume = corev1.Volume{
+	Name: UICertVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		Secret: &corev1.SecretVolumeSource{
+			SecretName: UICertSecretName,
+			Optional:   &TrueVar,
+		},
+	},
+}
+
 var commonSecurityContext = corev1.SecurityContext{
 	AllowPrivilegeEscalation: &FalseVar,
 	Privileged:               &FalseVar,
@@ -121,7 +140,7 @@ var CommonContainer = corev1.Container{
 					Type:   intstr.Int,
 					IntVal: 3000,
 				},
-				Scheme: "",
+				Scheme: corev1.URISchemeHTTPS,
 			},
 		},
 		InitialDelaySeconds: 100,
@@ -139,7 +158,7 @@ var CommonContainer = corev1.Container{
 					Type:   intstr.Int,
 					IntVal: 3000,
 				},
-				Scheme: "",
+				Scheme: corev1.URISchemeHTTPS,
 			},
 		},
 		InitialDelaySeconds: 100,
@@ -158,6 +177,10 @@ var CommonContainer = corev1.Container{
 		{
 			Name:      ClusterCaVolumeName,
 			MountPath: "/opt/ibm/platform-header/certs",
+		},
+		{
+			Name:      UICertVolumeName,
+			MountPath: "/certs/common-web-ui",
 		},
 	},
 	// CommonEnvVars will be added by the controller
@@ -261,6 +284,22 @@ var CommonContainer = corev1.Container{
 					Key: "WLP_CLIENT_SECRET",
 				},
 			},
+		},
+		{
+			Name:  "USE_HTTPS",
+			Value: "true",
+		},
+		{
+			Name:  "UI_SSL_CA",
+			Value: "/certs/common-web-ui/ca.crt",
+		},
+		{
+			Name:  "UI_SSL_CERT",
+			Value: "/certs/common-web-ui/tls.crt",
+		},
+		{
+			Name:  "UI_SSL_KEY",
+			Value: "/certs/common-web-ui/tls.key",
 		},
 	},
 }

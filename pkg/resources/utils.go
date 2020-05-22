@@ -21,6 +21,8 @@ import (
 	"strings"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
+	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,6 +35,14 @@ import (
 )
 
 var log = logf.Log.WithName("resource_utils")
+
+type CertificateData struct {
+	Name      string
+	Secret    string
+	Common    string
+	App       string
+	Component string
+}
 
 const ReleaseName = "common-web-ui"
 const Log4jsConfigMap = "common-web-ui-log4js"
@@ -96,7 +106,8 @@ var DeamonSetAnnotations = map[string]string{
 }
 
 var APIIngressAnnotations = map[string]string{
-	"kubernetes.io/ingress.class": "ibm-icp-management",
+	"kubernetes.io/ingress.class":            "ibm-icp-management",
+	"icp.management.ibm.com/secure-backends": "true",
 	//nolint
 	"icp.management.ibm.com/configuration-snippet": `
 		add_header 'X-XSS-Protection' '1' always;
@@ -104,14 +115,16 @@ var APIIngressAnnotations = map[string]string{
 }
 
 var CallbackIngressAnnotations = map[string]string{
-	"kubernetes.io/ingress.class":         "ibm-icp-management",
-	"icp.management.ibm.com/upstream-uri": "/auth/liberty/callback",
+	"kubernetes.io/ingress.class":            "ibm-icp-management",
+	"icp.management.ibm.com/upstream-uri":    "/auth/liberty/callback",
+	"icp.management.ibm.com/secure-backends": "true",
 }
 
 var CommonUIIngressAnnotations = map[string]string{
-	"kubernetes.io/ingress.class":      "ibm-icp-management",
-	"icp.management.ibm.com/auth-type": "access-token",
-	"icp.management.ibm.com/app-root":  "/common-nav?root=true",
+	"kubernetes.io/ingress.class":            "ibm-icp-management",
+	"icp.management.ibm.com/auth-type":       "access-token",
+	"icp.management.ibm.com/secure-backends": "true",
+	"icp.management.ibm.com/app-root":        "/common-nav?root=true",
 	//nolint
 	"icp.management.ibm.com/configuration-snippet": `
 		add_header 'X-XSS-Protection' '1' always;
@@ -160,6 +173,14 @@ var Log4jsData = map[string]string{
 		  "template": { "appenders": ["console"], "level": "error" }
 		}
 	  }`,
+}
+
+var UICertificateData = CertificateData{
+	Name:      UICertName,
+	Secret:    UICertSecretName,
+	Common:    UICertCommonName,
+	App:       "common-web-ui",
+	Component: "common-web-ui",
 }
 
 //nolint
@@ -692,6 +713,55 @@ func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress
 		},
 	}
 	return ingress
+}
+
+func BuildCertificate(instanceNamespace, instanceClusterIssuer string, certData CertificateData) *certmgr.Certificate {
+	reqLogger := log.WithValues("func", "BuildCertificate")
+
+	metaLabels := labelsForCertificateMeta(certData.App, certData.Component)
+	var clusterIssuer string
+	if instanceClusterIssuer != "" {
+		reqLogger.Info("clusterIssuer=" + instanceClusterIssuer)
+		clusterIssuer = instanceClusterIssuer
+	} else {
+		reqLogger.Info("clusterIssuer is blank, default=" + DefaultClusterIssuer)
+		clusterIssuer = DefaultClusterIssuer
+	}
+
+	certificate := &certmgr.Certificate{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      certData.Name,
+			Labels:    metaLabels,
+			Namespace: instanceNamespace,
+		},
+		Spec: certmgr.CertificateSpec{
+			CommonName: certData.Common,
+			SecretName: certData.Secret,
+			IsCA:       false,
+			DNSNames: []string{
+				certData.Common,
+				certData.Common + "." + instanceNamespace,
+				certData.Common + "." + instanceNamespace + ".svc.cluster.local",
+			},
+			Organization: []string{"IBM"},
+			IssuerRef: certmgr.ObjectReference{
+				Name: clusterIssuer,
+				Kind: certmgr.ClusterIssuerKind,
+			},
+		},
+	}
+	return certificate
+}
+
+func labelsForCertificateMeta(appName, componentName string) map[string]string {
+	return map[string]string{
+		"app":                          appName,
+		"component":                    componentName,
+		"release":                      ReleaseName,
+		"app.kubernetes.io/instance":   "ibm-commonui-operator",
+		"app.kubernetes.io/managed-by": "ibm-commonui-operator",
+		"app.kubernetes.io/name":       UICertName,
+	}
 }
 
 // GetPodNames returns the pod names of the array of pods passed in

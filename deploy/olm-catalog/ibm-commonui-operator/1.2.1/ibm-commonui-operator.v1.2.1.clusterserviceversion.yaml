@@ -23,6 +23,9 @@ metadata:
                   },
                   {
                     "name": "ibm-platform-api-operator"
+                  },
+                  {
+                    "name": "ibm-cert-manager-operator"
                   }
                 ],
                 "registry": "common-service"
@@ -63,7 +66,7 @@ metadata:
             },
             "operatorVersion": "1.2.1"
           }
-        },
+        }
       ]
     capabilities: Seamless Upgrades
     categories: Security
@@ -74,7 +77,7 @@ metadata:
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.2.1
-  namespace: ibm-common-services
+  namespace: placeholder
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -112,6 +115,9 @@ spec:
       - kind: Deployment
         name: ''
         version: v1
+      - kind: Certificate
+        name: ''
+        version: v1alpha1
       specDescriptors:
         - description: Configuration parameters for common web ui specific to the service
           displayName: Common Web UI Configuration
@@ -174,7 +180,8 @@ spec:
           displayName: Pod Names
           path: nodes
   description: "**Important:** Do not install this operator directly. Only install this operator using the IBM Common Services Operator. 
-    For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall).\n\n 
+    For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall). 
+    Additionally, you can exit this panel and navigate to the IBM Common Services tile in OperatorHub to learn more about the operator.\n\n 
     If you are using this operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak to learn more about how to install and use the operator 
     service. For more information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).\n\n 
     You can use the ibm-commonui-operator to install the Common Web UI service for the IBM Cloud Platform Common Services and access 
@@ -214,6 +221,12 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - clusterissuers
+          verbs:
+          - use
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
@@ -260,10 +273,10 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-                  value: sha256:4ba3a0364529d3532a9bcae30d7bedc459d669a428710f071d254e623b8b4cae
+                  value: "1.2.1"
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
-                  value: sha256:35a27f3b01569b41668d7033999681a269d274d586a7948cfc3e2dc024a310e0
-                image: quay.io/siddarthpatel/ibm-commonui-operator:latest
+                  value: "3.2.4"
+                image: quay.io/siddarthpatel/ibm-commonui-operator:1.2.1
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
@@ -357,6 +370,19 @@ spec:
           - foundation.ibm.com
           resources:
           - navconfigurations
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
+        - apiGroups:
+          - certmanager.k8s.io
+          resources:
+          - '*'
+          - certificates
           verbs:
           - create
           - delete
