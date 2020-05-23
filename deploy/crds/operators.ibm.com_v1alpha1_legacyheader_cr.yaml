@@ -2,6 +2,10 @@ apiVersion: operators.ibm.com/v1alpha1
 kind: LegacyHeader
 metadata:
   name: example-legacyheaderservice
+  labels:
+    app.kubernetes.io/instance: example-legacyheaderservice
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
 spec:
   legacyGlobalUIConfig:
     cloudPakVersion: 3.2.4

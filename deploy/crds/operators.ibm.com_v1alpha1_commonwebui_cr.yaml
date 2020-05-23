@@ -2,6 +2,10 @@ apiVersion: operators.ibm.com/v1alpha1
 kind: CommonWebUI
 metadata:
   name: example-commonwebui
+  labels:
+    app.kubernetes.io/instance: example-commonwebui
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
 spec:
   globalUIConfig:
     cloudPakVersion: 3.2.4
