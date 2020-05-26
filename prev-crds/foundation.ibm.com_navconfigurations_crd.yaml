@@ -40,11 +40,27 @@
             type: object
             required: ["logoUrl"]
             properties:
-              disabledItem:
+              disabledItems:
                 description: An array of header items that should be disabled when running within this CR context. Valid values are 'catalog', 'createResource', 'bookmark'
                 type: array
                 items:
                   type: string
+              detectHeaderItems:
+                description: An object that maps header items to service detection values, such as service name, label selector, and namespace. The only supported header item is 'search'.
+                type: object
+                additionalProperties:
+                  type: object
+                  properties:
+                    detectionNamespace:
+                      type: string
+                    detectionServiceName:
+                      type: string
+                    detectionLabelSelector:
+                      type: string
+                    isAuthorized:
+                      type: array
+                      items:
+                        type: string
               logoUrl:
                 description: The URL that provides the login page logo. Must be an unprotected URL.
                 type: string
