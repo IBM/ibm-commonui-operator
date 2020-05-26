@@ -141,6 +141,49 @@ spec:
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
       version: v1alpha1
+      displayName: LegacyHeader service
+      resources:
+        - kind: Service
+          name: ''
+          version: v1
+        - kind: Ingress
+          name: ''
+          version: v1
+        - kind: Daemonset
+          name: ''
+          version: v1
+        - kind: Pod
+          name: ''
+          version: v1
+        - kind: ConfigMap
+          name: ''
+          version: v1
+        - kind: LegacyHeader
+          name: ''
+          version: 'v1alpha1'
+        - kind: ReplicaSet
+          name: ''
+          version: v1
+        - kind: CommonWebUI
+          name: ''
+          version: 'v1alpha1'
+        - kind: Deployment
+          name: ''
+          version: v1
+      specDescriptors:
+        - description: Configuration parameters for the legacy header service
+          displayName: Legacy header configuration parameters
+          path: legacyConfig
+        - description: Configuration parameters the service will consume particular to the cluster
+          displayName: Cluster configuration parameters
+          path: legacyGlobalUIConfig
+        - description: Version for the installed operator
+          displayName: Operator Version 
+          path: operatorVersion
+      statusDescriptors:
+        - description: Displays names of pods associated with the Legacy Header service
+          displayName: Pod Names
+          path: nodes
   description: "**Important:** Do not install this operator directly. Only install
     this operator using the IBM Common Services Operator. For more information about
     installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall).
