@@ -342,6 +342,30 @@ func isContainerEqual(oldContainers, newContainers []corev1.Container, isInitCon
 					return false
 				}
 
+				if !reflect.DeepEqual(oldContainer.Resources.Limits["cpu"], newContainer.Resources.Limits["cpu"]) {
+					logger.Info(containerType+" resource cpu limits not equal", "container num", i,
+						"old", oldContainer.Resources.Limits["cpu"], "new", newContainer.Resources.Limits["cpu"])
+					return false
+				}
+
+				if !reflect.DeepEqual(oldContainer.Resources.Limits["memory"], newContainer.Resources.Limits["memory"]) {
+					logger.Info(containerType+" resource memory limits not equal", "container num", i,
+						"old", oldContainer.Resources.Limits["memory"], "new", newContainer.Resources.Limits["memory"])
+					return false
+				}
+
+				if !reflect.DeepEqual(oldContainer.Resources.Requests["cpu"], newContainer.Resources.Requests["cpu"]) {
+					logger.Info(containerType+" resource cpu requests not equal", "container num", i,
+						"old", oldContainer.Resources.Requests["cpu"], "new", newContainer.Resources.Requests["cpu"])
+					return false
+				}
+
+				if !reflect.DeepEqual(oldContainer.Resources.Requests["memory"], newContainer.Resources.Requests["memory"]) {
+					logger.Info(containerType+" resource memory requests not equal", "container num", i,
+						"old", oldContainer.Resources.Requests["memory"], "new", newContainer.Resources.Requests["memory"])
+					return false
+				}
+
 				oldEnvVars := oldContainer.Env
 				newEnvVars := newContainer.Env
 				if len(oldEnvVars) != len(newEnvVars) {
