@@ -3,7 +3,7 @@ kind: CustomResourceDefinition
 metadata:
   name: legacyheaders.operators.ibm.com
   labels:
-    app.kubernetes.io/instance: commonwebuis.operators.ibm.com
+    app.kubernetes.io/instance: legacyheaders.operators.ibm.com
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
 spec:
