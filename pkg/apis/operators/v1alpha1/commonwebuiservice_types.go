@@ -34,10 +34,10 @@ type CommonWebUIConfig struct {
 	ServiceName   string `json:"serviceName,omitempty"`
 	ImageRegistry string `json:"imageRegistry,omitempty"`
 	ImageTag      string `json:"imageTag,omitempty"`
-	CPULimits     int64  `json:"cpuLimits,omitempty"`
-	CPUMemory     int64  `json:"cpuMemory,omitempty"`
-	RequestLimits int64  `json:"requestLimits,omitempty"`
-	RequestMemory int64  `json:"requestMemory,omitempty"`
+	CPULimits     string `json:"cpuLimits,omitempty"`
+	CPUMemory     string `json:"cpuMemory,omitempty"`
+	RequestLimits string `json:"requestLimits,omitempty"`
+	RequestMemory string `json:"requestMemory,omitempty"`
 	IngressPath   string `json:"ingressPath,omitempty"`
 }
 

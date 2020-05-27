@@ -26,7 +26,7 @@ NAMESPACE=ibm-common-services
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
-COMMON_WEB_UI_OPERAND_TAG ?= 1.2.0
+COMMON_WEB_UI_OPERAND_TAG ?= 1.2.1
 LEGACY_HEADER_OPERAND_TAG ?= 3.2.4
 
 # Github host to use for checking the source tree;

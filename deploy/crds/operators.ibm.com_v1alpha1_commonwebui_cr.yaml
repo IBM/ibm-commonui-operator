@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/name: ibm-commonui-operator
 spec:
   globalUIConfig:
-    cloudPakVersion: 3.2.4
+    cloudPakVersion: 3.4.1
     authServiceURL: https://icp-management-ingress:443/idauth
     routerURL: https://icp-management-ingress:443
     identityProviderURL: https://icp-management-ingress:443/idprovider
@@ -22,10 +22,10 @@ spec:
     osAuth: ''
   commonWebUIConfig:
     ingressPath: /common-nav
-    cpuLimits: 300
-    cpuMemory: 256
-    requestLimits: 300
-    requestMemory: 256
+    cpuLimits: "300"
+    cpuMemory: "256"
+    requestLimits: "300"
+    requestMemory: "256"
     imageRegistry: quay.io/opencloudio
     imageTag: 1.2.1
     serviceName: common-web-ui
