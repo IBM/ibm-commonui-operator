@@ -19,6 +19,7 @@ import (
 	"context"
 	"encoding/json"
 	gorun "runtime"
+	"strconv"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
 
@@ -315,10 +316,23 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
 	podLabels := res.LabelsForPodMetadata(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
 	Annotations := res.DeamonSetAnnotations
-	cpuLimits := instance.Spec.CommonWebUIConfig.CPULimits
-	cpuMemory := instance.Spec.CommonWebUIConfig.CPUMemory
-	reqLimits := instance.Spec.CommonWebUIConfig.RequestLimits
-	reqMemory := instance.Spec.CommonWebUIConfig.RequestMemory
+
+	cpuLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
+	if errLim != nil {
+		cpuLimits = 300
+	}
+	cpuMemory, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPUMemory, 10, 64)
+	if errLim != nil {
+		cpuMemory = 256
+	}
+	reqLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestLimits, 10, 64)
+	if errLim != nil {
+		reqLimits = 300
+	}
+	reqMemory, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestMemory, 10, 64)
+	if errLim != nil {
+		reqMemory = 256
+	}
 
 	imageRegistry := instance.Spec.CommonWebUIConfig.ImageRegistry
 	imageTag := instance.Spec.CommonWebUIConfig.ImageTag

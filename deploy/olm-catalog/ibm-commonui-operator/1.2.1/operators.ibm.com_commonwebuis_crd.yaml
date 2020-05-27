@@ -39,11 +39,9 @@ spec:
               description: CommonWebUIConfig defines the desired state of CommonWebUIConfig
               properties:
                 cpuLimits:
-                  format: int64
-                  type: integer
+                  type: string
                 cpuMemory:
-                  format: int64
-                  type: integer
+                  type: string
                 imageRegistry:
                   type: string
                 imageTag:
@@ -51,11 +49,9 @@ spec:
                 ingressPath:
                   type: string
                 requestLimits:
-                  format: int64
-                  type: integer
+                  type: string
                 requestMemory:
-                  format: int64
-                  type: integer
+                  type: string
                 serviceName:
                   type: string
               type: object
