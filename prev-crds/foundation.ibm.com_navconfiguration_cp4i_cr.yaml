@@ -8,7 +8,7 @@ spec:
   header:
     logoUrl: "/common-nav/graphics/ibm-cloudpak-integration.svg"
     logoAltText: "Cloud Pak for Integration"
-    disabledItem: ['catalog', 'createResource', 'bookmark']
+    disabledItems: ['catalog', 'createResource', 'bookmark']
   navItems:
     - id: "metering"
       label: "Metering"

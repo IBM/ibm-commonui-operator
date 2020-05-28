@@ -383,7 +383,7 @@ var CrTemplates = `[
 		},
 		"spec": {
 		  "header": {
-			"disabledItem": [
+			"disabledItems": [
 			  "catalog",
 			  "createResource",
 			  "bookmark"
@@ -799,6 +799,35 @@ func GetNavConfigContent() map[string]apiextv1beta.JSONSchemaProps {
 					Items: &apiextv1beta.JSONSchemaPropsOrArray{
 						Schema: &apiextv1beta.JSONSchemaProps{
 							Type: "string",
+						},
+					},
+				},
+				"detectHeaderItems": apiextv1beta.JSONSchemaProps{
+					Type: "array",
+					// nolint
+					Description: "An object that maps header items to service detection values, such as service name, label selector, and namespace. The only supported header item is 'search'.",
+					AdditionalProperties: &apiextv1beta.JSONSchemaPropsOrBool{
+						Schema: &apiextv1beta.JSONSchemaProps{
+							Type: "object",
+							Properties: map[string]apiextv1beta.JSONSchemaProps{
+								"detectionNamespace": apiextv1beta.JSONSchemaProps{
+									Type: "string",
+								},
+								"detectionServiceName": apiextv1beta.JSONSchemaProps{
+									Type: "string",
+								},
+								"detectionLabelSelector": apiextv1beta.JSONSchemaProps{
+									Type: "string",
+								},
+								"isAuthorized": apiextv1beta.JSONSchemaProps{
+									Type: "array",
+									Items: &apiextv1beta.JSONSchemaPropsOrArray{
+										Schema: &apiextv1beta.JSONSchemaProps{
+											Type: "string",
+										},
+									},
+								},
+							},
 						},
 					},
 				},
