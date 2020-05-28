@@ -45,13 +45,13 @@ metadata:
           },
           "spec": {
             "commonWebUIConfig": {
-              "cpuLimits": 300,
-              "cpuMemory": 256,
+              "cpuLimits": "300",
+              "cpuMemory": "256",
               "imageRegistry": "quay.io/opencloudio",
               "imageTag": "1.2.1",
               "ingressPath": "/common-nav",
-              "requestLimits": 300,
-              "requestMemory": 256,
+              "requestLimits": "300",
+              "requestMemory": "256",
               "serviceName": "common-web-ui"
             },
             "globalUIConfig": {
