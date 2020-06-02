@@ -52,8 +52,6 @@ import (
 
 const commonwebuiserviceCrType = "commonwebuiservice_cr"
 
-var commonVolume = []corev1.Volume{}
-
 var log = logf.Log.WithName("controller_commonwebuiservice")
 
 /**
@@ -311,6 +309,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 }
 
 func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.DaemonSet, error) {
+	var commonVolume = []corev1.Volume{}
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
@@ -345,7 +344,7 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	image := res.GetImageID(imageRegistry, res.DefaultImageName, imageTag, "", "COMMON_WEB_UI_IMAGE_TAG_OR_SHA")
 	reqLogger.Info("CS??? default Image=" + image)
 
-	commonVolume := append(commonVolume, res.Log4jsVolume)
+	commonVolume = append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 	commonVolumes = append(commonVolumes, res.UICertVolume)
 

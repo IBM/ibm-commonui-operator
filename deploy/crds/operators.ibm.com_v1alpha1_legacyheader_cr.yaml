@@ -31,4 +31,4 @@ spec:
     legacyLogoPath: "/common-nav/graphics/ibm-cloudpack-logo.svg"
     legacyLogoWidth: 18px
     legacySupportURL: /path/to/support.html
-  operatorVersion: 1.2.1
+  operatorVersion: 1.2.2
