@@ -284,7 +284,7 @@ spec:
                   value: sha256:fa53caa7fe9cdd46f35816586c39d31486b8795f20c981414111d1c5b3615934
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:35a27f3b01569b41668d7033999681a269d274d586a7948cfc3e2dc024a310e0
-                image: quay.io/opencloudio/ibm-commonui-operator:1.2.2
+                image: quay.io/opencloudio/ibm-commonui-operator@sha256:0ffb9c8c010ed6663cc04c59b4aac9908a82ace8205021c13a5b8b28b75c02bb
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
