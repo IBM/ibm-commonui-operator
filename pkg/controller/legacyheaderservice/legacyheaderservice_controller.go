@@ -46,8 +46,6 @@ import (
 
 const legacyheaderCrType = "legacyheader_cr"
 
-var commonVolume = []corev1.Volume{}
-
 var log = logf.Log.WithName("controller_legacyheader")
 
 /**
@@ -277,6 +275,7 @@ func (r *ReconcileLegacyHeader) reconcileConfigMaps(instance *operatorsv1alpha1.
 }
 
 func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.LegacyHeader) (*appsv1.DaemonSet, error) {
+	var commonVolume = []corev1.Volume{}
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.LegacyReleaseName)
 	selectorLabels := res.LabelsForSelector(res.LegacyReleaseName, legacyheaderCrType, instance.Name)
@@ -293,7 +292,7 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 	image := res.GetImageID(imageRegistry, res.LegacyImageName, imageTag, "", "LEGACYHEADER_IMAGE_TAG_OR_SHA")
 	reqLogger.Info("CS??? default Image=" + image)
 
-	commonVolume := append(commonVolume, res.Log4jsVolume)
+	commonVolume = append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 
 	legacyContainer := res.CommonContainer
