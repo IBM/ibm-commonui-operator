@@ -275,6 +275,17 @@ func (r *ReconcileLegacyHeader) reconcileConfigMaps(instance *operatorsv1alpha1.
 }
 
 func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.LegacyHeader) (*appsv1.DaemonSet, error) {
+	// CommonMainVolumeMounts will be added by the controller
+	legacyVolumeMounts := []corev1.VolumeMount{
+		{
+			Name:      res.Log4jsVolumeName,
+			MountPath: "/etc/config",
+		},
+		{
+			Name:      res.ClusterCaVolumeName,
+			MountPath: "/opt/ibm/platform-header/certs",
+		},
+	}
 	var commonVolume = []corev1.Volume{}
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.LegacyReleaseName)
@@ -304,6 +315,7 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 	legacyContainer.Env[7].Value = instance.Spec.LegacyGlobalUIConfig.CloudPakVersion
 	legacyContainer.Env[8].Value = instance.Spec.LegacyGlobalUIConfig.DefaultAdminUser
 	legacyContainer.Env[9].Value = instance.Spec.LegacyGlobalUIConfig.ClusterName
+	legacyContainer.VolumeMounts = legacyVolumeMounts
 
 	daemon := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{

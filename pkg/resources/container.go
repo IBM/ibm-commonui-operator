@@ -168,21 +168,6 @@ var CommonContainer = corev1.Container{
 		FailureThreshold:    3,
 	},
 
-	// CommonMainVolumeMounts will be added by the controller
-	VolumeMounts: []corev1.VolumeMount{
-		{
-			Name:      Log4jsVolumeName,
-			MountPath: "/etc/config",
-		},
-		{
-			Name:      ClusterCaVolumeName,
-			MountPath: "/opt/ibm/platform-header/certs",
-		},
-		{
-			Name:      UICertVolumeName,
-			MountPath: "/certs/common-web-ui",
-		},
-	},
 	// CommonEnvVars will be added by the controller
 	Env: []corev1.EnvVar{
 		{

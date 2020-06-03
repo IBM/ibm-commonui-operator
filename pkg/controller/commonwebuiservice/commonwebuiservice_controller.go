@@ -309,6 +309,21 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 }
 
 func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.DaemonSet, error) {
+	// CommonMainVolumeMounts will be added by the controller
+	commonUIVolumeMounts := []corev1.VolumeMount{
+		{
+			Name:      res.Log4jsVolumeName,
+			MountPath: "/etc/config",
+		},
+		{
+			Name:      res.ClusterCaVolumeName,
+			MountPath: "/opt/ibm/platform-header/certs",
+		},
+		{
+			Name:      res.UICertVolumeName,
+			MountPath: "/certs/common-web-ui",
+		},
+	}
 	var commonVolume = []corev1.Volume{}
 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
@@ -365,6 +380,7 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	commonwebuiContainer.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
+	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
 	daemon := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
