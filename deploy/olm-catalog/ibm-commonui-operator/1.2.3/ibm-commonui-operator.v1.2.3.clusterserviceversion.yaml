@@ -68,7 +68,7 @@ metadata:
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "1.2.2"
+            "operatorVersion": "1.2.3"
           }
         }
       ]
@@ -78,10 +78,10 @@ metadata:
     containerImage: quay.io/opencloudio/ibm-commonui-operator:1.2.1
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
-    olm.skipRange: '>=1.1.0 <1.2.2'
+    olm.skipRange: '>=1.1.0 <1.2.3'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
-  name: ibm-commonui-operator.v1.2.2
+  name: ibm-commonui-operator.v1.2.3
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -284,7 +284,7 @@ spec:
                   value: sha256:fa53caa7fe9cdd46f35816586c39d31486b8795f20c981414111d1c5b3615934
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:35a27f3b01569b41668d7033999681a269d274d586a7948cfc3e2dc024a310e0
-                image: quay.io/opencloudio/ibm-commonui-operator@sha256:29045ead929d394f42ebbb4279919597c3d137d0445fb12e075ab03be08c5e12
+                image: quay.io/opencloudio/ibm-commonui-operator:latest
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
@@ -426,5 +426,5 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-commonui-operator.v1.2.1
-  version: 1.2.2
+  replaces: ibm-commonui-operator.v1.2.2
+  version: 1.2.3

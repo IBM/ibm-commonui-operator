@@ -1,0 +1,116 @@
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  name: legacyheaders.operators.ibm.com
+  labels:
+    app.kubernetes.io/instance: legacyheaders.operators.ibm.com
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
+spec:
+  group: operators.ibm.com
+  names:
+    kind: LegacyHeader
+    listKind: LegacyHeaderList
+    plural: legacyheaders
+    singular: legacyheader
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: LegacyHeader is the Schema for the legacyHeader API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: LegacyHeaderSpec defines the desired state of LegacyHeaderSpec
+          properties:
+            legacyConfig:
+              description: 'INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
+                Important: Run "operator-sdk generate k8s" to regenerate code after
+                modifying this file Add custom validation using kubebuilder tags:
+                https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html'
+              properties:
+                cpuLimits:
+                  type: string
+                cpuMemory:
+                  type: string
+                imageRegistry:
+                  type: string
+                imageTag:
+                  type: string
+                ingressPath:
+                  type: string
+                legacyDocURL:
+                  type: string
+                legacyLogoAltText:
+                  type: string
+                legacyLogoHeight:
+                  type: string
+                legacyLogoPath:
+                  type: string
+                legacyLogoWidth:
+                  type: string
+                legacySupportURL:
+                  type: string
+                requestLimits:
+                  type: string
+                requestMemory:
+                  type: string
+                serviceName:
+                  type: string
+              type: object
+            legacyGlobalUIConfig:
+              description: LegacyGlobalUIConfig defines the desired state of LegacyGlobalUIConfig
+              properties:
+                authServiceURL:
+                  type: string
+                cloudPakVersion:
+                  type: string
+                clusterName:
+                  type: string
+                defaultAdminUser:
+                  type: string
+                identityProviderURL:
+                  type: string
+                pullSecret:
+                  type: string
+                routerHTTPSPort:
+                  format: int32
+                  type: integer
+                routerURL:
+                  type: string
+                sessionPollingInterval:
+                  format: int32
+                  type: integer
+              type: object
+            operatorVersion:
+              type: string
+          type: object
+        status:
+          description: LegacyHeaderStatus defines the observed state of LegacyHeaderService
+          properties:
+            nodes:
+              description: PodNames will hold the names of the legacyheader's
+              items:
+                type: string
+              type: array
+          required:
+          - nodes
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
