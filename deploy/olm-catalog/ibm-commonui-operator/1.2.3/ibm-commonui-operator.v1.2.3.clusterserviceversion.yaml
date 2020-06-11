@@ -68,7 +68,8 @@ metadata:
               "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "1.2.3"
+            "operatorVersion": "1.2.3",
+            "version": 1.2.3
           }
         }
       ]

@@ -32,6 +32,7 @@ type LegacyHeaderSpec struct {
 	LegacyConfig         LegacyConfig         `json:"legacyConfig,omitempty"`
 	LegacyGlobalUIConfig LegacyGlobalUIConfig `json:"legacyGlobalUIConfig,omitempty"`
 	OperatorVersion      string               `json:"operatorVersion,omitempty"`
+	Version              string               `json:"version,omitempty"`
 }
 
 // LegacyConfig defines the desired state of LegacyConfig

@@ -30,3 +30,4 @@ spec:
     imageTag: 1.2.1
     serviceName: common-web-ui
   operatorVersion: 1.2.2
+  version: 1.2.3
