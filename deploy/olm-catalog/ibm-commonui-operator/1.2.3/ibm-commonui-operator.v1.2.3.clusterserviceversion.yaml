@@ -83,7 +83,7 @@ metadata:
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.2.3
-  namespace: ibm-common-services
+  namespace: placeholder
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
