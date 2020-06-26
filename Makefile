@@ -20,7 +20,7 @@ BUILD_LOCALLY ?= 1
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-commonui-operator
 REGISTRY ?= quay.io/opencloudio
-REGISTRY_DEV ?= quay.io/ericabr
+REGISTRY_DEV ?= quay.io/ajhavar
 CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
 
