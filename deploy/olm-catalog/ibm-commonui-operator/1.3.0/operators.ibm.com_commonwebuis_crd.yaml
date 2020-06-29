@@ -54,11 +54,7 @@ spec:
             globalUIConfig:
               description: GlobalUIConfig defines the desired state of GlobalUIConfig
               properties:
-                authServiceURL:
-                  type: string
                 cloudPakVersion:
-                  type: string
-                clusterName:
                   type: string
                 defaultAdminUser:
                   type: string
@@ -68,16 +64,9 @@ spec:
                   type: string
                 enterpriseSAML:
                   type: string
-                identityProviderURL:
-                  type: string
                 osAuth:
                   type: string
                 pullSecret:
-                  type: string
-                routerHTTPSPort:
-                  format: int32
-                  type: integer
-                routerURL:
                   type: string
                 sessionPollingInterval:
                   format: int32

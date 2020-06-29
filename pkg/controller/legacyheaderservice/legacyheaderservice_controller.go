@@ -309,12 +309,8 @@ func (r *ReconcileLegacyHeader) newDaemonSetForCR(instance *operatorsv1alpha1.Le
 	legacyContainer := res.CommonContainer
 	legacyContainer.Image = image
 	legacyContainer.Name = res.LegacyReleaseName
-	legacyContainer.Env[1].Value = instance.Spec.LegacyGlobalUIConfig.RouterURL
-	legacyContainer.Env[3].Value = instance.Spec.LegacyGlobalUIConfig.IdentityProviderURL
-	legacyContainer.Env[4].Value = instance.Spec.LegacyGlobalUIConfig.AuthServiceURL
 	legacyContainer.Env[7].Value = instance.Spec.LegacyGlobalUIConfig.CloudPakVersion
 	legacyContainer.Env[8].Value = instance.Spec.LegacyGlobalUIConfig.DefaultAdminUser
-	legacyContainer.Env[9].Value = instance.Spec.LegacyGlobalUIConfig.ClusterName
 	legacyContainer.VolumeMounts = legacyVolumeMounts
 
 	daemon := &appsv1.DaemonSet{

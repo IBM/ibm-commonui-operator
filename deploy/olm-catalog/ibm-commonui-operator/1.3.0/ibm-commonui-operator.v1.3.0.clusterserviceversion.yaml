@@ -55,17 +55,12 @@ metadata:
               "serviceName": "common-web-ui"
             },
             "globalUIConfig": {
-              "authServiceURL": "https://icp-management-ingress:443/idauth",
               "cloudPakVersion": "3.4.1",
-              "clusterName": "mycluster",
               "defaultAdminUser": "admin",
               "defaultAuth": "",
               "enterpriseLDAP": "",
               "enterpriseSAML": "",
-              "identityProviderURL": "https://icp-management-ingress:443/idprovider",
               "osAuth": "",
-              "routerHTTPSPort": 443,
-              "routerURL": "https://icp-management-ingress:443",
               "sessionPollingInterval": 5000
             },
             "operatorVersion": "1.3.0",

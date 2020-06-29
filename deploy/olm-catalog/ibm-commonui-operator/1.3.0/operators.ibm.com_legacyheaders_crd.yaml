@@ -69,22 +69,11 @@ spec:
             legacyGlobalUIConfig:
               description: LegacyGlobalUIConfig defines the desired state of LegacyGlobalUIConfig
               properties:
-                authServiceURL:
-                  type: string
                 cloudPakVersion:
-                  type: string
-                clusterName:
                   type: string
                 defaultAdminUser:
                   type: string
-                identityProviderURL:
-                  type: string
                 pullSecret:
-                  type: string
-                routerHTTPSPort:
-                  format: int32
-                  type: integer
-                routerURL:
                   type: string
                 sessionPollingInterval:
                   format: int32
