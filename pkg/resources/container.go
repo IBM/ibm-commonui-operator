@@ -43,6 +43,12 @@ var Seconds60 int64 = 60
 var cpu300 = resource.NewMilliQuantity(300, resource.DecimalSI)        // 300m
 var memory256 = resource.NewQuantity(256*1024*1024, resource.BinarySI) // 256Mi
 
+var ArchitectureList = []string{
+	"amd64",
+	"ppc64le",
+	"s390x",
+}
+
 const Log4jsVolumeName = "log4js"
 const ClusterCaVolumeName = "cluster-ca"
 

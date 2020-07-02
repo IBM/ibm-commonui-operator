@@ -32,6 +32,57 @@ import (
 )
 
 // Check if a DaemonSet already exists. If not, create a new one.
+func ReconcileDeployment(client client.Client, instanceNamespace string, deploymentName string,
+	newDeployment *appsv1.Deployment, needToRequeue *bool) error {
+	logger := log.WithValues("func", "ReconcileDeployment")
+
+	currentDeployment := &appsv1.Deployment{}
+	err := client.Get(context.TODO(), types.NamespacedName{Name: deploymentName, Namespace: instanceNamespace}, currentDeployment)
+	if err != nil && errors.IsNotFound(err) {
+		// Create a new deployment
+		logger.Info("Creating a new Deployment", "Deployment.Namespace", newDeployment.Namespace, "Deployment.Name", newDeployment.Name)
+		err = client.Create(context.TODO(), newDeployment)
+		if err != nil && errors.IsAlreadyExists(err) {
+			// Already exists from previous reconcile, requeue
+			logger.Info("Deployment already exists")
+			*needToRequeue = true
+		} else if err != nil {
+			logger.Error(err, "Failed to create new Deployment", "Deployment.Namespace", newDeployment.Namespace,
+				"Deployment.Name", newDeployment.Name)
+			return err
+		} else {
+			// Deployment created successfully - return and requeue
+			*needToRequeue = true
+		}
+	} else if err != nil {
+		logger.Error(err, "Failed to get Deployment", "Deployment.Name", deploymentName)
+		return err
+	} else {
+		// Found deployment, so determine if the resource has changed
+		logger.Info("Comparing Deployments")
+		if !IsDeploymentEqual(currentDeployment, newDeployment) {
+			logger.Info("Updating Deployment", "Deployment.Name", currentDeployment.Name)
+			currentDeployment.ObjectMeta.Name = newDeployment.ObjectMeta.Name
+			currentDeployment.ObjectMeta.Labels = newDeployment.ObjectMeta.Labels
+			currentReplicas := *currentDeployment.Spec.Replicas
+			currentDeployment.Spec = newDeployment.Spec
+			if currentReplicas == 0 {
+				// since currentDeployment has been scaled to 0,
+				// don't use the default replica count in newDeployment.
+				currentDeployment.Spec.Replicas = &currentReplicas
+			}
+			err = client.Update(context.TODO(), currentDeployment)
+			if err != nil {
+				logger.Error(err, "Failed to update Deployment",
+					"Deployment.Namespace", currentDeployment.Namespace, "Deployment.Name", currentDeployment.Name)
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+// Check if a DaemonSet already exists. If not, create a new one.
 func ReconcileDaemonSet(client client.Client, instanceNamespace string, daemonSetName string,
 	newDaemonSet *appsv1.DaemonSet, needToRequeue *bool) error {
 	logger := log.WithValues("func", "ReconcileDaemonSet")
@@ -211,6 +262,46 @@ func ReconcileCertificate(client client.Client, instanceNamespace, certificateNa
 		}
 	}
 	return nil
+}
+
+// Use DeepEqual to determine if 2 deployments are equal.
+// Check labels, replicas, pod template labels, service account names, volumes,
+// containers, init containers, image name, volume mounts, env vars, liveness, readiness.
+// If there are any differences, return false. Otherwise, return true.
+// oldDeployment is the deployment that is currently running.
+// newDeployment is what we expect the deployment to look like.
+func IsDeploymentEqual(oldDeployment, newDeployment *appsv1.Deployment) bool {
+	logger := log.WithValues("func", "IsDeploymentEqual")
+
+	if !reflect.DeepEqual(oldDeployment.ObjectMeta.Name, newDeployment.ObjectMeta.Name) {
+		logger.Info("Names not equal", "old", oldDeployment.ObjectMeta.Name, "new", newDeployment.ObjectMeta.Name)
+		return false
+	}
+
+	if !reflect.DeepEqual(oldDeployment.ObjectMeta.Labels, newDeployment.ObjectMeta.Labels) {
+		logger.Info("Labels not equal",
+			"old", fmt.Sprintf("%v", oldDeployment.ObjectMeta.Labels),
+			"new", fmt.Sprintf("%v", newDeployment.ObjectMeta.Labels))
+		return false
+	}
+
+	if *oldDeployment.Spec.Replicas != *newDeployment.Spec.Replicas {
+		if *oldDeployment.Spec.Replicas == 0 {
+			logger.Info("Allowing deployment to scale to 0", "name", oldDeployment.ObjectMeta.Name)
+		} else {
+			logger.Info("Replicas not equal", "old", oldDeployment.Spec.Replicas, "new", newDeployment.Spec.Replicas)
+			return false
+		}
+	}
+
+	oldPodTemplate := oldDeployment.Spec.Template
+	newPodTemplate := newDeployment.Spec.Template
+	if !isPodTemplateEqual(oldPodTemplate, newPodTemplate) {
+		return false
+	}
+
+	logger.Info("Deployments are equal", "Deployment.Name", oldDeployment.ObjectMeta.Name)
+	return true
 }
 
 // Use DeepEqual to determine if 2 daemon sets are equal.
