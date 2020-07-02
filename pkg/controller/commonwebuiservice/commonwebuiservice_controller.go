@@ -385,12 +385,8 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
 	commonwebuiContainer.Name = res.DaemonSetName
-	commonwebuiContainer.Env[1].Value = instance.Spec.GlobalUIConfig.RouterURL
-	commonwebuiContainer.Env[3].Value = instance.Spec.GlobalUIConfig.IdentityProviderURL
-	commonwebuiContainer.Env[4].Value = instance.Spec.GlobalUIConfig.AuthServiceURL
 	commonwebuiContainer.Env[7].Value = instance.Spec.GlobalUIConfig.CloudPakVersion
 	commonwebuiContainer.Env[8].Value = instance.Spec.GlobalUIConfig.DefaultAdminUser
-	commonwebuiContainer.Env[9].Value = instance.Spec.GlobalUIConfig.ClusterName
 	commonwebuiContainer.Env[10].Value = instance.Spec.GlobalUIConfig.DefaultAuth
 	commonwebuiContainer.Env[11].Value = instance.Spec.GlobalUIConfig.EnterpriseLDAP
 	commonwebuiContainer.Env[12].Value = instance.Spec.GlobalUIConfig.EnterpriseSAML
