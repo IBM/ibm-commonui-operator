@@ -74,8 +74,13 @@ spec:
               type: object
             operatorVersion:
               type: string
+            replicas:
+              format: int32
+              type: integer
             version:
               type: string
+          required:
+          - replicas
           type: object
         status:
           description: CommonWebUIStatus defines the observed state of CommonWebUI

@@ -349,6 +349,9 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	podLabels := res.LabelsForPodMetadata(res.DeploymentName, commonwebuiserviceCrType, instance.Name)
 	Annotations := res.DeploymentAnnotations
 	var replicas int32 = 1
+	if &instance.Spec.Replicas != nil {
+		replicas = instance.Spec.Replicas
+	}
 
 	cpuLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
 	if errLim != nil {
