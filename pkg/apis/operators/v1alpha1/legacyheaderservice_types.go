@@ -58,13 +58,8 @@ type LegacyConfig struct {
 // +k8s:openapi-gen=true
 type LegacyGlobalUIConfig struct {
 	PullSecret             string `json:"pullSecret,omitempty"`
-	RouterURL              string `json:"routerURL,omitempty"`
-	IdentityProviderURL    string `json:"identityProviderURL,omitempty"`
-	AuthServiceURL         string `json:"authServiceURL,omitempty"`
 	CloudPakVersion        string `json:"cloudPakVersion,omitempty"`
 	DefaultAdminUser       string `json:"defaultAdminUser,omitempty"`
-	RouterHTTPSPort        int32  `json:"routerHTTPSPort,omitempty"`
-	ClusterName            string `json:"clusterName,omitempty"`
 	SessionPollingInterval int32  `json:"sessionPollingInterval,omitempty"`
 }
 

@@ -9,12 +9,7 @@ metadata:
 spec:
   legacyGlobalUIConfig:
     cloudPakVersion: 3.2.4
-    authServiceURL: https://icp-management-ingress:443/idauth
-    routerURL: https://icp-management-ingress:443
-    identityProviderURL: https://icp-management-ingress:443/idprovider
-    clusterName: mycluster
     defaultAdminUser: admin
-    routerHTTPSPort: 443
     sessionPollingInterval: 5000
   legacyConfig:
     ingressPath: /header

@@ -9,12 +9,7 @@ metadata:
 spec:
   globalUIConfig:
     cloudPakVersion: 3.4.1
-    authServiceURL: https://icp-management-ingress:443/idauth
-    routerURL: https://icp-management-ingress:443
-    identityProviderURL: https://icp-management-ingress:443/idprovider
-    clusterName: mycluster
     defaultAdminUser: admin
-    routerHTTPSPort: 443
     sessionPollingInterval: 5000
     enterpriseLDAP: ''
     defaultAuth: ''
@@ -27,7 +22,7 @@ spec:
     requestLimits: "300"
     requestMemory: "256"
     imageRegistry: quay.io/opencloudio
-    imageTag: 1.2.2
+    imageTag: 1.3.0
     serviceName: common-web-ui
-  operatorVersion: 1.2.3
-  version: 1.2.3
+  operatorVersion: 1.3.0
+  version: 1.3.0
