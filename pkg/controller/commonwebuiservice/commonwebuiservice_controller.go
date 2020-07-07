@@ -328,9 +328,9 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	selectorLabels := res.LabelsForSelector(res.DeploymentName, commonwebuiserviceCrType, instance.Name)
 	podLabels := res.LabelsForPodMetadata(res.DeploymentName, commonwebuiserviceCrType, instance.Name)
 	Annotations := res.DeploymentAnnotations
-	var replicas int32 = 1
-	if &instance.Spec.Replicas != nil {
-		replicas = instance.Spec.Replicas
+	var replicas int32 = instance.Spec.Replicas
+	if &replicas == nil {
+		replicas = 1
 	}
 
 	cpuLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
