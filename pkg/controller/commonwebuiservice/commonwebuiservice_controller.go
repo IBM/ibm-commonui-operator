@@ -95,16 +95,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource "Daemonset" and requeue the owner CommonWebUIService
-	// err = c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForOwner{
-	// 	IsController: true,
-	// 	OwnerType:    &operatorsv1alpha1.CommonWebUI{},
-	// })
-	// if err != nil {
-	// 	return err
-	// }
-
 	// Watch for changes to secondary resource "Deployment" and requeue the owner CommonWebUIService
 	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
@@ -202,16 +192,6 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-
-	// Check if the DaemonSet already exists, if not create a new one
-	// newDaemonSet, err := r.newDaemonSetForCR(instance)
-	// if err != nil {
-	// 	return reconcile.Result{}, err
-	// }
-	// err = res.ReconcileDaemonSet(r.client, instance.Namespace, res.DaemonSetName, newDaemonSet, &needToRequeue)
-	// if err != nil {
-	// 	return reconcile.Result{}, err
-	// }
 
 	// Check if the UI Deployment already exists, if not create a new one
 	newDeployment, err := r.deploymentForUI(instance)
@@ -466,152 +446,6 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	}
 	return deployment, nil
 }
-
-// func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.DaemonSet, error) {
-// 	// CommonMainVolumeMounts will be added by the controller
-// 	commonUIVolumeMounts := []corev1.VolumeMount{
-// 		{
-// 			Name:      res.Log4jsVolumeName,
-// 			MountPath: "/etc/config",
-// 		},
-// 		{
-// 			Name:      res.ClusterCaVolumeName,
-// 			MountPath: "/opt/ibm/platform-header/certs",
-// 		},
-// 		{
-// 			Name:      res.UICertVolumeName,
-// 			MountPath: "/certs/common-web-ui",
-// 		},
-// 	}
-// 	var commonVolume = []corev1.Volume{}
-// 	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
-// 	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
-// 	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
-// 	podLabels := res.LabelsForPodMetadata(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
-// 	Annotations := res.DeamonSetAnnotations
-
-// 	cpuLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
-// 	if errLim != nil {
-// 		cpuLimits = 300
-// 	}
-// 	cpuMemory, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPUMemory, 10, 64)
-// 	if errLim != nil {
-// 		cpuMemory = 256
-// 	}
-// 	reqLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestLimits, 10, 64)
-// 	if errLim != nil {
-// 		reqLimits = 300
-// 	}
-// 	reqMemory, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestMemory, 10, 64)
-// 	if errLim != nil {
-// 		reqMemory = 256
-// 	}
-
-// 	imageRegistry := instance.Spec.CommonWebUIConfig.ImageRegistry
-// 	imageTag := instance.Spec.CommonWebUIConfig.ImageTag
-// 	if imageRegistry == "" {
-// 		imageRegistry = res.DefaultImageRegistry
-// 	}
-// 	if imageTag == "" {
-// 		imageTag = res.DefaultImageTag
-// 	}
-// 	image := res.GetImageID(imageRegistry, res.DefaultImageName, imageTag, "", "COMMON_WEB_UI_IMAGE_TAG_OR_SHA")
-// 	reqLogger.Info("CS??? default Image=" + image)
-
-// 	commonVolume = append(commonVolume, res.Log4jsVolume)
-// 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
-// 	commonVolumes = append(commonVolumes, res.UICertVolume)
-
-// 	commonwebuiContainer := res.CommonContainer
-// 	commonwebuiContainer.Image = image
-// 	commonwebuiContainer.Name = res.DaemonSetName
-// 	commonwebuiContainer.Env[1].Value = instance.Spec.GlobalUIConfig.RouterURL
-// 	commonwebuiContainer.Env[3].Value = instance.Spec.GlobalUIConfig.IdentityProviderURL
-// 	commonwebuiContainer.Env[4].Value = instance.Spec.GlobalUIConfig.AuthServiceURL
-// 	commonwebuiContainer.Env[7].Value = instance.Spec.GlobalUIConfig.CloudPakVersion
-// 	commonwebuiContainer.Env[8].Value = instance.Spec.GlobalUIConfig.DefaultAdminUser
-// 	commonwebuiContainer.Env[9].Value = instance.Spec.GlobalUIConfig.ClusterName
-// 	commonwebuiContainer.Env[10].Value = instance.Spec.GlobalUIConfig.DefaultAuth
-// 	commonwebuiContainer.Env[11].Value = instance.Spec.GlobalUIConfig.EnterpriseLDAP
-// 	commonwebuiContainer.Env[12].Value = instance.Spec.GlobalUIConfig.EnterpriseSAML
-// 	commonwebuiContainer.Env[13].Value = instance.Spec.GlobalUIConfig.OSAuth
-// 	commonwebuiContainer.Resources.Limits["cpu"] = *resource.NewMilliQuantity(cpuLimits, resource.DecimalSI)
-// 	commonwebuiContainer.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
-// 	commonwebuiContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
-// 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
-// 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
-
-// 	daemon := &appsv1.DaemonSet{
-// 		ObjectMeta: metav1.ObjectMeta{
-// 			Name:      res.DaemonSetName,
-// 			Namespace: instance.Namespace,
-// 			Labels:    metaLabels,
-// 		},
-// 		Spec: appsv1.DaemonSetSpec{
-// 			Selector: &metav1.LabelSelector{
-// 				MatchLabels: selectorLabels,
-// 			},
-// 			UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
-// 				Type: appsv1.RollingUpdateDaemonSetStrategyType,
-// 				RollingUpdate: &appsv1.RollingUpdateDaemonSet{
-// 					MaxUnavailable: &intstr.IntOrString{
-// 						Type:   intstr.Int,
-// 						IntVal: 1,
-// 					},
-// 				},
-// 			},
-// 			Template: corev1.PodTemplateSpec{
-// 				ObjectMeta: metav1.ObjectMeta{
-// 					Labels:      podLabels,
-// 					Annotations: Annotations,
-// 				},
-// 				Spec: corev1.PodSpec{
-// 					ServiceAccountName: res.GetServiceAccountName(),
-// 					Affinity: &corev1.Affinity{
-// 						NodeAffinity: &corev1.NodeAffinity{
-// 							RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
-// 								NodeSelectorTerms: []corev1.NodeSelectorTerm{
-// 									{
-// 										MatchExpressions: []corev1.NodeSelectorRequirement{
-// 											{
-// 												Key:      "beta.kubernetes.io/arch",
-// 												Operator: corev1.NodeSelectorOpIn,
-// 												Values:   []string{gorun.GOARCH},
-// 											},
-// 										},
-// 									},
-// 								},
-// 							},
-// 						},
-// 					},
-// 					Volumes:                       commonVolumes,
-// 					TerminationGracePeriodSeconds: &res.Seconds60,
-// 					Tolerations: []corev1.Toleration{
-// 						{
-// 							Key:      "dedicated",
-// 							Operator: corev1.TolerationOpExists,
-// 							Effect:   corev1.TaintEffectNoSchedule,
-// 						},
-// 						{
-// 							Key:      "CriticalAddonsOnly",
-// 							Operator: corev1.TolerationOpExists,
-// 						},
-// 					},
-// 					Containers: []corev1.Container{
-// 						commonwebuiContainer,
-// 					},
-// 				},
-// 			},
-// 		},
-// 	}
-// 	// Set Commonsvcsuiservice instance as the owner and controller of the DaemonSet
-// 	err := controllerutil.SetControllerReference(instance, daemon, r.scheme)
-// 	if err != nil {
-// 		reqLogger.Error(err, "Failed to set owner for common ui DaemonSet")
-// 		return nil, err
-// 	}
-// 	return daemon, nil
-// }
 
 // Check if the Common web ui Service already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
