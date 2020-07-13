@@ -21,6 +21,7 @@ import (
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 	corev1 "k8s.io/api/core/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -116,54 +117,103 @@ func (r *ReconcileCloudPakSwitcher) Reconcile(request reconcile.Request) (reconc
 		return reconcile.Result{}, err
 	}
 
-	// Define a new Pod object
-	pod := newPodForCR(instance)
-
-	// Set CloudPakSwitcher instance as the owner and controller
-	if err := controllerutil.SetControllerReference(instance, pod, r.scheme); err != nil {
-		return reconcile.Result{}, err
+	recResult, err := r.handleClusterRole(instance)
+	if err != nil {
+		return recResult, err
 	}
 
-	// Check if this Pod already exists
-	found := &corev1.Pod{}
-	err = r.client.Get(context.TODO(), types.NamespacedName{Name: pod.Name, Namespace: pod.Namespace}, found)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("Creating a new Pod", "Pod.Namespace", pod.Namespace, "Pod.Name", pod.Name)
-		err = r.client.Create(context.TODO(), pod)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-
-		// Pod created successfully - don't requeue
-		return reconcile.Result{}, nil
-	} else if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// Pod already exists - don't requeue
-	reqLogger.Info("Skip reconcile: Pod already exists", "Pod.Namespace", found.Namespace, "Pod.Name", found.Name)
 	return reconcile.Result{}, nil
 }
 
-// newPodForCR returns a busybox pod with the same name/namespace as the cr
-func newPodForCR(cr *operatorsv1alpha1.CloudPakSwitcher) *corev1.Pod {
-	labels := map[string]string{
-		"app": cr.Name,
+func (r *ReconcileCloudPakSwitcher) handleClusterRole(instance *operatorsv1alpha1.CloudPakSwitcher) (reconcile.Result, error) {
+	currentClusterRole := &rbacv1.ClusterRole{}
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "icp-cps-admin-aggregate", Namespace: ""}, currentClusterRole)
+	if err != nil && errors.IsNotFound(err) {
+		// Define admin cluster role
+		adminClusterRole := r.adminClusterRoleForCloudPakSwitcher(instance)
+		reqLogger.Info("Creating a new ClusterRole", "ClusterRole.Namespace", instance.Namespace, "ClusterRole.Name", "icp-cps-admin-aggregate")
+		err = r.client.Create(context.TODO(), adminClusterRole)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new ClusterRole", "ClusterRole.Namespace", instance.Namespace, "ClusterRole.Name", "icp-cps-admin-aggregate")
+			return reconcile.Result{}, err
+		}
+
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get ClusterRole")
+		return reconcile.Result{}, err
 	}
-	return &corev1.Pod{
+
+	err = r.client.Get(context.TODO(), types.NamespacedName{Name: "icp-cps-operate-aggregate", Namespace: ""}, currentClusterRole)
+	if err != nil && errors.IsNotFound(err) {
+		// Define operator cluster role
+		operatorClusterRole := r.operatorClusterRoleForCloudPakSwitcher(instance)
+		reqLogger.Info("Creating a new ClusterRole", "ClusterRole.Namespace", instance.Namespace, "ClusterRole.Name", "icp-cps-operate-aggregate")
+		err = r.client.Create(context.TODO(), operatorClusterRole)
+		if err != nil {
+			reqLogger.Error(err, "Failed to create new ClusterRole", "ClusterRole.Namespace", instance.Namespace, "ClusterRole.Name", "icp-cps-operate-aggregate")
+			return reconcile.Result{}, err
+		}
+	} else if err != nil {
+		reqLogger.Error(err, "Failed to get ClusterRole")
+		return reconcile.Result{}, err
+	}
+	//admin roles created successfully
+	return reconcile.Result{Requeue: true}, nil
+}
+
+func (r *ReconcileCloudPakSwitcher) adminClusterRoleForCloudPakSwitcher(instance *operatorsv1alpha1.CloudPakSwitcher) *rbacv1.ClusterRole {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	adminClusterRole := &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      cr.Name + "-pod",
-			Namespace: cr.Namespace,
-			Labels:    labels,
+			Name: "icp-cps-admin-aggregate",
+			Labels: map[string]string{
+				"kubernetes.io/bootstrapping":                  "rbac-defaults",
+				"rbac.icp.com/aggregate-to-icp-admin":          "true",
+				"rbac.authorization.k8s.io/aggregate-to-admin": "true",
+			},
 		},
-		Spec: corev1.PodSpec{
-			Containers: []corev1.Container{
-				{
-					Name:    "busybox",
-					Image:   "busybox",
-					Command: []string{"sleep", "3600"},
-				},
+		Rules: []rbacv1.PolicyRule{
+			{
+				APIGroups: []string{"*"},
+				Resources: []string{"*"},
+				Verbs:     []string{"get", "list"},
 			},
 		},
 	}
+	// Set OIDCClientWatcher instance as the owner and controller of the cluster role
+	err := controllerutil.SetControllerReference(instance, adminClusterRole, r.scheme)
+	if err != nil {
+		reqLogger.Error(err, "Failed to set owner for operator Cluster Role")
+		return nil
+	}
+	return adminClusterRole
+}
+
+func (r *ReconcileCloudPakSwitcher) operatorClusterRoleForCloudPakSwitcher(instance *operatorsv1alpha1.CloudPakSwitcher) *rbacv1.ClusterRole {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	operatorClusterRole := &rbacv1.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "icp-cps-operate-aggregate",
+			Labels: map[string]string{
+				"kubernetes.io/bootstrapping":                 "rbac-defaults",
+				"rbac.icp.com/aggregate-to-icp-operate":       "true",
+				"rbac.authorization.k8s.io/aggregate-to-edit": "true",
+			},
+		},
+		Rules: []rbacv1.PolicyRule{
+			{
+				APIGroups: []string{"*"},
+				Resources: []string{"*"},
+				Verbs:     []string{"get", "list"},
+			},
+		},
+	}
+	// Set OIDCClientWatcher instance as the owner and controller of the cluster role
+	err := controllerutil.SetControllerReference(instance, operatorClusterRole, r.scheme)
+	if err != nil {
+		reqLogger.Error(err, "Failed to set owner for operator Cluster Role")
+		return nil
+	}
+	return operatorClusterRole
 }

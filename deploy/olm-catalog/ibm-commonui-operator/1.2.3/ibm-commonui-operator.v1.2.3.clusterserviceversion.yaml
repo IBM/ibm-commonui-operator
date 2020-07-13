@@ -93,7 +93,7 @@ metadata:
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.2.3
-  namespace: placeholder
+  namespace: ibm-common-services
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -330,7 +330,7 @@ spec:
                   value: sha256:d5fda83f0abd6deb8c484338d093255d32b29a3adde7c15300a695e9ec6a9e00
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
-                image: quay.io/opencloudio/ibm-commonui-operator@sha256:8287f9b7771aaef4ee5ed220826471f8f55ca1a0db317bcc1580e081cc3f445d
+                image: quay.io/ajhavar/ibm-commonui-operator:b90fe249
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:

@@ -42,18 +42,16 @@ spec:
                 logoURL:
                   type: string
                 otherLinks:
-                  items:
-                    properties:
-                      display:
-                        type: string
-                      label:
-                        type: string
-                      target:
-                        type: string
-                      url:
-                        type: string
-                    type: object
-                  type: array
+                  properties:
+                    display:
+                      type: string
+                    label:
+                      type: string
+                    target:
+                      type: string
+                    url:
+                      type: string
+                  type: object
               type: object
             operatorVersion:
               type: string
