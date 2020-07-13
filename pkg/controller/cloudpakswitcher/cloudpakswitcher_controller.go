@@ -28,7 +28,6 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
-	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
@@ -163,8 +162,9 @@ func (r *ReconcileCloudPakSwitcher) handleClusterRole(instance *operatorsv1alpha
 	return reconcile.Result{Requeue: true}, nil
 }
 
+//nolint
 func (r *ReconcileCloudPakSwitcher) adminClusterRoleForCloudPakSwitcher(instance *operatorsv1alpha1.CloudPakSwitcher) *rbacv1.ClusterRole {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	// reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	adminClusterRole := &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "icp-cps-admin-aggregate",
@@ -183,16 +183,17 @@ func (r *ReconcileCloudPakSwitcher) adminClusterRoleForCloudPakSwitcher(instance
 		},
 	}
 	// Set OIDCClientWatcher instance as the owner and controller of the cluster role
-	err := controllerutil.SetControllerReference(instance, adminClusterRole, r.scheme)
-	if err != nil {
-		reqLogger.Error(err, "Failed to set owner for admin Cluster Role")
-		return nil
-	}
+	// err := controllerutil.SetControllerReference(instance, adminClusterRole, r.scheme)
+	// if err != nil {
+	// 	reqLogger.Error(err, "Failed to set owner for admin Cluster Role")
+	// 	return nil
+	// }
 	return adminClusterRole
 }
 
+//nolint
 func (r *ReconcileCloudPakSwitcher) operatorClusterRoleForCloudPakSwitcher(instance *operatorsv1alpha1.CloudPakSwitcher) *rbacv1.ClusterRole {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	// reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	operatorClusterRole := &rbacv1.ClusterRole{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "icp-cps-operate-aggregate",
@@ -211,10 +212,10 @@ func (r *ReconcileCloudPakSwitcher) operatorClusterRoleForCloudPakSwitcher(insta
 		},
 	}
 	// Set OIDCClientWatcher instance as the owner and controller of the cluster role
-	err := controllerutil.SetControllerReference(instance, operatorClusterRole, r.scheme)
-	if err != nil {
-		reqLogger.Error(err, "Failed to set owner for operator Cluster Role")
-		return nil
-	}
+	// err := controllerutil.SetControllerReference(instance, operatorClusterRole, r.scheme)
+	// if err != nil {
+	// 	reqLogger.Error(err, "Failed to set owner for operator Cluster Role")
+	// 	return nil
+	// }
 	return operatorClusterRole
 }
