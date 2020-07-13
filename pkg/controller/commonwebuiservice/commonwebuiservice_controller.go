@@ -225,6 +225,9 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
+	// For 1.3.0 operator version check if daemonSet exits on upgrade and delete if so
+	r.deleteDaemonSet(instance)
+
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
@@ -663,4 +666,29 @@ func (r *ReconcileCommonWebUI) reconcileCertificates(instance *operatorsv1alpha1
 		}
 	}
 	return nil
+}
+
+// delete the old common ui daemonset from an older version
+func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.CommonWebUI) {
+	reqLogger := log.WithValues("func", "deleteDaemonSet", "instance.Name", instance.Name)
+	daemonSet := &appsv1.DaemonSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      res.DaemonSetName,
+			Namespace: res.DefaultNamespace,
+		},
+	}
+	// check if the DaemonSet exists
+	err := r.client.Get(context.TODO(),
+		types.NamespacedName{Name: res.DaemonSetName, Namespace: res.DefaultNamespace}, daemonSet)
+	if err == nil {
+		// DaemonSet found so delete it
+		err := r.client.Delete(context.TODO(), daemonSet)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete old common ui DaemonSet")
+		} else {
+			reqLogger.Info("Deleted old common ui DaemonSet")
+		}
+	} else if !errors.IsNotFound(err) {
+		reqLogger.Error(err, "Failed to get old DaemonSet")
+	}
 }

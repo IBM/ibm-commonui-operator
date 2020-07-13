@@ -30,6 +30,7 @@ const DefaultImageRegistry = "quay.io/opencloudio"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.2.1"
 const DefaultClusterIssuer = "cs-ca-clusterissuer"
+const DefaultNamespace = "ibm-common-services"
 
 const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"
