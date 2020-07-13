@@ -184,7 +184,7 @@ func (r *ReconcileCloudPakSwitcher) adminClusterRoleForCloudPakSwitcher(instance
 	// Set OIDCClientWatcher instance as the owner and controller of the cluster role
 	err := controllerutil.SetControllerReference(instance, adminClusterRole, r.scheme)
 	if err != nil {
-		reqLogger.Error(err, "Failed to set owner for operator Cluster Role")
+		reqLogger.Error(err, "Failed to set owner for admin Cluster Role")
 		return nil
 	}
 	return adminClusterRole
