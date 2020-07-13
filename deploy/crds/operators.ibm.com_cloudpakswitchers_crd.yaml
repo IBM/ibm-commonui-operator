@@ -9,7 +9,7 @@ spec:
     listKind: CloudPakSwitcherList
     plural: cloudpakswitchers
     singular: cloudpakswitcher
-  scope: Cluster
+  scope: Namespaced
   subresources:
     status: {}
   validation:

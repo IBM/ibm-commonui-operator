@@ -117,7 +117,8 @@ func (r *ReconcileCloudPakSwitcher) Reconcile(request reconcile.Request) (reconc
 		return reconcile.Result{}, err
 	}
 
-	recResult, err := r.handleClusterRole(instance)
+	currentClusterRole := &rbacv1.ClusterRole{}
+	recResult, err := r.handleClusterRole(instance, currentClusterRole)
 	if err != nil {
 		return recResult, err
 	}
@@ -125,8 +126,8 @@ func (r *ReconcileCloudPakSwitcher) Reconcile(request reconcile.Request) (reconc
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileCloudPakSwitcher) handleClusterRole(instance *operatorsv1alpha1.CloudPakSwitcher) (reconcile.Result, error) {
-	currentClusterRole := &rbacv1.ClusterRole{}
+//nolint
+func (r *ReconcileCloudPakSwitcher) handleClusterRole(instance *operatorsv1alpha1.CloudPakSwitcher, currentClusterRole *rbacv1.ClusterRole) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "icp-cps-admin-aggregate", Namespace: ""}, currentClusterRole)
 	if err != nil && errors.IsNotFound(err) {

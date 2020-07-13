@@ -76,6 +76,8 @@ rules:
   - legacyheaders/status
   - commonwebuis/status
   - cloudpakswitchers
+  - cloudpakswitchers/finalizers
+  - cloudpakswitchers/status
   verbs:
   - '*'
 - apiGroups:
