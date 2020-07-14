@@ -333,6 +333,10 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	Annotations := res.DeploymentAnnotations
 	var replicas int32 = instance.Spec.Replicas
 
+	if replicas == 0 {
+		replicas = 1
+	}
+
 	cpuLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
 	if errLim != nil {
 		cpuLimits = 300
