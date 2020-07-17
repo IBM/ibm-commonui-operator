@@ -277,7 +277,7 @@ var CrTemplates = `[
 			"version": "1.1.0"
 		  },
 		  "header": {
-			"logoAltText": "Cloud Pak",
+			"logoAltText": "IBM Cloud Pak",
 			"logoHeight": "47px",
 			"logoUrl": "/common-nav/graphics/ibm-cloudpack-logo.svg",
 			"logoWidth": "190px"
@@ -289,7 +289,7 @@ var CrTemplates = `[
 			  "enable": false,
 			  "headerText": "Header text here"
 			},
-			"logoAltText": "IBM Cloud Pak",
+			"logoAltText": "Cloud Pak",
 			"logoHeight": "47px",
 			"logoUrl": "/common-nav/api/graphics/logincloudpak.svg",
 			"logoWidth": "190px"
