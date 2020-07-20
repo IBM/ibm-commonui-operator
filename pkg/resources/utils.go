@@ -48,6 +48,7 @@ const ReleaseName = "common-web-ui"
 const Log4jsConfigMap = "common-web-ui-log4js"
 const CommonConfigMap = "common-web-ui-config"
 const DaemonSetName = "common-web-ui"
+const DeploymentName = "common-web-ui"
 const ServiceName = "common-web-ui"
 const APIIngress = "common-web-ui-api"
 const CallbackIngress = "common-web-ui-callback"
@@ -102,6 +103,14 @@ var DeamonSetAnnotations = map[string]string{
 	"productName":    "IBM Cloud Platform Common Services",
 	"productID":      "068a62892a1e4db39641342e592daa25",
 	"productVersion": "3.3.0",
+	"productMetric":  "FREE",
+}
+
+var DeploymentAnnotations = map[string]string{
+	"scheduler.alpha.kubernetes.io/critical-pod": "",
+	"productName":    "IBM Cloud Platform Common Services",
+	"productID":      "068a62892a1e4db39641342e592daa25",
+	"productVersion": "3.5.0",
 	"productMetric":  "FREE",
 }
 

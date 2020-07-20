@@ -173,7 +173,14 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUISpec(ref common.ReferenceCall
 							Format: "",
 						},
 					},
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int32",
+						},
+					},
 				},
+				Required: []string{"replicas"},
 			},
 		},
 		Dependencies: []string{

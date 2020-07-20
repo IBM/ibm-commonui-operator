@@ -64,7 +64,8 @@ metadata:
               "sessionPollingInterval": 5000
             },
             "operatorVersion": "1.3.0",
-            "version": "1.3.0"
+            "version": "1.3.0",
+            "replicas": 1,
           }
         }
       ]
