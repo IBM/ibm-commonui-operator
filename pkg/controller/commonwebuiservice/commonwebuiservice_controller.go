@@ -239,10 +239,10 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	podList := &corev1.PodList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
-		client.MatchingLabels(res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)),
+		client.MatchingLabels(res.LabelsForSelector(res.DeploymentName, commonwebuiserviceCrType, instance.Name)),
 	}
 	if err = r.client.List(context.TODO(), podList, listOpts...); err != nil {
-		reqLogger.Error(err, "Failed to list pods", "CommonWebUI.Namespace", instance.Namespace, "CommonWebUI.Name", res.DaemonSetName)
+		reqLogger.Error(err, "Failed to list pods", "CommonWebUI.Namespace", instance.Namespace, "CommonWebUI.Name", res.DeploymentName)
 		return reconcile.Result{}, err
 	}
 	podNames := res.GetPodNames(podList.Items)
