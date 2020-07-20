@@ -179,12 +179,17 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUISpec(ref common.ReferenceCall
 							Format: "int32",
 						},
 					},
+					"Resources": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.Resources"),
+						},
+					},
 				},
 				Required: []string{"replicas"},
 			},
 		},
 		Dependencies: []string{
-			"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUIConfig", "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.GlobalUIConfig"},
+			"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.CommonWebUIConfig", "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.GlobalUIConfig", "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.Resources"},
 	}
 }
 
