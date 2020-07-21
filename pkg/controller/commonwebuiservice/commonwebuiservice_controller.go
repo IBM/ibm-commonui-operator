@@ -332,26 +332,63 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	podLabels := res.LabelsForPodMetadata(res.DeploymentName, commonwebuiserviceCrType, instance.Name)
 	Annotations := res.DeploymentAnnotations
 	var replicas int32 = instance.Spec.Replicas
+	var cpuLimits, cpuMemory, reqLimits, reqMemory int64
+	var errLim error
 
 	if replicas == 0 {
 		replicas = 1
 	}
 
-	cpuLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
-	if errLim != nil {
-		cpuLimits = 300
+	if instance.Spec.Resources.Limits.CPULimits != "" {
+		limits := instance.Spec.Resources.Limits.CPULimits
+		cpuLimits, errLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
+		if errLim != nil {
+			cpuLimits = 300
+		}
+	} else {
+		cpuLimits, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
+		if errLim != nil {
+			cpuLimits = 300
+		}
 	}
-	cpuMemory, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPUMemory, 10, 64)
-	if errLim != nil {
-		cpuMemory = 256
+
+	if instance.Spec.Resources.Limits.CPUMemory != "" {
+		memory := instance.Spec.Resources.Limits.CPUMemory
+		cpuMemory, errLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
+		if errLim != nil {
+			cpuMemory = 256
+		}
+	} else {
+		cpuMemory, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPUMemory, 10, 64)
+		if errLim != nil {
+			cpuMemory = 256
+		}
 	}
-	reqLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestLimits, 10, 64)
-	if errLim != nil {
-		reqLimits = 300
+
+	if instance.Spec.Resources.Requests.RequestLimits != "" {
+		limits := instance.Spec.Resources.Requests.RequestLimits
+		reqLimits, errLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
+		if errLim != nil {
+			reqLimits = 300
+		}
+	} else {
+		reqLimits, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestLimits, 10, 64)
+		if errLim != nil {
+			reqLimits = 300
+		}
 	}
-	reqMemory, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestMemory, 10, 64)
-	if errLim != nil {
-		reqMemory = 256
+
+	if instance.Spec.Resources.Requests.RequestMemory != "" {
+		memory := instance.Spec.Resources.Requests.RequestMemory
+		reqMemory, errLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
+		if errLim != nil {
+			reqMemory = 256
+		}
+	} else {
+		reqMemory, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestMemory, 10, 64)
+		if errLim != nil {
+			reqMemory = 256
+		}
 	}
 
 	imageRegistry := instance.Spec.CommonWebUIConfig.ImageRegistry

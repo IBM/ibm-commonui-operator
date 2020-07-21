@@ -66,6 +66,16 @@ metadata:
             "operatorVersion": "1.3.0",
             "version": "1.3.0",
             "replicas": 1,
+            "resources": {
+              "limits": {
+                "limits": "300m",
+                "memory": "256Mi"
+              },
+              "requests": {
+                "limits": "300m",
+                "memory": "256Mi"
+              }
+            },
           }
         }
       ]
