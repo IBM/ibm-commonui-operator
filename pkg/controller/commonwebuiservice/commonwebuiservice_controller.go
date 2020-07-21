@@ -340,7 +340,8 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	}
 
 	if instance.Spec.Resources.Limits.CPULimits != "" {
-		cpuLimits, errLim = strconv.ParseInt(instance.Spec.Resources.Limits.CPULimits, 10, 64)
+		limits := instance.Spec.Resources.Limits.CPULimits
+		cpuLimits, errLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
 		if errLim != nil {
 			cpuLimits = 300
 		}
@@ -352,7 +353,8 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	}
 
 	if instance.Spec.Resources.Limits.CPUMemory != "" {
-		cpuMemory, errLim = strconv.ParseInt(instance.Spec.Resources.Limits.CPUMemory, 10, 64)
+		memory := instance.Spec.Resources.Limits.CPUMemory
+		cpuMemory, errLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
 		if errLim != nil {
 			cpuMemory = 256
 		}
@@ -364,7 +366,8 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	}
 
 	if instance.Spec.Resources.Requests.RequestLimits != "" {
-		reqLimits, errLim = strconv.ParseInt(instance.Spec.Resources.Requests.RequestLimits, 10, 64)
+		limits := instance.Spec.Resources.Requests.RequestLimits
+		reqLimits, errLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
 		if errLim != nil {
 			reqLimits = 300
 		}
@@ -376,7 +379,8 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	}
 
 	if instance.Spec.Resources.Requests.RequestMemory != "" {
-		reqMemory, errLim = strconv.ParseInt(instance.Spec.Resources.Requests.RequestMemory, 10, 64)
+		memory := instance.Spec.Resources.Requests.RequestMemory
+		reqMemory, errLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
 		if errLim != nil {
 			reqMemory = 256
 		}
