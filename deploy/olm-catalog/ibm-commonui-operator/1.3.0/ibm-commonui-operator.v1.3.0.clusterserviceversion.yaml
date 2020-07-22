@@ -75,7 +75,7 @@ metadata:
                 "limits": "300m",
                 "memory": "256Mi"
               }
-            },
+            }
           }
         }
       ]
