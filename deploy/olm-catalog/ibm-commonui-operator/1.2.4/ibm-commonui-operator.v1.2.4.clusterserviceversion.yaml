@@ -76,7 +76,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.2.4
+    containerImage: quay.io/opencloudio/ibm-commonui-operator@sha256:b76e915a0e4cab75d9fb460eb13f2eb97d5ab87bb115edd6f40fcef9e3422e47
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
     olm.skipRange: '>=1.1.0 <1.2.4'
@@ -285,7 +285,7 @@ spec:
                   value: 1.2.3
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
-                image: quay.io/opencloudio/ibm-commonui-operator:1.2.4
+                image: quay.io/opencloudio/ibm-commonui-operator@sha256:b76e915a0e4cab75d9fb460eb13f2eb97d5ab87bb115edd6f40fcef9e3422e47
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
