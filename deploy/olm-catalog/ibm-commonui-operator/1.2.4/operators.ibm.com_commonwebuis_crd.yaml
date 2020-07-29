@@ -31,23 +31,6 @@ spec:
         spec:
           description: CommonWebUISpec defines the desired state of CommonWebUISpec
           properties:
-            Resources:
-              properties:
-                limits:
-                  properties:
-                    limits:
-                      type: string
-                    memory:
-                      type: string
-                  type: object
-                requests:
-                  properties:
-                    limits:
-                      type: string
-                    memory:
-                      type: string
-                  type: object
-              type: object
             commonWebUIConfig:
               description: CommonWebUIConfig defines the desired state of CommonWebUIConfig
               properties:
@@ -71,7 +54,11 @@ spec:
             globalUIConfig:
               description: GlobalUIConfig defines the desired state of GlobalUIConfig
               properties:
+                authServiceURL:
+                  type: string
                 cloudPakVersion:
+                  type: string
+                clusterName:
                   type: string
                 defaultAdminUser:
                   type: string
@@ -81,9 +68,16 @@ spec:
                   type: string
                 enterpriseSAML:
                   type: string
+                identityProviderURL:
+                  type: string
                 osAuth:
                   type: string
                 pullSecret:
+                  type: string
+                routerHTTPSPort:
+                  format: int32
+                  type: integer
+                routerURL:
                   type: string
                 sessionPollingInterval:
                   format: int32
@@ -91,13 +85,8 @@ spec:
               type: object
             operatorVersion:
               type: string
-            replicas:
-              format: int32
-              type: integer
             version:
               type: string
-          required:
-          - replicas
           type: object
         status:
           description: CommonWebUIStatus defines the observed state of CommonWebUI

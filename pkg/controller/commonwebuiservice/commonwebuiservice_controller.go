@@ -18,7 +18,6 @@ package commonwebuiservice
 import (
 	"context"
 	"encoding/json"
-	gorun "runtime"
 	"strconv"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
@@ -96,9 +95,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	// TODO(user): Modify this to be the types you create that are owned by the primary resource
-	// Watch for changes to secondary resource "Daemonset" and requeue the owner CommonWebUIService
-	err = c.Watch(&source.Kind{Type: &appsv1.DaemonSet{}}, &handler.EnqueueRequestForOwner{
+	// Watch for changes to secondary resource "Deployment" and requeue the owner CommonWebUIService
+	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForOwner{
 		IsController: true,
 		OwnerType:    &operatorsv1alpha1.CommonWebUI{},
 	})
@@ -195,12 +193,12 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
-	// Check if the DaemonSet already exists, if not create a new one
-	newDaemonSet, err := r.newDaemonSetForCR(instance)
+	// Check if the UI Deployment already exists, if not create a new one
+	newDeployment, err := r.deploymentForUI(instance)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = res.ReconcileDaemonSet(r.client, instance.Namespace, res.DaemonSetName, newDaemonSet, &needToRequeue)
+	err = res.ReconcileDeployment(r.client, instance.Namespace, res.DeploymentName, newDeployment, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -227,6 +225,9 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
+	// For 1.3.0 operator version check if daemonSet exits on upgrade and delete if so
+	r.deleteDaemonSet(instance)
+
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
@@ -238,10 +239,10 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	podList := &corev1.PodList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
-		client.MatchingLabels(res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)),
+		client.MatchingLabels(res.LabelsForSelector(res.DeploymentName, commonwebuiserviceCrType, instance.Name)),
 	}
 	if err = r.client.List(context.TODO(), podList, listOpts...); err != nil {
-		reqLogger.Error(err, "Failed to list pods", "CommonWebUI.Namespace", instance.Namespace, "CommonWebUI.Name", res.DaemonSetName)
+		reqLogger.Error(err, "Failed to list pods", "CommonWebUI.Namespace", instance.Namespace, "CommonWebUI.Name", res.DeploymentName)
 		return reconcile.Result{}, err
 	}
 	podNames := res.GetPodNames(podList.Items)
@@ -308,7 +309,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 
 }
 
-func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.DaemonSet, error) {
+func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.Deployment, error) {
 	// CommonMainVolumeMounts will be added by the controller
 	commonUIVolumeMounts := []corev1.VolumeMount{
 		{
@@ -325,27 +326,69 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 		},
 	}
 	var commonVolume = []corev1.Volume{}
-	reqLogger := log.WithValues("func", "newDaemonSetForCR", "instance.Name", instance.Name)
-	metaLabels := res.LabelsForMetadata(res.DaemonSetName)
-	selectorLabels := res.LabelsForSelector(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
-	podLabels := res.LabelsForPodMetadata(res.DaemonSetName, commonwebuiserviceCrType, instance.Name)
-	Annotations := res.DeamonSetAnnotations
+	reqLogger := log.WithValues("func", "newDeploymentForUI", "instance.Name", instance.Name)
+	metaLabels := res.LabelsForMetadata(res.DeploymentName)
+	selectorLabels := res.LabelsForSelector(res.DeploymentName, commonwebuiserviceCrType, instance.Name)
+	podLabels := res.LabelsForPodMetadata(res.DeploymentName, commonwebuiserviceCrType, instance.Name)
+	Annotations := res.DeploymentAnnotations
+	var replicas int32 = instance.Spec.Replicas
+	var cpuLimits, cpuMemory, reqLimits, reqMemory int64
+	var errLim error
 
-	cpuLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
-	if errLim != nil {
-		cpuLimits = 300
+	if replicas == 0 {
+		replicas = 1
 	}
-	cpuMemory, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPUMemory, 10, 64)
-	if errLim != nil {
-		cpuMemory = 256
+
+	if instance.Spec.Resources.Limits.CPULimits != "" {
+		limits := instance.Spec.Resources.Limits.CPULimits
+		cpuLimits, errLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
+		if errLim != nil {
+			cpuLimits = 300
+		}
+	} else {
+		cpuLimits, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
+		if errLim != nil {
+			cpuLimits = 300
+		}
 	}
-	reqLimits, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestLimits, 10, 64)
-	if errLim != nil {
-		reqLimits = 300
+
+	if instance.Spec.Resources.Limits.CPUMemory != "" {
+		memory := instance.Spec.Resources.Limits.CPUMemory
+		cpuMemory, errLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
+		if errLim != nil {
+			cpuMemory = 256
+		}
+	} else {
+		cpuMemory, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPUMemory, 10, 64)
+		if errLim != nil {
+			cpuMemory = 256
+		}
 	}
-	reqMemory, errLim := strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestMemory, 10, 64)
-	if errLim != nil {
-		reqMemory = 256
+
+	if instance.Spec.Resources.Requests.RequestLimits != "" {
+		limits := instance.Spec.Resources.Requests.RequestLimits
+		reqLimits, errLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
+		if errLim != nil {
+			reqLimits = 300
+		}
+	} else {
+		reqLimits, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestLimits, 10, 64)
+		if errLim != nil {
+			reqLimits = 300
+		}
+	}
+
+	if instance.Spec.Resources.Requests.RequestMemory != "" {
+		memory := instance.Spec.Resources.Requests.RequestMemory
+		reqMemory, errLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
+		if errLim != nil {
+			reqMemory = 256
+		}
+	} else {
+		reqMemory, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestMemory, 10, 64)
+		if errLim != nil {
+			reqMemory = 256
+		}
 	}
 
 	imageRegistry := instance.Spec.CommonWebUIConfig.ImageRegistry
@@ -378,24 +421,16 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
-	daemon := &appsv1.DaemonSet{
+	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.DaemonSetName,
+			Name:      res.DeploymentName,
 			Namespace: instance.Namespace,
 			Labels:    metaLabels,
 		},
-		Spec: appsv1.DaemonSetSpec{
+		Spec: appsv1.DeploymentSpec{
+			Replicas: &replicas,
 			Selector: &metav1.LabelSelector{
 				MatchLabels: selectorLabels,
-			},
-			UpdateStrategy: appsv1.DaemonSetUpdateStrategy{
-				Type: appsv1.RollingUpdateDaemonSetStrategyType,
-				RollingUpdate: &appsv1.RollingUpdateDaemonSet{
-					MaxUnavailable: &intstr.IntOrString{
-						Type:   intstr.Int,
-						IntVal: 1,
-					},
-				},
 			},
 			Template: corev1.PodTemplateSpec{
 				ObjectMeta: metav1.ObjectMeta{
@@ -403,7 +438,11 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 					Annotations: Annotations,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName: res.GetServiceAccountName(),
+					ServiceAccountName:            res.GetServiceAccountName(),
+					HostNetwork:                   false,
+					HostPID:                       false,
+					HostIPC:                       false,
+					TerminationGracePeriodSeconds: &res.Seconds60,
 					Affinity: &corev1.Affinity{
 						NodeAffinity: &corev1.NodeAffinity{
 							RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
@@ -413,7 +452,7 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 											{
 												Key:      "beta.kubernetes.io/arch",
 												Operator: corev1.NodeSelectorOpIn,
-												Values:   []string{gorun.GOARCH},
+												Values:   res.ArchitectureList,
 											},
 										},
 									},
@@ -421,8 +460,6 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 							},
 						},
 					},
-					Volumes:                       commonVolumes,
-					TerminationGracePeriodSeconds: &res.Seconds60,
 					Tolerations: []corev1.Toleration{
 						{
 							Key:      "dedicated",
@@ -434,6 +471,7 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 							Operator: corev1.TolerationOpExists,
 						},
 					},
+					Volumes: commonVolumes,
 					Containers: []corev1.Container{
 						commonwebuiContainer,
 					},
@@ -441,13 +479,13 @@ func (r *ReconcileCommonWebUI) newDaemonSetForCR(instance *operatorsv1alpha1.Com
 			},
 		},
 	}
-	// Set Commonsvcsuiservice instance as the owner and controller of the DaemonSet
-	err := controllerutil.SetControllerReference(instance, daemon, r.scheme)
+	// Set CommonUI instance as the owner and controller of the Deployment
+	err := controllerutil.SetControllerReference(instance, deployment, r.scheme)
 	if err != nil {
-		reqLogger.Error(err, "Failed to set owner for common ui DaemonSet")
+		reqLogger.Error(err, "Failed to set owner for UI Deployment")
 		return nil, err
 	}
-	return daemon, nil
+	return deployment, nil
 }
 
 // Check if the Common web ui Service already exist. If not, create a new one.
@@ -669,4 +707,29 @@ func (r *ReconcileCommonWebUI) reconcileCertificates(instance *operatorsv1alpha1
 		}
 	}
 	return nil
+}
+
+// delete the old common ui daemonset from an older version
+func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.CommonWebUI) {
+	reqLogger := log.WithValues("func", "deleteDaemonSet", "instance.Name", instance.Name)
+	daemonSet := &appsv1.DaemonSet{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      res.DaemonSetName,
+			Namespace: res.DefaultNamespace,
+		},
+	}
+	// check if the DaemonSet exists
+	err := r.client.Get(context.TODO(),
+		types.NamespacedName{Name: res.DaemonSetName, Namespace: res.DefaultNamespace}, daemonSet)
+	if err == nil {
+		// DaemonSet found so delete it
+		err := r.client.Delete(context.TODO(), daemonSet)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete old common ui DaemonSet")
+		} else {
+			reqLogger.Info("Deleted old common ui DaemonSet")
+		}
+	} else if !errors.IsNotFound(err) {
+		reqLogger.Error(err, "Failed to get old DaemonSet")
+	}
 }

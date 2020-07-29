@@ -27,6 +27,8 @@ type CommonWebUISpec struct {
 	GlobalUIConfig    GlobalUIConfig    `json:"globalUIConfig,omitempty"`
 	OperatorVersion   string            `json:"operatorVersion,omitempty"`
 	Version           string            `json:"version,omitempty"`
+	Replicas          int32             `json:"replicas"`
+	Resources         Resources         `json:"resources,omitempty"`
 }
 
 // CommonWebUIConfig defines the desired state of CommonWebUIConfig
@@ -53,6 +55,19 @@ type GlobalUIConfig struct {
 	EnterpriseLDAP         string `json:"enterpriseLDAP,omitempty"`
 	EnterpriseSAML         string `json:"enterpriseSAML,omitempty"`
 	SessionPollingInterval int32  `json:"sessionPollingInterval,omitempty"`
+}
+
+type Resources struct {
+	Requests Requests `json:"requests,omitempty"`
+	Limits   Limits   `json:"limits,omitempty"`
+}
+type Requests struct {
+	RequestLimits string `json:"limits,omitempty"`
+	RequestMemory string `json:"memory,omitempty"`
+}
+type Limits struct {
+	CPULimits string `json:"limits,omitempty"`
+	CPUMemory string `json:"memory,omitempty"`
 }
 
 // CommonWebUIStatus defines the observed state of CommonWebUI

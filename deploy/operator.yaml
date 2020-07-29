@@ -56,7 +56,7 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-commonui-operator"
             - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-              value: "1.3.0"
+              value: "sha256:41b9522699c5c88bd11e3bbe95bce1014311fe10aa254730bb5fe9eb944d9eb5"
             - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
               value: "3.2.4"
           resources:

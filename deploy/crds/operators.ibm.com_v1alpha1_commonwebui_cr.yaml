@@ -7,6 +7,14 @@ metadata:
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
 spec:
+  replicas: 1
+  resources:
+    requests:
+      memory: "256Mi"
+      limits: "300m"
+    limits:
+      memory: "256Mi"
+      limits: "300m"
   globalUIConfig:
     cloudPakVersion: 3.4.1
     defaultAdminUser: admin

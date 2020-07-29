@@ -30,6 +30,7 @@ const DefaultImageRegistry = "quay.io/opencloudio"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.2.1"
 const DefaultClusterIssuer = "cs-ca-clusterissuer"
+const DefaultNamespace = "ibm-common-services"
 
 const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"
@@ -42,6 +43,12 @@ var Seconds60 int64 = 60
 
 var cpu300 = resource.NewMilliQuantity(300, resource.DecimalSI)        // 300m
 var memory256 = resource.NewQuantity(256*1024*1024, resource.BinarySI) // 256Mi
+
+var ArchitectureList = []string{
+	"amd64",
+	"ppc64le",
+	"s390x",
+}
 
 const Log4jsVolumeName = "log4js"
 const ClusterCaVolumeName = "cluster-ca"

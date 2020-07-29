@@ -31,6 +31,23 @@ spec:
         spec:
           description: CommonWebUISpec defines the desired state of CommonWebUISpec
           properties:
+            Resources:
+              properties:
+                limits:
+                  properties:
+                    limits:
+                      type: string
+                    memory:
+                      type: string
+                  type: object
+                requests:
+                  properties:
+                    limits:
+                      type: string
+                    memory:
+                      type: string
+                  type: object
+              type: object
             commonWebUIConfig:
               description: CommonWebUIConfig defines the desired state of CommonWebUIConfig
               properties:
@@ -74,8 +91,13 @@ spec:
               type: object
             operatorVersion:
               type: string
+            replicas:
+              format: int32
+              type: integer
             version:
               type: string
+          required:
+          - replicas
           type: object
         status:
           description: CommonWebUIStatus defines the observed state of CommonWebUI
