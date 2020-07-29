@@ -31,18 +31,10 @@ type CloudPakSwitcherSpec struct {
 }
 
 type CloudPakInfo struct {
-	LogoURL     string     `json:"logoURL,omitempty"`
-	Label       string     `json:"label,omitempty"`
-	Display     string     `json:"display,omitempty"`
-	LandingPage string     `json:"landingPage,omitempty"`
-	OtherLinks  OtherLinks `json:"otherLinks,omitempty"`
-}
-
-type OtherLinks struct {
-	Label   string `json:"label,omitempty"`
-	Display string `json:"display,omitempty"`
-	URL     string `json:"url,omitempty"`
-	Target  string `json:"target,omitempty"`
+	LogoURL     string `json:"logoURL,omitempty"`
+	Label       string `json:"label,omitempty"`
+	Display     string `json:"display,omitempty"`
+	LandingPage string `json:"landingPage,omitempty"`
 }
 
 // CloudPakSwitcherStatus defines the observed state of CloudPakSwitcher

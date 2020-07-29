@@ -41,17 +41,6 @@ spec:
                   type: string
                 logoURL:
                   type: string
-                otherLinks:
-                  properties:
-                    display:
-                      type: string
-                    label:
-                      type: string
-                    target:
-                      type: string
-                    url:
-                      type: string
-                  type: object
               type: object
             operatorVersion:
               type: string
