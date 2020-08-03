@@ -23,8 +23,8 @@ import (
 // EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
 // NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
 
-// CloudPakSwitcherSpec defines the desired state of CloudPakSwitcher
-type CloudPakSwitcherSpec struct {
+// SwitcherItemSpec defines the desired state of SwitcherItem
+type SwitcherItemSpec struct {
 	CloudPakInfo    CloudPakInfo `json:"cloudPakInfo,omitempty"`
 	OperatorVersion string       `json:"operatorVersion,omitempty"`
 	Version         string       `json:"version,omitempty"`
@@ -37,34 +37,35 @@ type CloudPakInfo struct {
 	LandingPage string `json:"landingPage,omitempty"`
 }
 
-// CloudPakSwitcherStatus defines the observed state of CloudPakSwitcher
-type CloudPakSwitcherStatus struct {
-	// PodNames will hold the names of the commonwebui's
-	Nodes []string `json:"nodes"`
+// SwitcherItemStatus defines the observed state of SwitcherItem
+type SwitcherItemStatus struct {
+	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
+	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
+	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// CloudPakSwitcher is the Schema for the cloudpakswitchers API
+// SwitcherItem is the Schema for the switcheritems API
 // +kubebuilder:subresource:status
-// +kubebuilder:resource:path=cloudpakswitchers,scope=Namespaced
-type CloudPakSwitcher struct {
+// +kubebuilder:resource:path=switcheritems,scope=Namespaced
+type SwitcherItem struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
 
-	Spec   CloudPakSwitcherSpec   `json:"spec,omitempty"`
-	Status CloudPakSwitcherStatus `json:"status,omitempty"`
+	Spec   SwitcherItemSpec   `json:"spec,omitempty"`
+	Status SwitcherItemStatus `json:"status,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
-// CloudPakSwitcherList contains a list of CloudPakSwitcher
-type CloudPakSwitcherList struct {
+// SwitcherItemList contains a list of SwitcherItem
+type SwitcherItemList struct {
 	metav1.TypeMeta `json:",inline"`
 	metav1.ListMeta `json:"metadata,omitempty"`
-	Items           []CloudPakSwitcher `json:"items"`
+	Items           []SwitcherItem `json:"items"`
 }
 
 func init() {
-	SchemeBuilder.Register(&CloudPakSwitcher{}, &CloudPakSwitcherList{})
+	SchemeBuilder.Register(&SwitcherItem{}, &SwitcherItemList{})
 }

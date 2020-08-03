@@ -78,6 +78,9 @@ rules:
   - cloudpakswitchers
   - cloudpakswitchers/finalizers
   - cloudpakswitchers/status
+  - switcheritems
+  - switcheritems/finalizers
+  - switcheritems/status
   verbs:
   - '*'
 - apiGroups:

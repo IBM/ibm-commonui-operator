@@ -191,6 +191,41 @@ spec:
         - description: Displays names of pods associated with the Legacy Header service
           displayName: Pod Names
           path: nodes
+    - description: CloudPakSwitcher is the Schema for the cloupakswithcer API
+      kind: CloudPakSwitcher
+      name: cloudpakswitchers.operators.ibm.com
+      version: v1alpha1
+      displayName: CloudPakSwitcher service
+      resources:
+      - kind: Service
+        name: ''
+        version: v1
+      - kind: Ingress
+        name: ''
+        version: v1
+      - kind: ConfigMap
+        name: ''
+        version: v1
+      - kind: LegacyHeader
+        name: ''
+        version: 'v1alpha1'
+      - kind: CommonWebUI
+        name: ''
+        version: 'v1alpha1'
+      - kind: Certificate
+        name: ''
+        version: v1alpha1
+      specDescriptors:
+        - description: Configuration parameters for common web ui specific to the service
+          displayName: CloudPakSwitcher Configuration
+          path: cloudPakInfo
+        - description: Version for the installed operator
+          displayName: Operator Version 
+          path: operatorVersion
+      statusDescriptors:
+        - description: Displays names of pods associated with the Common Web UI service
+          displayName: Pod Names
+          path: nodes
   description: "**Important:** Do not install this operator directly. Only install this operator using the IBM Common Services Operator. 
   For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall). 
   Additionally, you can exit this panel and navigate to the IBM Common Services tile in OperatorHub to learn more about the operator.\n\n 
@@ -379,6 +414,9 @@ spec:
           - legacyheaders/finalizers
           - legacyheaders/status
           - commonwebuis/status
+          - switcheritems
+          - switcheritems/finalizers
+          - switcheritems/status
           verbs:
           - '*'
         - apiGroups:
