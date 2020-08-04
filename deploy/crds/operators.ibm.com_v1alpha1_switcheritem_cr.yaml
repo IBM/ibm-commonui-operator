@@ -1,7 +1,9 @@
 apiVersion: operators.ibm.com/v1alpha1
 kind: SwitcherItem
 metadata:
-  name: example-switcheritem
+  name: default-switcheritem
 spec:
-  # Add fields here
-  size: 3
+  display: "Cloud Pak Administration Hub"
+  label: "administration-hub"
+  landingPage: "/cloudpak-admin"
+  logoURL: "/"
