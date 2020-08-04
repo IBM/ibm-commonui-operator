@@ -34,6 +34,21 @@ metadata:
         },
         {
           "apiVersion": "operators.ibm.com/v1alpha1",
+          "kind": "SwitcherItem",
+          "metadata": {
+            "name": "example-switcheritem"
+          },
+          "spec": {
+            "cloudPakInfo": {
+              "display": "Cloud Pak Administration Hub",
+              "label": "administration-hub",
+              "landingPage": "/cloudpak-admin",
+              "logoURL": ""
+            }
+          }
+        },
+        {
+          "apiVersion": "operators.ibm.com/v1alpha1",
           "kind": "CommonWebUI",
           "metadata": {
             "labels": {
