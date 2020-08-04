@@ -19,16 +19,24 @@ BUILD_LOCALLY ?= 1
 # Image URL to use all building/pushing image targets;
 # Use your own docker registry and image name for dev/test by overridding the IMG and REGISTRY environment variable.
 IMG ?= ibm-commonui-operator
-REGISTRY ?= quay.io/opencloudio
+REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
 REGISTRY_DEV ?= quay.io/ericabr
 CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
+LEGACY_TAG ?= 3.2.5
+COMMON_TAG ?= 1.2.3
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
-COMMON_WEB_UI_OPERAND_TAG ?= 1.2.2
-LEGACY_HEADER_OPERAND_TAG ?= 3.2.5
-
+COMMON_WEB_UI_OPERAND_TAG ?= $(COMMON_TAG)
+COMMON_WEB_UI_OPERAND_TAG_AMD ?= $(COMMON_TAG)-amd64
+COMMON_WEB_UI_OPERAND_TAG_PPC ?= $(COMMON_TAG)-ppc64le
+COMMON_WEB_UI_OPERAND_TAG_Z ?= $(COMMON_TAG)-s390x
+LEGACY_HEADER_OPERAND_TAG ?= $(LEGACY_TAG)
+LEGACY_HEADER_OPERAND_TAG_AMD ?= $(LEGACY_TAG)-amd64
+LEGACY_HEADER_OPERAND_TAG_PPC ?= $(LEGACY_TAG)-ppc64le
+LEGACY_HEADER_OPERAND_TAG_Z ?= $(LEGACY_TAG)-s390x
+COMMONUI_OPERATOR_TAG ?= $(VERSION)
 # Github host to use for checking the source tree;
 # Override this variable ue with your own value if you're working on forked repo.
 GIT_HOST ?= github.com/IBM
@@ -44,8 +52,7 @@ export GOBIN ?= $(GOBIN_DEFAULT)
 TESTARGS_DEFAULT := "-v"
 export TESTARGS ?= $(TESTARGS_DEFAULT)
 DEST := $(GOPATH)/src/$(GIT_HOST)/$(BASE_DIR)
-VERSION ?= $(shell git describe --exact-match 2> /dev/null || \
-                 git describe --match=$(git rev-parse --short=8 HEAD) --always --dirty --abbrev=8)
+VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
 
 LOCAL_OS := $(shell uname)
 ifeq ($(LOCAL_OS),Linux)
@@ -101,18 +108,42 @@ include common/Makefile.common.mk
 ############################################################
 
 .PHONY: get-all-operand-image-sha
-get-all-operand-image-sha: get-common-web-ui-image-sha get-legacy-header-image-sha
+get-all-operand-image-sha: get-common-web-ui-image-sha get-legacy-header-image-sha get-commonui-operator-image-sha
 	@echo Got SHAs for all operand images
+
+.PHONY: get-commonui-operator-image-sha
+get-commonui-operator-image-sha:
+	@echo Get SHA for ibm-commonui-operator:$(COMMONUI_OPERATOR_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator $(COMMONUI_OPERATOR_TAG) COMMONUI_OPERATOR_TAG_OR_SHA
+	@echo Get SHA for ibm-commonui-operator:$(COMMONUI_OPERATOR_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator-amd64 $(COMMONUI_OPERATOR_TAG) COMMONUI_OPERATOR_TAG_OR_SHA
+	@echo Get SHA for ibm-commonui-operator:$(COMMONUI_OPERATOR_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator-ppc64le $(COMMONUI_OPERATOR_TAG) COMMONUI_OPERATOR_TAG_OR_SHA
+	@echo Get SHA for ibm-commonui-operator:$(COMMONUI_OPERATOR_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator-s390x $(COMMONUI_OPERATOR_TAG) COMMONUI_OPERATOR_TAG_OR_SHA
+
 
 .PHONY: get-common-web-ui-image-sha
 get-common-web-ui-image-sha:
 	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG)
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
+	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG_AMD)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG_AMD) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
+	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG_PPC)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG_PPC) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
+	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG_Z)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG_Z) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
 
 .PHONY: get-legacy-header-image-sha
 get-legacy-header-image-sha:
 	@echo Get SHA for platform-header:$(LEGACY_HEADER_OPERAND_TAG)
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-platform-header $(LEGACY_HEADER_OPERAND_TAG) LEGACYHEADER_IMAGE_TAG_OR_SHA
+	@echo Get SHA for platform-header:$(LEGACY_HEADER_OPERAND_TAG_AMD)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-platform-header $(LEGACY_HEADER_OPERAND_TAG_AMD) LEGACYHEADER_IMAGE_TAG_OR_SHA
+	@echo Get SHA for platform-header:$(LEGACY_HEADER_OPERAND_TAG_PPC)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-platform-header $(LEGACY_HEADER_OPERAND_TAG_PPC) LEGACYHEADER_IMAGE_TAG_OR_SHA
+	@echo Get SHA for platform-header:$(LEGACY_HEADER_OPERAND_TAG_Z)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-platform-header $(LEGACY_HEADER_OPERAND_TAG_Z) LEGACYHEADER_IMAGE_TAG_OR_SHA
 
 ############################################################
 # work section
