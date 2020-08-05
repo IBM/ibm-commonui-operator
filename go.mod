@@ -6,9 +6,9 @@ require (
 	github.com/go-openapi/spec v0.19.2
 	github.com/jetstack/cert-manager v0.10.1
 	github.com/operator-framework/operator-sdk v0.13.0
+	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/spf13/pflag v1.0.5
-	golang.org/x/crypto v0.0.0-20191011191535-87dc89f01550 // indirect
-	golang.org/x/xerrors v0.0.0-20191011141410-1b5146add898 // indirect
+	golang.org/x/tools v0.0.0-20200204074204-1cc6d1ef6c74 // indirect
 	k8s.io/api v0.0.0
 	k8s.io/apiextensions-apiserver v0.0.0
 	k8s.io/apimachinery v0.0.0
