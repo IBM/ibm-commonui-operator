@@ -206,7 +206,7 @@ spec:
         - description: Displays names of pods associated with the Legacy Header service
           displayName: Pod Names
           path: nodes
-    - description: SwitcherItem is the Schema for the cloupakswithcer API
+    - description: SwitcherItem is the Schema for the switcheritems API
       kind: SwitcherItem
       name: switcheritems.operators.ibm.com
       version: v1alpha1
