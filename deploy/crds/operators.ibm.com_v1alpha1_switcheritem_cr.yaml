@@ -6,5 +6,5 @@ spec:
   cloudPakInfo:
     display: "Cloud Pak Administration Hub"
     label: "administration-hub"
-    landingPage: "/cloudpak-admin"
+    landingPage: "/common-nav/dashboard"
     logoURL: ""
