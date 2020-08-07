@@ -34,6 +34,21 @@ metadata:
         },
         {
           "apiVersion": "operators.ibm.com/v1alpha1",
+          "kind": "SwitcherItem",
+          "metadata": {
+            "name": "example-switcheritem"
+          },
+          "spec": {
+            "cloudPakInfo": {
+              "display": "Cloud Pak Administration Hub",
+              "label": "administration-hub",
+              "landingPage": "/common-nav/dashboard",
+              "logoURL": ""
+            }
+          }
+        },
+        {
+          "apiVersion": "operators.ibm.com/v1alpha1",
           "kind": "CommonWebUI",
           "metadata": {
             "labels": {
@@ -191,6 +206,10 @@ spec:
         - description: Displays names of pods associated with the Legacy Header service
           displayName: Pod Names
           path: nodes
+    - description: SwitcherItem is the Schema for the switcheritems API
+      kind: SwitcherItem
+      name: switcheritems.operators.ibm.com
+      version: v1alpha1
   description: "**Important:** Do not install this operator directly. Only install this operator using the IBM Common Services Operator. 
   For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall). 
   Additionally, you can exit this panel and navigate to the IBM Common Services tile in OperatorHub to learn more about the operator.\n\n 
@@ -379,6 +398,9 @@ spec:
           - legacyheaders/finalizers
           - legacyheaders/status
           - commonwebuis/status
+          - switcheritems
+          - switcheritems/finalizers
+          - switcheritems/status
           verbs:
           - '*'
         - apiGroups:
