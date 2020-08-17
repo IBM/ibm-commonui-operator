@@ -24,7 +24,7 @@ REGISTRY_DEV ?= quay.io/ericabr
 CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
 LEGACY_TAG ?= 3.2.5
-COMMON_TAG ?= 1.2.3
+COMMON_TAG ?= 1.3.0
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
@@ -144,6 +144,11 @@ get-legacy-header-image-sha:
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-platform-header $(LEGACY_HEADER_OPERAND_TAG_PPC) LEGACYHEADER_IMAGE_TAG_OR_SHA
 	@echo Get SHA for platform-header:$(LEGACY_HEADER_OPERAND_TAG_Z)
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-platform-header $(LEGACY_HEADER_OPERAND_TAG_Z) LEGACYHEADER_IMAGE_TAG_OR_SHA
+
+.PHONY: get-oper-image-sha
+get-oper-image-sha:
+	@echo Get SHA for ibm-commonui-operator:$(VERSION)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator $(CSV_VERSION) CSV_VERSION
 
 ############################################################
 # work section
