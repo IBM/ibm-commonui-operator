@@ -10,11 +10,11 @@ spec:
   replicas: 1
   resources:
     requests:
-      memory: "256Mi"
-      limits: "300m"
+      memory: 256Mi
+      cpu: 300m
     limits:
-      memory: "256Mi"
-      limits: "300m"
+      memory: 256Mi
+      cpu: 300m
   globalUIConfig:
     cloudPakVersion: 3.4.1
     defaultAdminUser: admin

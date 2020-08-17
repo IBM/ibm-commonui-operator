@@ -62,11 +62,11 @@ type Resources struct {
 	Limits   Limits   `json:"limits,omitempty"`
 }
 type Requests struct {
-	RequestLimits string `json:"limits,omitempty"`
+	RequestLimits string `json:"cpu,omitempty"`
 	RequestMemory string `json:"memory,omitempty"`
 }
 type Limits struct {
-	CPULimits string `json:"limits,omitempty"`
+	CPULimits string `json:"cpu,omitempty"`
 	CPUMemory string `json:"memory,omitempty"`
 }
 
