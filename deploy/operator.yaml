@@ -40,7 +40,7 @@ spec:
       containers:
         - name: ibm-commonui-operator
           # Replace this with the built image name
-          image: quay.io/opencloudio/ibm-commonui-operator:latest
+          image: quay.io/opencloudio/ibm-commonui-operator@sha256:9d2805d04a1a166fc3c2df11f7f9d62836754187c2a65a2a59e736431e242332
           command:
           - ibm-commonui-operator
           imagePullPolicy: Always
@@ -58,7 +58,7 @@ spec:
             - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
               value: "sha256:41b9522699c5c88bd11e3bbe95bce1014311fe10aa254730bb5fe9eb944d9eb5"
             - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
-              value: "3.2.4"
+              value: "sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46"
           resources:
             limits:
               cpu: 40m

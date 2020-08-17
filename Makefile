@@ -145,6 +145,11 @@ get-legacy-header-image-sha:
 	@echo Get SHA for platform-header:$(LEGACY_HEADER_OPERAND_TAG_Z)
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) icp-platform-header $(LEGACY_HEADER_OPERAND_TAG_Z) LEGACYHEADER_IMAGE_TAG_OR_SHA
 
+.PHONY: get-oper-image-sha
+get-oper-image-sha:
+	@echo Get SHA for ibm-commonui-operator:$(VERSION)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator $(CSV_VERSION) CSV_VERSION
+
 ############################################################
 # work section
 ############################################################
