@@ -83,12 +83,12 @@ metadata:
             "replicas": 1,
             "resources": {
               "limits": {
-                "limits": "300m",
-                "memory": "256Mi"
+                "cpu": 300m,
+                "memory": 256Mi
               },
               "requests": {
-                "limits": "300m",
-                "memory": "256Mi"
+                "cpu": 300m,
+                "memory": 256Mi
               }
             }
           }

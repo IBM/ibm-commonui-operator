@@ -179,7 +179,7 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUISpec(ref common.ReferenceCall
 							Format: "int32",
 						},
 					},
-					"Resources": {
+					"resources": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.Resources"),
 						},
