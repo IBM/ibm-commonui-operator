@@ -185,7 +185,6 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUISpec(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"replicas"},
 			},
 		},
 		Dependencies: []string{
