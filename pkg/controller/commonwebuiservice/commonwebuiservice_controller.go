@@ -441,6 +441,10 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	dashboardDataCollectorContainer.VolumeMounts = commonUIVolumeMounts
 	dashboardDataCollectorContainer.Image = dashboardImage
 	dashboardDataCollectorContainer.Name = res.DasboardDefaultImageName
+	dashboardDataCollectorContainer.Resources.Limits["cpu"] = *resource.NewMilliQuantity(cpuLimits, resource.DecimalSI)
+	dashboardDataCollectorContainer.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
+	dashboardDataCollectorContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
+	dashboardDataCollectorContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

@@ -32,7 +32,7 @@ const DefaultImageTag = "1.2.1"
 const DefaultClusterIssuer = "cs-ca-clusterissuer"
 const DefaultNamespace = "ibm-common-services"
 
-const DasboardDefaultImageName = "dashboard-data-collector"
+const DasboardDefaultImageName = "ibm-dashboard-data-collector"
 const DasboardDefaultImageTag = "1.0.0"
 
 const LegacyImageRegistry = "quay.io/opencloudio"
@@ -308,7 +308,7 @@ var CommonContainer = corev1.Container{
 
 var DashboardDataContainer = corev1.Container{
 	Image:           "quay.io/ericabr/dashboard-collector:latest",
-	Name:            "dashboard-data-collector",
+	Name:            "ibm-dashboard-data-collector",
 	ImagePullPolicy: corev1.PullAlways,
 
 	Resources: corev1.ResourceRequirements{
@@ -321,41 +321,4 @@ var DashboardDataContainer = corev1.Container{
 	},
 
 	SecurityContext: &commonSecurityContext,
-
-	// ReadinessProbe: &corev1.Probe{
-	// 	Handler: corev1.Handler{
-	// 		HTTPGet: &corev1.HTTPGetAction{
-	// 			Path: "/readinessProbe",
-	// 			Port: intstr.IntOrString{
-	// 				Type:   intstr.Int,
-	// 				IntVal: 3000,
-	// 			},
-	// 			Scheme: corev1.URISchemeHTTPS,
-	// 		},
-	// 	},
-	// 	InitialDelaySeconds: 100,
-	// 	TimeoutSeconds:      15,
-	// 	PeriodSeconds:       10,
-	// 	SuccessThreshold:    1,
-	// 	FailureThreshold:    3,
-	// },
-
-	// LivenessProbe: &corev1.Probe{
-	// 	Handler: corev1.Handler{
-	// 		HTTPGet: &corev1.HTTPGetAction{
-	// 			Path: "/livenessProbe",
-	// 			Port: intstr.IntOrString{
-	// 				Type:   intstr.Int,
-	// 				IntVal: 3000,
-	// 			},
-	// 			Scheme: corev1.URISchemeHTTPS,
-	// 		},
-	// 	},
-	// 	InitialDelaySeconds: 100,
-	// 	TimeoutSeconds:      5,
-	// 	PeriodSeconds:       30,
-	// 	SuccessThreshold:    1,
-	// 	FailureThreshold:    3,
-	// },
-
 }
