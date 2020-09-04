@@ -34,14 +34,15 @@ type CommonWebUISpec struct {
 // CommonWebUIConfig defines the desired state of CommonWebUIConfig
 // +k8s:openapi-gen=true
 type CommonWebUIConfig struct {
-	ServiceName   string `json:"serviceName,omitempty"`
-	ImageRegistry string `json:"imageRegistry,omitempty"`
-	ImageTag      string `json:"imageTag,omitempty"`
-	CPULimits     string `json:"cpuLimits,omitempty"`
-	CPUMemory     string `json:"cpuMemory,omitempty"`
-	RequestLimits string `json:"requestLimits,omitempty"`
-	RequestMemory string `json:"requestMemory,omitempty"`
-	IngressPath   string `json:"ingressPath,omitempty"`
+	ServiceName   string        `json:"serviceName,omitempty"`
+	ImageRegistry string        `json:"imageRegistry,omitempty"`
+	ImageTag      string        `json:"imageTag,omitempty"`
+	CPULimits     string        `json:"cpuLimits,omitempty"`
+	CPUMemory     string        `json:"cpuMemory,omitempty"`
+	RequestLimits string        `json:"requestLimits,omitempty"`
+	RequestMemory string        `json:"requestMemory,omitempty"`
+	IngressPath   string        `json:"ingressPath,omitempty"`
+	DashboardData DashboardData `json:"dashboardData,omitempty"`
 }
 
 // GlobalUIConfig defines the desired state of GlobalUIConfig
@@ -68,6 +69,11 @@ type Requests struct {
 type Limits struct {
 	CPULimits string `json:"cpu,omitempty"`
 	CPUMemory string `json:"memory,omitempty"`
+}
+
+type DashboardData struct {
+	ImageRegistry string `json:"imageRegistry,omitempty"`
+	ImageTag      string `json:"imageTag,omitempty"`
 }
 
 // CommonWebUIStatus defines the observed state of CommonWebUI

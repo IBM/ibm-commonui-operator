@@ -59,6 +59,8 @@ spec:
               value: "sha256:b89c86bf9394f8ec493672a70b7b48e3ba96b64c4112a3b6b0915cd863cfe37b"
             - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
               value: "sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46"
+            - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
+              value: "1.0.0"
           resources:
             limits:
               cpu: 40m

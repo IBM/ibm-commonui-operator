@@ -138,9 +138,16 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUIConfig(ref common.ReferenceCa
 							Format: "",
 						},
 					},
+					"dashboardData": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.DashboardData"),
+						},
+					},
 				},
 			},
 		},
+		Dependencies: []string{
+			"github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.DashboardData"},
 	}
 }
 

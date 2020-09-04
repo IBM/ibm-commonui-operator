@@ -426,9 +426,22 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
+	dashboardImageRegistry := instance.Spec.CommonWebUIConfig.DashboardData.ImageRegistry
+	dashboardImageTag := instance.Spec.CommonWebUIConfig.DashboardData.ImageTag
+	if dashboardImageRegistry == "" {
+		dashboardImageRegistry = res.DefaultImageRegistry
+	}
+	if dashboardImageTag == "" {
+		dashboardImageTag = res.DasboardDefaultImageTag
+	}
+	dashboardImage := res.GetImageID(dashboardImageRegistry, res.DasboardDefaultImageName, dashboardImageTag, "", "DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA")
+	reqLogger.Info("Dashboard data collector Image=" + dashboardImage)
+
 	dashboardDataCollectorContainer := res.DashboardDataContainer
 	dashboardDataCollectorContainer.VolumeMounts = commonUIVolumeMounts
-	// dashboardDataCollectorContainer.Image =
+	dashboardDataCollectorContainer.Image = dashboardImage
+	dashboardDataCollectorContainer.Name = res.DasboardDefaultImageName
+
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      res.DeploymentName,

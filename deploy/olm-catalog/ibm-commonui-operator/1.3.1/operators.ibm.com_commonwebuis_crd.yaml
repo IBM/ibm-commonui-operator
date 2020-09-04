@@ -38,6 +38,13 @@ spec:
                   type: string
                 cpuMemory:
                   type: string
+                dashboardData:
+                  properties:
+                    imageRegistry:
+                      type: string
+                    imageTag:
+                      type: string
+                  type: object
                 imageRegistry:
                   type: string
                 imageTag:
