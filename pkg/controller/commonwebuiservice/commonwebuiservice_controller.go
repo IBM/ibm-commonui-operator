@@ -324,6 +324,10 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 			Name:      res.UICertVolumeName,
 			MountPath: "/certs/common-web-ui",
 		},
+		{
+			Name:      res.DashboardDataVolumeName,
+			MountPath: "/tmp/dashboardData",
+		},
 	}
 	var commonVolume = []corev1.Volume{}
 	reqLogger := log.WithValues("func", "newDeploymentForUI", "instance.Name", instance.Name)
@@ -405,6 +409,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonVolume = append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 	commonVolumes = append(commonVolumes, res.UICertVolume)
+	commonVolumes2 := append(commonVolumes, res.DashboardDataVolume)
 
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
@@ -421,6 +426,9 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
+	dashboardDataCollectorContainer := res.DashboardDataContainer
+	dashboardDataCollectorContainer.VolumeMounts = commonUIVolumeMounts
+	// dashboardDataCollectorContainer.Image =
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      res.DeploymentName,
@@ -471,9 +479,10 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 							Operator: corev1.TolerationOpExists,
 						},
 					},
-					Volumes: commonVolumes,
+					Volumes: commonVolumes2,
 					Containers: []corev1.Container{
 						commonwebuiContainer,
+						dashboardDataCollectorContainer,
 					},
 				},
 			},

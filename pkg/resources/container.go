@@ -52,7 +52,14 @@ var ArchitectureList = []string{
 
 const Log4jsVolumeName = "log4js"
 const ClusterCaVolumeName = "cluster-ca"
+const DashboardDataVolumeName = "dashboard-data"
 
+var DashboardDataVolume = corev1.Volume{
+	Name: DashboardDataVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		EmptyDir: &corev1.EmptyDirVolumeSource{},
+	},
+}
 var Log4jsVolume = corev1.Volume{
 	Name: Log4jsVolumeName,
 	VolumeSource: corev1.VolumeSource{
@@ -294,4 +301,58 @@ var CommonContainer = corev1.Container{
 			Value: "/certs/common-web-ui/tls.key",
 		},
 	},
+}
+
+var DashboardDataContainer = corev1.Container{
+	Image:           "quay.io/ericabr/dashboard-collector:latest",
+	Name:            "dashboard-data-collector",
+	ImagePullPolicy: corev1.PullAlways,
+
+	Resources: corev1.ResourceRequirements{
+		Limits: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    *cpu300,
+			corev1.ResourceMemory: *memory256},
+		Requests: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    *cpu300,
+			corev1.ResourceMemory: *memory256},
+	},
+
+	SecurityContext: &commonSecurityContext,
+
+	// ReadinessProbe: &corev1.Probe{
+	// 	Handler: corev1.Handler{
+	// 		HTTPGet: &corev1.HTTPGetAction{
+	// 			Path: "/readinessProbe",
+	// 			Port: intstr.IntOrString{
+	// 				Type:   intstr.Int,
+	// 				IntVal: 3000,
+	// 			},
+	// 			Scheme: corev1.URISchemeHTTPS,
+	// 		},
+	// 	},
+	// 	InitialDelaySeconds: 100,
+	// 	TimeoutSeconds:      15,
+	// 	PeriodSeconds:       10,
+	// 	SuccessThreshold:    1,
+	// 	FailureThreshold:    3,
+	// },
+
+	// LivenessProbe: &corev1.Probe{
+	// 	Handler: corev1.Handler{
+	// 		HTTPGet: &corev1.HTTPGetAction{
+	// 			Path: "/livenessProbe",
+	// 			Port: intstr.IntOrString{
+	// 				Type:   intstr.Int,
+	// 				IntVal: 3000,
+	// 			},
+	// 			Scheme: corev1.URISchemeHTTPS,
+	// 		},
+	// 	},
+	// 	InitialDelaySeconds: 100,
+	// 	TimeoutSeconds:      5,
+	// 	PeriodSeconds:       30,
+	// 	SuccessThreshold:    1,
+	// 	FailureThreshold:    3,
+	// },
+
 }
