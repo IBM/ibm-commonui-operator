@@ -324,6 +324,10 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 			Name:      res.UICertVolumeName,
 			MountPath: "/certs/common-web-ui",
 		},
+		{
+			Name:      res.DashboardDataVolumeName,
+			MountPath: "/tmp/dashboardData",
+		},
 	}
 	var commonVolume = []corev1.Volume{}
 	reqLogger := log.WithValues("func", "newDeploymentForUI", "instance.Name", instance.Name)
@@ -405,6 +409,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonVolume = append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 	commonVolumes = append(commonVolumes, res.UICertVolume)
+	commonVolumes2 := append(commonVolumes, res.DashboardDataVolume)
 
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
@@ -420,6 +425,26 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
+
+	dashboardImageRegistry := instance.Spec.CommonWebUIConfig.DashboardData.ImageRegistry
+	dashboardImageTag := instance.Spec.CommonWebUIConfig.DashboardData.ImageTag
+	if dashboardImageRegistry == "" {
+		dashboardImageRegistry = res.DefaultImageRegistry
+	}
+	if dashboardImageTag == "" {
+		dashboardImageTag = res.DasboardDefaultImageTag
+	}
+	dashboardImage := res.GetImageID(dashboardImageRegistry, res.DasboardDefaultImageName, dashboardImageTag, "", "DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA")
+	reqLogger.Info("Dashboard data collector Image=" + dashboardImage)
+
+	dashboardDataCollectorContainer := res.DashboardDataContainer
+	dashboardDataCollectorContainer.VolumeMounts = commonUIVolumeMounts
+	dashboardDataCollectorContainer.Image = dashboardImage
+	dashboardDataCollectorContainer.Name = res.DasboardDefaultImageName
+	dashboardDataCollectorContainer.Resources.Limits["cpu"] = *resource.NewMilliQuantity(cpuLimits, resource.DecimalSI)
+	dashboardDataCollectorContainer.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
+	dashboardDataCollectorContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
+	dashboardDataCollectorContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -471,9 +496,10 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 							Operator: corev1.TolerationOpExists,
 						},
 					},
-					Volumes: commonVolumes,
+					Volumes: commonVolumes2,
 					Containers: []corev1.Container{
 						commonwebuiContainer,
+						dashboardDataCollectorContainer,
 					},
 				},
 			},

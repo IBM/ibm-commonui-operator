@@ -32,6 +32,9 @@ const DefaultImageTag = "1.2.1"
 const DefaultClusterIssuer = "cs-ca-clusterissuer"
 const DefaultNamespace = "ibm-common-services"
 
+const DasboardDefaultImageName = "ibm-dashboard-data-collector"
+const DasboardDefaultImageTag = "1.0.0"
+
 const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"
 const LegacyImageTag = "3.2.4"
@@ -52,7 +55,14 @@ var ArchitectureList = []string{
 
 const Log4jsVolumeName = "log4js"
 const ClusterCaVolumeName = "cluster-ca"
+const DashboardDataVolumeName = "dashboard-data"
 
+var DashboardDataVolume = corev1.Volume{
+	Name: DashboardDataVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		EmptyDir: &corev1.EmptyDirVolumeSource{},
+	},
+}
 var Log4jsVolume = corev1.Volume{
 	Name: Log4jsVolumeName,
 	VolumeSource: corev1.VolumeSource{
@@ -294,4 +304,21 @@ var CommonContainer = corev1.Container{
 			Value: "/certs/common-web-ui/tls.key",
 		},
 	},
+}
+
+var DashboardDataContainer = corev1.Container{
+	Image:           "ibm-dashboard-data-collector",
+	Name:            "ibm-dashboard-data-collector",
+	ImagePullPolicy: corev1.PullAlways,
+
+	Resources: corev1.ResourceRequirements{
+		Limits: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    *cpu300,
+			corev1.ResourceMemory: *memory256},
+		Requests: map[corev1.ResourceName]resource.Quantity{
+			corev1.ResourceCPU:    *cpu300,
+			corev1.ResourceMemory: *memory256},
+	},
+
+	SecurityContext: &commonSecurityContext,
 }
