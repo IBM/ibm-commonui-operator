@@ -307,7 +307,7 @@ var CommonContainer = corev1.Container{
 }
 
 var DashboardDataContainer = corev1.Container{
-	Image:           "quay.io/ericabr/dashboard-collector:latest",
+	Image:           "ibm-dashboard-data-collector",
 	Name:            "ibm-dashboard-data-collector",
 	ImagePullPolicy: corev1.PullAlways,
 
