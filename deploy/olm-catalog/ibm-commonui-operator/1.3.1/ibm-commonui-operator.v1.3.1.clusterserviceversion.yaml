@@ -311,11 +311,11 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-                  value: 1.3.1
+                  value: sha256:70de37739f71e984f6be5b94af5d532a2a18fa90e0695900a722ef59d03a1ce9
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
-                  value: 1.0.0
+                  value: sha256:67e5fbbd65daf17cfce66009b75287ce974f3aa3f2b8b1b4e029a9de0c7011ba
                 image: quay.io/opencloudio/ibm-commonui-operator@sha256:1cf87e27d306b56e1f376917aa874be5479a070d97782545bcab754c5ca1539f
                 imagePullPolicy: Always
                 name: ibm-commonui-operator

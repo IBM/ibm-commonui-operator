@@ -25,6 +25,7 @@ CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
 LEGACY_TAG ?= 3.2.5
 COMMON_TAG ?= 1.3.1
+DASHBOARD_TAG ?= 1.0.0
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
@@ -149,6 +150,11 @@ get-legacy-header-image-sha:
 get-oper-image-sha:
 	@echo Get SHA for ibm-commonui-operator:$(VERSION)
 	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator $(CSV_VERSION) CSV_VERSION
+
+.PHONY: get-dashboard-image-sha
+get-dashboard-image-sha:
+	@echo Get SHA for ibm-dashboard-data-collector:$(DASHBOARD_TAG)
+	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-dashboard-data-collector $(DASHBOARD_TAG) DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
 
 ############################################################
 # work section
