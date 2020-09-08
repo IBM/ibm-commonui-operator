@@ -305,16 +305,16 @@ var CrTemplates = `[
 		  },
 		  "navItems": [
 			{
-			  "iconUrl": "/common-nav/graphics/monitor-health.svg",
-			  "id": "monitor-health",
-			  "label": "Monitor Health"
+			  "id": "home",
+			  "label": "Home",
+			  "url": "/common-nav/dashboard",
+			  "iconUrl": "/common-nav/graphics/home.svg"
 			},
 			{
 			  "detectionServiceName": true,
 			  "id": "metering",
 			  "label": "Metering",
 			  "namespace": "ibm-common-services",
-			  "parentId": "administer",
 			  "serviceId": "metering-ui",
 			  "serviceName": "metering-ui",
 			  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
@@ -329,7 +329,6 @@ var CrTemplates = `[
 			  ],
 			  "label": "Monitoring",
 			  "namespace": "ibm-common-services",
-			  "parentId": "monitor-health",
 			  "serviceId": "monitoring-ui",
 			  "serviceName": "ibm-monitoring-grafana",
 			  "target": "_blank",
@@ -340,7 +339,6 @@ var CrTemplates = `[
 			  "id": "releases",
 			  "label": "Helm Releases",
 			  "namespace": "ibm-common-services",
-			  "parentId": "monitor-health",
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
 			  "url": "/catalog/instances"
@@ -350,34 +348,38 @@ var CrTemplates = `[
 			  "id": "repos",
 			  "label": "Helm Repositories",
 			  "namespace": "ibm-common-services",
-			  "parentId": "administer",
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
 			  "url": "/catalog/repositories"
 			},
 			{
-			  "iconUrl": "/common-nav/graphics/administer.svg",
-			  "id": "administer",
-			  "label": "Administer"
-			},
-			{
 			  "id": "id-access",
 			  "label": "Identity and Access",
-			  "parentId": "administer",
 			  "serviceId": "webui-nav",
-			  "url": "/common-nav/identity-access"
+			  "url": "/common-nav/identity-access",
+			  "iconUrl": "/common-nav/graphics/events.svg"
 			},
 			{
 			  "detectionServiceName": true,
 			  "id": "logging",
 			  "label": "Logging",
 			  "namespace": "ibm-common-services",
-			  "parentId": "administer",
 			  "serviceId": "kibana",
 			  "serviceName": "kibana",
 			  "target": "logging",
 			  "url": "/kibana"
-			}
+			},
+			{
+			  "detectionServiceName": true,
+			  "id": "licensing",
+			  "label": "Licensing",
+			  "namespace": "ibm-common-services",
+			  "serviceId": "ibm-license-service-reporter-instance",
+			  "serviceName": "ibm-license-service-reporter-instance",
+			  "target": "_blank",
+			  "url": "/license-service-reporter",
+			  "iconUrl": "/common-nav/graphics/document.svg"
+			},
 		  ]
 		}
 	  },
@@ -406,7 +408,6 @@ var CrTemplates = `[
 			  "id": "metering",
 			  "label": "Metering",
 			  "namespace": "ibm-common-services",
-			  "parentId": "administer",
 			  "serviceId": "metering-ui",
 			  "serviceName": "metering-ui",
 			  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main\u0026useNav=icp4i"
@@ -421,7 +422,6 @@ var CrTemplates = `[
 			  ],
 			  "label": "Monitoring",
 			  "namespace": "ibm-common-services",
-			  "parentId": "administer",
 			  "serviceId": "monitoring-ui",
 			  "serviceName": "ibm-monitoring-grafana",
 			  "target": "_blank",
@@ -432,7 +432,6 @@ var CrTemplates = `[
 			  "id": "releases",
 			  "label": "Helm Releases",
 			  "namespace": "ibm-common-services",
-			  "parentId": "administer",
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
 			  "url": "/catalog/instances?useNav=icp4i"
@@ -442,20 +441,13 @@ var CrTemplates = `[
 			  "id": "repos",
 			  "label": "Helm Repositories",
 			  "namespace": "ibm-common-services",
-			  "parentId": "administer",
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
 			  "url": "/catalog/repositories?useNav=icp4i"
 			},
 			{
-			  "iconUrl": "/common-nav/graphics/administer.svg",
-			  "id": "administer",
-			  "label": "Administer"
-			},
-			{
 			  "id": "id-access",
 			  "label": "Identity and Access",
-			  "parentId": "administer",
 			  "serviceId": "webui-nav",
 			  "url": "/common-nav/identity-access?useNav=icp4i"
 			},
@@ -464,7 +456,6 @@ var CrTemplates = `[
 			  "id": "logging",
 			  "label": "Logging",
 			  "namespace": "ibm-common-services",
-			  "parentId": "administer",
 			  "serviceId": "kibana",
 			  "serviceName": "kibana",
 			  "target": "logging",
