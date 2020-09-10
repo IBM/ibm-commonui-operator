@@ -286,7 +286,7 @@ var CrTemplates = `[
 			"version": "1.1.0"
 		  },
 		  "header": {
-			"logoAltText": "IBM Cloud Pak",
+			"logoAltText": "IBM Cloud Pak Administration Hub",
 			"logoHeight": "47px",
 			"logoUrl": "/common-nav/graphics/ibm-cloudpack-logo.svg",
 			"logoWidth": "190px"
@@ -298,7 +298,7 @@ var CrTemplates = `[
 			  "enable": false,
 			  "headerText": "Header text here"
 			},
-			"logoAltText": "IBM Cloud Pak",
+			"logoAltText": "Cloud Pak Administration Hub",
 			"logoHeight": "47px",
 			"logoUrl": "/common-nav/api/graphics/logincloudpak.svg",
 			"logoWidth": "190px"
@@ -379,7 +379,7 @@ var CrTemplates = `[
 			  "target": "_blank",
 			  "url": "/license-service-reporter",
 			  "iconUrl": "/common-nav/graphics/document.svg"
-			},
+			}
 		  ]
 		}
 	  },
