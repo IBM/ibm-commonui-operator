@@ -225,8 +225,9 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
-	// For 1.3.0 operator version check if daemonSet exits on upgrade and delete if so
+	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(instance)
+	r.deleteCRD(instance)
 
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
@@ -758,4 +759,23 @@ func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.Commo
 	} else if !errors.IsNotFound(err) {
 		reqLogger.Error(err, "Failed to get old DaemonSet")
 	}
+}
+
+func (r *ReconcileCommonWebUI) deleteCRD(instance *operatorsv1alpha1.CommonWebUI) {
+	reqLogger := log.WithValues("func", "deleteCRD", "Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	navConfigCRD := &apiextv1beta.CustomResourceDefinition{}
+	reqLogger.Info("ABOUT TO DELETE THIS CRD IF EXISTS")
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "navconfigurations.foundation.ibm.com", Namespace: ""}, navConfigCRD)
+	if err == nil {
+		// Nav crd found so delete it
+		err := r.client.Delete(context.TODO(), navConfigCRD)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete old navconfig CRD")
+		} else {
+			reqLogger.Info("Deleted old navconfig CRD")
+		}
+	} else if !errors.IsNotFound(err) {
+		reqLogger.Error(err, "Failed to get old navconfig CRD")
+	}
+
 }
