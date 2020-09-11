@@ -311,11 +311,11 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-                  value: sha256:a3de6e84a8fc63875b9bde8f32389bf4bf4df47c3b33955b9cafe74b039dcfbb
+                  value: sha256:9c87f95226cc2b747819a3c571bf19bc6f1425f83344ee0a46167395e1df5e0a
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
-                  value: sha256:fcfddaaa1322fb4150979aacdba338e75a830bffc71fb1eb13522ae4fb3fc977
+                  value: sha256:6af874ebba30a0c0668c92e29234d82e5d8a677723d887776dea1cf993288ead
                 image: quay.io/opencloudio/ibm-commonui-operator@sha256:1cf87e27d306b56e1f376917aa874be5479a070d97782545bcab754c5ca1539f
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
@@ -464,6 +464,6 @@ spec:
     name: Erica Brown
   maturity: alpha
   provider:
-    name: IBMa
+    name: IBM
   replaces: ibm-commonui-operator.v1.3.0
   version: 1.3.1
