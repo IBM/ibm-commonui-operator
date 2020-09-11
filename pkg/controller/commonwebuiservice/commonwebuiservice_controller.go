@@ -225,7 +225,7 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
-	// For 1.3.0 operator version check if daemonSet exits on upgrade and delete if so
+	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(instance)
 
 	if needToRequeue {
@@ -609,6 +609,12 @@ func (r *ReconcileCommonWebUI) handleCRD(instance *operatorsv1alpha1.CommonWebUI
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	reqLogger.Info("ABOUT TO HANDLE THIS CRD")
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "navconfigurations.foundation.ibm.com", Namespace: ""}, currentCRD)
+	if err == nil {
+		crErr := r.deleteCRs(instance)
+		if crErr == nil {
+			reqLogger.Info("CRS HANDLED")
+		}
+	}
 	if err != nil && errors.IsNotFound(err) {
 		// Define CRD
 		newCRD := r.newNavconfgCRD()
@@ -758,4 +764,42 @@ func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.Commo
 	} else if !errors.IsNotFound(err) {
 		reqLogger.Error(err, "Failed to get old DaemonSet")
 	}
+}
+
+func (r *ReconcileCommonWebUI) deleteCRs(instance *operatorsv1alpha1.CommonWebUI) error {
+	reqLogger := log.WithValues("func", "deleteCRD", "Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("ABOUT TO DELETE CR IF EXISTS")
+
+	namespace := instance.Namespace
+	// Empty interface of type Array to hold the crs
+	var crTemplates []map[string]interface{}
+	// Unmarshal or Decode the JSON to the interface.
+	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplates)
+	if crTemplatesErr != nil {
+		reqLogger.Info("Failed to unmarshall crTemplates")
+		return crTemplatesErr
+	}
+	for _, crTemplate := range crTemplates {
+		var unstruct unstructured.Unstructured
+		unstruct.Object = crTemplate
+		name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
+
+		err := r.client.Get(context.TODO(), types.NamespacedName{
+			Name:      name,
+			Namespace: namespace,
+		}, &unstruct)
+
+		if err == nil {
+			// CR found so delete it
+			err := r.client.Delete(context.TODO(), &unstruct)
+			if err != nil {
+				reqLogger.Error(err, "Failed to delete old CR")
+			} else {
+				reqLogger.Info("Deleted old CR	")
+			}
+		} else if !errors.IsNotFound(err) {
+			reqLogger.Error(err, "Failed to old CR")
+		}
+	}
+	return nil
 }
