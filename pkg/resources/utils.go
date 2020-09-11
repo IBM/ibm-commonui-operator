@@ -307,8 +307,23 @@ var CrTemplates = `[
 			{
 			  "id": "home",
 			  "label": "Home",
-			  "url": "/common-nav/dashboard",
-			  "iconUrl": "/common-nav/graphics/home.svg"
+			  "url": "/common-nav/dashboard"
+			},
+			{
+			  "id": "id-access",
+			  "label": "Identity and Access",
+			  "serviceId": "webui-nav",
+			  "url": "/common-nav/identity-access"
+			},
+			{
+			  "detectionServiceName": true,
+			  "id": "licensing",
+			  "label": "Licensing",
+			  "namespace": "ibm-common-services",
+			  "serviceId": "ibm-license-service-reporter",
+			  "serviceName": "ibm-license-service-reporter",
+			  "target": "_blank",
+			  "url": "/license-service-reporter"
 			},
 			{
 			  "detectionServiceName": true,
@@ -336,6 +351,16 @@ var CrTemplates = `[
 			},
 			{
 			  "detectionServiceName": true,
+			  "id": "logging",
+			  "label": "Logging",
+			  "namespace": "ibm-common-services",
+			  "serviceId": "kibana",
+			  "serviceName": "kibana",
+			  "target": "logging",
+			  "url": "/kibana"
+			},
+			{
+			  "detectionServiceName": true,
 			  "id": "releases",
 			  "label": "Helm Releases",
 			  "namespace": "ibm-common-services",
@@ -351,34 +376,6 @@ var CrTemplates = `[
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
 			  "url": "/catalog/repositories"
-			},
-			{
-			  "id": "id-access",
-			  "label": "Identity and Access",
-			  "serviceId": "webui-nav",
-			  "url": "/common-nav/identity-access",
-			  "iconUrl": "/common-nav/graphics/events.svg"
-			},
-			{
-			  "detectionServiceName": true,
-			  "id": "logging",
-			  "label": "Logging",
-			  "namespace": "ibm-common-services",
-			  "serviceId": "kibana",
-			  "serviceName": "kibana",
-			  "target": "logging",
-			  "url": "/kibana"
-			},
-			{
-			  "detectionServiceName": true,
-			  "id": "licensing",
-			  "label": "Licensing",
-			  "namespace": "ibm-common-services",
-			  "serviceId": "ibm-license-service-reporter-instance",
-			  "serviceName": "ibm-license-service-reporter-instance",
-			  "target": "_blank",
-			  "url": "/license-service-reporter",
-			  "iconUrl": "/common-nav/graphics/document.svg"
 			}
 		  ]
 		}
@@ -460,6 +457,16 @@ var CrTemplates = `[
 			  "serviceName": "kibana",
 			  "target": "logging",
 			  "url": "/kibana"
+			},
+			{
+			  "detectionServiceName": true,
+			  "id": "licensing",
+			  "label": "Licensing",
+			  "namespace": "ibm-common-services",
+			  "serviceId": "ibm-license-service-reporter",
+			  "serviceName": "ibm-license-service-reporter",
+			  "target": "_blank",
+			  "url": "/license-service-reporter"
 			}
 		  ]
 		}

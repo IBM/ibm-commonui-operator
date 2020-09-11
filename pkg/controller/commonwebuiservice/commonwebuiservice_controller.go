@@ -227,7 +227,6 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(instance)
-	r.deleteCRD(instance)
 
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
@@ -610,6 +609,12 @@ func (r *ReconcileCommonWebUI) handleCRD(instance *operatorsv1alpha1.CommonWebUI
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	reqLogger.Info("ABOUT TO HANDLE THIS CRD")
 	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "navconfigurations.foundation.ibm.com", Namespace: ""}, currentCRD)
+	if err == nil {
+		crErr := r.deleteCRs(instance)
+		if crErr == nil {
+			reqLogger.Info("CRS HANDLED")
+		}
+	}
 	if err != nil && errors.IsNotFound(err) {
 		// Define CRD
 		newCRD := r.newNavconfgCRD()
@@ -761,21 +766,40 @@ func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.Commo
 	}
 }
 
-func (r *ReconcileCommonWebUI) deleteCRD(instance *operatorsv1alpha1.CommonWebUI) {
+func (r *ReconcileCommonWebUI) deleteCRs(instance *operatorsv1alpha1.CommonWebUI) error {
 	reqLogger := log.WithValues("func", "deleteCRD", "Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-	navConfigCRD := &apiextv1beta.CustomResourceDefinition{}
-	reqLogger.Info("ABOUT TO DELETE THIS CRD IF EXISTS")
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: "navconfigurations.foundation.ibm.com", Namespace: ""}, navConfigCRD)
-	if err == nil {
-		// Nav crd found so delete it
-		err := r.client.Delete(context.TODO(), navConfigCRD)
-		if err != nil {
-			reqLogger.Error(err, "Failed to delete old navconfig CRD")
-		} else {
-			reqLogger.Info("Deleted old navconfig CRD")
-		}
-	} else if !errors.IsNotFound(err) {
-		reqLogger.Error(err, "Failed to get old navconfig CRD")
-	}
+	reqLogger.Info("ABOUT TO DELETE CR IF EXISTS")
 
+	namespace := instance.Namespace
+	// Empty interface of type Array to hold the crs
+	var crTemplates []map[string]interface{}
+	// Unmarshal or Decode the JSON to the interface.
+	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplates)
+	if crTemplatesErr != nil {
+		reqLogger.Info("Failed to unmarshall crTemplates")
+		return crTemplatesErr
+	}
+	for _, crTemplate := range crTemplates {
+		var unstruct unstructured.Unstructured
+		unstruct.Object = crTemplate
+		name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
+
+		err := r.client.Get(context.TODO(), types.NamespacedName{
+			Name:      name,
+			Namespace: namespace,
+		}, &unstruct)
+
+		if err == nil {
+			// CR found so delete it
+			err := r.client.Delete(context.TODO(), &unstruct)
+			if err != nil {
+				reqLogger.Error(err, "Failed to delete old CR")
+			} else {
+				reqLogger.Info("Deleted old CR	")
+			}
+		} else if !errors.IsNotFound(err) {
+			reqLogger.Error(err, "Failed to old CR")
+		}
+	}
+	return nil
 }
