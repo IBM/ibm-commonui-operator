@@ -1015,6 +1015,6 @@ func GetNavConfigContent() map[string]apiextv1beta.JSONSchemaProps {
 // returns the service account name or default if it is not set in the environment
 func GetServiceAccountName() string {
 
-	sa := "ibm-commonui-operator"
+	sa := "ibm-commonui-serviceaccount"
 	return sa
 }
