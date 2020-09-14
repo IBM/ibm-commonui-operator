@@ -207,6 +207,8 @@ var CrTemplates = `[
 			"copyright": "© 2018, 2020 IBM. All rights reserved.",
 			"edition": "Enterprise",
 			"licenses": [
+				"yq, version 3.3.0, MIT+GPL",
+				"MongoDB, version 4.0.16 Community Edition, SSPL",
 			  "Ansible: © 2017 Red Hat, Inc., http://www.redhat.com; © Henry Graham (hzgraham) \u003cHenry.Graham@mail.wvu.edu\u003e",
 			  "calico-bird: © 1998–2008, Martin Mares \u003cmj@ucw.cz\u003e; © 1998–2000, Pavel Machek \u003cpavel@ucw.cz\u003e; © 1998–2008, Ondrej Filip \u003cfeela@network.cz\u003e; © 2009–2013,  CZ.NIC z.s.p.o.",
 			  "chrony: © Richard P. Curnow  1997-2003, GPL v2",
