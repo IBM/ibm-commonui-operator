@@ -238,13 +238,6 @@ spec:
       clusterPermissions:
       - rules:
         - apiGroups:
-          - '*'
-          resources:
-          - '*'
-          verbs:
-          - get
-          - list
-        - apiGroups:
           - apiextensions.k8s.io
           resources:
           - customresourcedefinitions
@@ -316,7 +309,7 @@ spec:
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
                   value: sha256:6af874ebba30a0c0668c92e29234d82e5d8a677723d887776dea1cf993288ead
-                image: quay.io/opencloudio/ibm-commonui-operator@sha256:1cf87e27d306b56e1f376917aa874be5479a070d97782545bcab754c5ca1539f
+                image: quay.io/morvencao/ibm-commonui-operator:latest
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
@@ -346,21 +339,26 @@ spec:
           - configmaps
           - secrets
           verbs:
-          - '*'
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         - apiGroups:
           - apps
           resources:
           - deployments
           - daemonsets
           verbs:
-          - '*'
-        - apiGroups:
-          - monitoring.coreos.com
-          resources:
-          - servicemonitors
-          verbs:
-          - get
           - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         - apiGroups:
           - apps
           resourceNames:
@@ -370,22 +368,27 @@ spec:
           verbs:
           - update
         - apiGroups:
+          - apps
+          resources:
+          - replicasets
+          verbs:
+          - get
+        - apiGroups:
+          - monitoring.coreos.com
+          resources:
+          - servicemonitors
+          verbs:
+          - get
+          - create
+        - apiGroups:
           - ""
           resources:
           - pods
           verbs:
           - get
         - apiGroups:
-          - apps
-          resources:
-          - replicasets
-          - deployments
-          verbs:
-          - get
-        - apiGroups:
           - networking.k8s.io
           resources:
-          - '*'
           - ingresses
           verbs:
           - create
@@ -408,7 +411,13 @@ spec:
           - switcheritems/finalizers
           - switcheritems/status
           verbs:
-          - '*'
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         - apiGroups:
           - foundation.ibm.com
           resources:
@@ -424,7 +433,6 @@ spec:
         - apiGroups:
           - certmanager.k8s.io
           resources:
-          - '*'
           - certificates
           verbs:
           - create

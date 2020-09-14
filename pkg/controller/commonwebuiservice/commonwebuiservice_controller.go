@@ -16,9 +16,11 @@
 package commonwebuiservice
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"strconv"
+	"text/template"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
 
@@ -618,10 +620,10 @@ func (r *ReconcileCommonWebUI) handleCRD(instance *operatorsv1alpha1.CommonWebUI
 	if err != nil && errors.IsNotFound(err) {
 		// Define CRD
 		newCRD := r.newNavconfgCRD()
-		reqLogger.Info("Creating a new CRD", "CRD.Namespace", instance.Namespace, "CRD.Name", "clients.oidc.security.ibm.com")
+		reqLogger.Info("Creating a new CRD", "CRD.Namespace", instance.Namespace, "CRD.Name", "navconfigurations.foundation.ibm.com")
 		err = r.client.Create(context.TODO(), newCRD)
 		if err != nil {
-			reqLogger.Error(err, "Failed to create new CRD", "CRD.Namespace", instance.Namespace, "CRD.Name", "clients.oidc.security.ibm.com")
+			reqLogger.Error(err, "Failed to create new CRD", "CRD.Namespace", instance.Namespace, "CRD.Name", "navconfigurations.foundation.ibm.com")
 			return reconcile.Result{}, err
 		}
 		// new CRD created successfully - return and requeue
@@ -642,7 +644,6 @@ func (r *ReconcileCommonWebUI) newNavconfgCRD() *apiextv1beta.CustomResourceDefi
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "navconfigurations.foundation.ibm.com",
 			Labels:    res.LabelsForMetadata(res.DaemonSetName),
-			Namespace: "ibm-common-services",
 		},
 		Spec: apiextv1beta.CustomResourceDefinitionSpec{
 			Scope:   "Namespaced",
@@ -670,10 +671,23 @@ func (r *ReconcileCommonWebUI) reconcileCr(instance *operatorsv1alpha1.CommonWeb
 	reqLogger.Info("RECONCILING CR")
 
 	namespace := instance.Namespace
+
+	commonWebUICRData := struct {
+		Namespace string
+	}{
+		Namespace: namespace,
+	}
+	// TO DO -- convert configmap to take option.
+	var commonWebUICRJSON bytes.Buffer
+	tc := template.Must(template.New("commonWebUICR").Parse(res.CrTemplates))
+	if err := tc.Execute(&commonWebUICRJSON, commonWebUICRData); err != nil {
+		return err
+	}
+
 	// Empty interface of type Array to hold the crs
 	var crTemplates []map[string]interface{}
 	// Unmarshal or Decode the JSON to the interface.
-	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplates)
+	crTemplatesErr := json.Unmarshal(commonWebUICRJSON.Bytes(), &crTemplates)
 	if crTemplatesErr != nil {
 		reqLogger.Info("Failed to unmarshall crTemplates")
 		return crTemplatesErr
@@ -771,10 +785,23 @@ func (r *ReconcileCommonWebUI) deleteCRs(instance *operatorsv1alpha1.CommonWebUI
 	reqLogger.Info("ABOUT TO DELETE CR IF EXISTS")
 
 	namespace := instance.Namespace
+
+	commonWebUICRData := struct {
+		Namespace string
+	}{
+		Namespace: namespace,
+	}
+	// TO DO -- convert configmap to take option.
+	var commonWebUICRJSON bytes.Buffer
+	tc := template.Must(template.New("commonWebUICR").Parse(res.CrTemplates))
+	if err := tc.Execute(&commonWebUICRJSON, commonWebUICRData); err != nil {
+		return err
+	}
+
 	// Empty interface of type Array to hold the crs
 	var crTemplates []map[string]interface{}
 	// Unmarshal or Decode the JSON to the interface.
-	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplates)
+	crTemplatesErr := json.Unmarshal(commonWebUICRJSON.Bytes(), &crTemplates)
 	if crTemplatesErr != nil {
 		reqLogger.Info("Failed to unmarshall crTemplates")
 		return crTemplatesErr
