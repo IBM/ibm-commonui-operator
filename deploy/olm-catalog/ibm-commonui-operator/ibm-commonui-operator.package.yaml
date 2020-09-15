@@ -1,7 +1,7 @@
 channels:
-- currentCSV: ibm-commonui-operator.v1.3.1
+- currentCSV: ibm-commonui-operator.v1.3.2
   name: beta
-- currentCSV: ibm-commonui-operator.v1.3.1
+- currentCSV: ibm-commonui-operator.v1.3.2
   name: dev
 - currentCSV: ibm-commonui-operator.v1.2.4
   name: stable-v1
