@@ -332,7 +332,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "metering-ui",
 			  "serviceName": "metering-ui",
-			  "target": "_blank",
 			  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
 			},
 			{
@@ -367,7 +366,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
-			  "target": "_blank",
 			  "url": "/catalog/instances"
 			},
 			{
@@ -377,7 +375,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
-			  "target": "_blank",
 			  "url": "/catalog/repositories"
 			}
 		  ]
@@ -410,7 +407,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "metering-ui",
 			  "serviceName": "metering-ui",
-			  "target": "_blank",
 			  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main\u0026useNav=icp4i"
 			},
 			{
@@ -435,7 +431,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
-			  "target": "_blank",
 			  "url": "/catalog/instances?useNav=icp4i"
 			},
 			{
@@ -445,7 +440,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "catalog-ui",
 			  "serviceName": "catalog-ui",
-			  "target": "_blank",
 			  "url": "/catalog/repositories?useNav=icp4i"
 			},
 			{
