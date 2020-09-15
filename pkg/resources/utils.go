@@ -332,7 +332,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "metering-ui",
 			  "serviceName": "metering-ui",
-			  "target": "_blank",
 			  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
 			},
 			{
@@ -410,7 +409,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "metering-ui",
 			  "serviceName": "metering-ui",
-			  "target": "_blank",
 			  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main\u0026useNav=icp4i"
 			},
 			{
