@@ -25,7 +25,7 @@ CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
 LEGACY_TAG ?= 3.2.5
 COMMON_TAG ?= 1.3.2
-DASHBOARD_TAG ?= 1.0.0
+DASHBOARD_TAG ?= 1.0.1
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
