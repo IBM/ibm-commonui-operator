@@ -108,7 +108,7 @@ metadata:
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.3.2
-  namespace: placeholder
+  namespace: ibm-common-services
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -214,6 +214,14 @@ spec:
       kind: SwitcherItem
       name: switcheritems.operators.ibm.com
       version: v1alpha1
+      resources:
+        - kind: SwitcherItem
+          name: ''
+          version: v1alpha1
+      specDescriptors:
+        - description: Configuration parameters for the for the 9-dot switcher in the dashboard hub
+          displayName: 9-dot switcher items for admin dashboard hub
+          path: cloudPakInfo
   description: "**Important:** Do not install this operator directly. Only install this operator using the IBM Common Services Operator. 
   For more information about installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall). 
   Additionally, you can exit this panel and navigate to the IBM Common Services tile in OperatorHub to learn more about the operator.\n\n 
@@ -278,7 +286,6 @@ spec:
                 productID: 068a62892a1e4db39641342e592daa25
                 productMetric: FREE
                 productName: IBM Cloud Platform Common Services
-                productVersion: 3.4.0
               labels:
                 app.kubernetes.io/instance: ibm-commonui-operator
                 app.kubernetes.io/managed-by: ibm-commonui-operator
@@ -316,7 +323,7 @@ spec:
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
                   value: sha256:6af874ebba30a0c0668c92e29234d82e5d8a677723d887776dea1cf993288ead
-                image: quay.io/opencloudio/ibm-commonui-operator@sha256:1cf87e27d306b56e1f376917aa874be5479a070d97782545bcab754c5ca1539f
+                image: quay.io/ericabr/ibm-commonui-operator:1.3.2
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:

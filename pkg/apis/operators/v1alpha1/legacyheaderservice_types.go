@@ -33,6 +33,7 @@ type LegacyHeaderSpec struct {
 	LegacyGlobalUIConfig LegacyGlobalUIConfig `json:"legacyGlobalUIConfig,omitempty"`
 	OperatorVersion      string               `json:"operatorVersion,omitempty"`
 	Version              string               `json:"version,omitempty"`
+	License              License              `json:"license"`
 }
 
 // LegacyConfig defines the desired state of LegacyConfig
@@ -67,7 +68,8 @@ type LegacyGlobalUIConfig struct {
 // +k8s:openapi-gen=true
 type LegacyHeaderStatus struct {
 	// PodNames will hold the names of the legacyheader's
-	Nodes []string `json:"nodes"`
+	Nodes    []string `json:"nodes"`
+	Versions Versions `json:"versions,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

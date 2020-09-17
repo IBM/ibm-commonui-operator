@@ -42,6 +42,12 @@ spec:
                 logoURL:
                   type: string
               type: object
+            license:
+              description: SwitcherItemSpec defines the desired state of SwitcherItem
+              properties:
+                accept:
+                  type: boolean
+              type: object
             operatorVersion:
               type: string
             version:
@@ -49,6 +55,12 @@ spec:
           type: object
         status:
           description: SwitcherItemStatus defines the observed state of SwitcherItem
+          properties:
+            versions:
+              properties:
+                reconciled:
+                  type: string
+              type: object
           type: object
       type: object
   version: v1alpha1

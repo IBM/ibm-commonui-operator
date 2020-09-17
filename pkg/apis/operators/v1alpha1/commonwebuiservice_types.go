@@ -29,6 +29,7 @@ type CommonWebUISpec struct {
 	Version           string            `json:"version,omitempty"`
 	Replicas          int32             `json:"replicas"`
 	Resources         Resources         `json:"resources,omitempty"`
+	License           License           `json:"license"`
 }
 
 // CommonWebUIConfig defines the desired state of CommonWebUIConfig
@@ -80,7 +81,8 @@ type DashboardData struct {
 // +k8s:openapi-gen=true
 type CommonWebUIStatus struct {
 	// PodNames will hold the names of the commonwebui's
-	Nodes []string `json:"nodes"`
+	Nodes    []string `json:"nodes"`
+	Versions Versions `json:"versions,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
