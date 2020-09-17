@@ -52,8 +52,6 @@ spec:
               type: string
             version:
               type: string
-          required:
-          - license
           type: object
         status:
           description: SwitcherItemStatus defines the observed state of SwitcherItem
