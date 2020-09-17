@@ -35,5 +35,12 @@ spec:
     dashboardData:
       imageRegistry: quay.io/opencloudio
       imageTag: 1.0.1
+      resources:
+        requests:
+          memory: 400Mi
+          cpu: 300m
+        limits:
+          memory: 400Mi
+          cpu: 300m
   operatorVersion: 1.3.2
   version: 1.3.2

@@ -73,8 +73,9 @@ type Limits struct {
 }
 
 type DashboardData struct {
-	ImageRegistry string `json:"imageRegistry,omitempty"`
-	ImageTag      string `json:"imageTag,omitempty"`
+	ImageRegistry string    `json:"imageRegistry,omitempty"`
+	ImageTag      string    `json:"imageTag,omitempty"`
+	Resources     Resources `json:"resources,omitempty"`
 }
 
 // CommonWebUIStatus defines the observed state of CommonWebUI
