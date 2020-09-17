@@ -33,7 +33,7 @@ const DefaultClusterIssuer = "cs-ca-clusterissuer"
 const DefaultNamespace = "ibm-common-services"
 
 const DasboardDefaultImageName = "ibm-dashboard-data-collector"
-const DasboardDefaultImageTag = "1.0.0"
+const DasboardDefaultImageTag = "1.0.1"
 
 const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"
