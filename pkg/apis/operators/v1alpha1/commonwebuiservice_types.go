@@ -27,9 +27,9 @@ type CommonWebUISpec struct {
 	GlobalUIConfig    GlobalUIConfig    `json:"globalUIConfig,omitempty"`
 	OperatorVersion   string            `json:"operatorVersion,omitempty"`
 	Version           string            `json:"version,omitempty"`
-	Replicas          int32             `json:"replicas"`
+	Replicas          int32             `json:"replicas,omitempty"`
 	Resources         Resources         `json:"resources,omitempty"`
-	License           License           `json:"license"`
+	License           License           `json:"license,omitempty"`
 }
 
 // CommonWebUIConfig defines the desired state of CommonWebUIConfig

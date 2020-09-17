@@ -199,7 +199,6 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUISpec(ref common.ReferenceCall
 						},
 					},
 				},
-				Required: []string{"replicas", "license"},
 			},
 		},
 		Dependencies: []string{
@@ -517,7 +516,6 @@ func schema_pkg_apis_operators_v1alpha1_LegacyHeaderSpec(ref common.ReferenceCal
 						},
 					},
 				},
-				Required: []string{"license"},
 			},
 		},
 		Dependencies: []string{
