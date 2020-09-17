@@ -28,6 +28,7 @@ type SwitcherItemSpec struct {
 	CloudPakInfo    CloudPakInfo `json:"cloudPakInfo,omitempty"`
 	OperatorVersion string       `json:"operatorVersion,omitempty"`
 	Version         string       `json:"version,omitempty"`
+	License         License      `json:"license"`
 }
 
 type CloudPakInfo struct {
@@ -39,9 +40,7 @@ type CloudPakInfo struct {
 
 // SwitcherItemStatus defines the observed state of SwitcherItem
 type SwitcherItemStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	Versions Versions `json:"versions,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object

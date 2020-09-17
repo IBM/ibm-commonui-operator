@@ -79,6 +79,12 @@ spec:
                   format: int32
                   type: integer
               type: object
+            license:
+              description: SwitcherItemSpec defines the desired state of SwitcherItem
+              properties:
+                accept:
+                  type: boolean
+              type: object
             operatorVersion:
               type: string
             version:
@@ -92,6 +98,11 @@ spec:
               items:
                 type: string
               type: array
+            versions:
+              properties:
+                reconciled:
+                  type: string
+              type: object
           required:
           - nodes
           type: object
