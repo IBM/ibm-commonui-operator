@@ -18,16 +18,16 @@ package resources
 
 import (
 	"encoding/json"
+	"os"
 	"strings"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1beta1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-
-	"os"
 
 	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	"k8s.io/apimachinery/pkg/util/intstr"
@@ -729,6 +729,16 @@ func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress
 func BuildCertificate(instanceNamespace, instanceClusterIssuer string, certData CertificateData) *certmgr.Certificate {
 	reqLogger := log.WithValues("func", "BuildCertificate")
 
+	namespace, err := k8sutil.GetWatchNamespace()
+	if err != nil {
+		reqLogger.Error(err, "Failed to get watch namespace")
+		os.Exit(1)
+	}
+	issuerKind := certmgr.IssuerKind
+	if len(namespace) == 0 {
+		issuerKind = certmgr.ClusterIssuerKind
+	}
+
 	metaLabels := labelsForCertificateMeta(certData.App, certData.Component)
 	var clusterIssuer string
 	if instanceClusterIssuer != "" {
@@ -757,7 +767,7 @@ func BuildCertificate(instanceNamespace, instanceClusterIssuer string, certData 
 			Organization: []string{"IBM"},
 			IssuerRef: certmgr.ObjectReference{
 				Name: clusterIssuer,
-				Kind: certmgr.ClusterIssuerKind,
+				Kind: issuerKind,
 			},
 		},
 	}
