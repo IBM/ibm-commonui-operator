@@ -49,7 +49,7 @@ metadata:
               "cpuMemory": "256",
               "dashboardData": {
                 "imageRegistry": "quay.io/opencloudio",
-                "imageTag": "1.0.1"
+                "imageTag": "1.0.1",
                 "resources": {
                   "limits": {
                     "cpu": "300m",
