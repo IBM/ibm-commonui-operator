@@ -16,7 +16,7 @@ spec:
       memory: 256Mi
       cpu: 300m
   globalUIConfig:
-    cloudPakVersion: 3.4.1
+    cloudPakVersion: 3.5.3
     defaultAdminUser: admin
     sessionPollingInterval: 5000
     enterpriseLDAP: ''
@@ -30,7 +30,7 @@ spec:
     requestLimits: "300"
     requestMemory: "256"
     imageRegistry: quay.io/opencloudio
-    imageTag: 1.3.2
+    imageTag: 1.3.3
     serviceName: common-web-ui
     dashboardData:
       imageRegistry: quay.io/opencloudio
@@ -42,5 +42,5 @@ spec:
         limits:
           memory: 400Mi
           cpu: 300m
-  operatorVersion: 1.3.2
-  version: 1.3.2
+  operatorVersion: 1.3.3
+  version: 1.3.3
