@@ -290,6 +290,7 @@ var CrTemplates = `[
 			"logoHeight": "47px",
 			"logoUrl": "/common-nav/graphics/ibm-cloudpack-logo.svg",
 			"logoWidth": "190px"
+			"disabledItems":["createResource","catalog"]
 		  },
 		  "login": {
 			"loginDialog": {
@@ -358,24 +359,6 @@ var CrTemplates = `[
 			  "serviceName": "kibana",
 			  "target": "_blank",
 			  "url": "/kibana"
-			},
-			{
-			  "detectionServiceName": true,
-			  "id": "releases",
-			  "label": "Helm Releases",
-			  "namespace": "ibm-common-services",
-			  "serviceId": "catalog-ui",
-			  "serviceName": "catalog-ui",
-			  "url": "/catalog/instances"
-			},
-			{
-			  "detectionServiceName": true,
-			  "id": "repos",
-			  "label": "Helm Repositories",
-			  "namespace": "ibm-common-services",
-			  "serviceId": "catalog-ui",
-			  "serviceName": "catalog-ui",
-			  "url": "/catalog/repositories"
 			}
 		  ]
 		}
