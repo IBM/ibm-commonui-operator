@@ -283,14 +283,15 @@ var CrTemplates = `[
 			],
 			"logoAltText": "IBM Cloud Pak",
 			"logoUrl": "IBM Cloud Pak",
-			"version": "1.1.0"
+			"version": "3.5.4"
 		  },
 		  "header": {
 			"logoAltText": "IBM Cloud Pak Administration Hub",
 			"logoHeight": "47px",
 			"logoUrl": "/common-nav/graphics/ibm-cloudpack-logo.svg",
 			"logoWidth": "190px",
-			"disabledItems":["createResource","catalog"]
+			"disabledItems":["createResource","catalog"],
+			"docUrlMapping": "http://ibm.biz/cpcs_adminui"
 		  },
 		  "login": {
 			"loginDialog": {
