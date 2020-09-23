@@ -266,6 +266,7 @@ spec:
           - events
           - nodes
           - persistentvolumeclaims
+          - secrets
           - services
           - serviceaccounts
           verbs:
@@ -301,6 +302,18 @@ spec:
           verbs:
           - get
           - list
+        - apiGroups:
+          - foundation.ibm.com
+          resources:
+          - navconfigurations
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         serviceAccountName: ibm-commonui-serviceaccount
       deployments:
       - name: ibm-commonui-operator
@@ -354,7 +367,7 @@ spec:
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
-                  value: sha256:3abc5b85a8c54d45704450677f9481bb183f769b6686ec3eefa9b6af42b1f356
+                  value: sha256:2efc8950c81db23332174b8cb37a1ea6d8c78679fc9d528ce4fc5b98240dd888
                 image: quay.io/morvencao/ibm-commonui-operator:latest
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
@@ -489,21 +502,6 @@ spec:
           - update
           - watch
         serviceAccountName: ibm-commonui-operator
-      - rules:
-        # operand common-web-ui need get and list these resources in namespaces scope
-        - apiGroups:
-          - foundation.ibm.com
-          resources:
-          - navconfigurations
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        serviceAccountName: ibm-commonui-serviceaccount
     strategy: deployment
   installModes:
   - supported: true
