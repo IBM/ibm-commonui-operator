@@ -289,7 +289,7 @@ var CrTemplates = `[
 			"logoAltText": "IBM Cloud Pak Administration Hub",
 			"logoHeight": "47px",
 			"logoUrl": "/common-nav/graphics/ibm-cloudpack-logo.svg",
-			"logoWidth": "190px"
+			"logoWidth": "190px",
 			"disabledItems":["createResource","catalog"]
 		  },
 		  "login": {
