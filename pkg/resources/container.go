@@ -26,14 +26,14 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-const DefaultImageRegistry = "quay.io/opencloudio"
+const DefaultImageRegistry = "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom"
 const DefaultImageName = "common-web-ui"
-const DefaultImageTag = "1.2.1"
+const DefaultImageTag = "citi"
 const DefaultClusterIssuer = "cs-ca-clusterissuer"
 const DefaultNamespace = "ibm-common-services"
 
 const DasboardDefaultImageName = "ibm-dashboard-data-collector"
-const DasboardDefaultImageTag = "1.0.0"
+const DasboardDefaultImageTag = "citi"
 
 const LegacyImageRegistry = "quay.io/opencloudio"
 const LegacyImageName = "icp-platform-header"

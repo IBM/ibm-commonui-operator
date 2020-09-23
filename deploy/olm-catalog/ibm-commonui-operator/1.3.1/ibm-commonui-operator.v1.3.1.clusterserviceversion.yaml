@@ -48,11 +48,11 @@ metadata:
               "cpuLimits": "300",
               "cpuMemory": "256",
               "dashboardData": {
-                "imageRegistry": "quay.io/opencloudio",
-                "imageTag": "1.0.0"
+                "imageRegistry": "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom",
+                "imageTag": "citi"
               },
-              "imageRegistry": "quay.io/opencloudio",
-              "imageTag": "1.3.1",
+              "imageRegistry": "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.com/ibmcom",
+              "imageTag": "citi",
               "ingressPath": "/common-nav",
               "requestLimits": "300",
               "requestMemory": "256",
@@ -350,11 +350,11 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-                  value: sha256:b37b147fd6b0d664d0ce7a322e4dc8d944735384accae95c960ae9d6ede7258d
+                  value: sha256:5736c078dcfb935567c24e1402918bdf847eafd14be020d20da3f988fb05a8e1
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
-                  value: sha256:6af874ebba30a0c0668c92e29234d82e5d8a677723d887776dea1cf993288ead
+                  value: sha256:3abc5b85a8c54d45704450677f9481bb183f769b6686ec3eefa9b6af42b1f356
                 image: quay.io/morvencao/ibm-commonui-operator:latest
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
