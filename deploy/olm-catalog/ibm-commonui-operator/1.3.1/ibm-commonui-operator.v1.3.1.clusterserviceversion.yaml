@@ -261,11 +261,13 @@ spec:
         - apiGroups:
           - ""
           resources:
+          - configmaps
           - pods
           - events
           - nodes
           - persistentvolumeclaims
           - services
+          - serviceaccounts
           verbs:
           - get
           - list
@@ -490,14 +492,17 @@ spec:
       - rules:
         # operand common-web-ui need get and list these resources in namespaces scope
         - apiGroups:
-          - ""
+          - foundation.ibm.com
           resources:
-          - configmaps
-          - secrets
-          - serviceaccounts
+          - navconfigurations
           verbs:
+          - create
+          - delete
           - get
           - list
+          - patch
+          - update
+          - watch
         serviceAccountName: ibm-commonui-serviceaccount
     strategy: deployment
   installModes:

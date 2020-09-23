@@ -303,6 +303,14 @@ var CommonContainer = corev1.Container{
 			Name:  "UI_SSL_KEY",
 			Value: "/certs/common-web-ui/tls.key",
 		},
+		{
+			Name: "POD_NAMESPACE",
+			ValueFrom:	&corev1.EnvVarSource{
+				FieldRef: &corev1.ObjectFieldSelector{
+					FieldPath: "metadata.namespace",
+				},
+			},
+		},
 	},
 }
 
@@ -321,4 +329,14 @@ var DashboardDataContainer = corev1.Container{
 	},
 
 	SecurityContext: &commonSecurityContext,
+	Env: []corev1.EnvVar{
+		{
+			Name: "POD_NAMESPACE",
+			ValueFrom:	&corev1.EnvVarSource{
+				FieldRef: &corev1.ObjectFieldSelector{
+					FieldPath: "metadata.namespace",
+				},
+			},
+		},
+	},
 }
