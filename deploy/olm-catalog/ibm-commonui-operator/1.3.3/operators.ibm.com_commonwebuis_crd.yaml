@@ -96,6 +96,8 @@ spec:
                   format: int32
                   type: integer
               type: object
+            iframeDomain:
+              type: string
             license:
               description: SwitcherItemSpec defines the desired state of SwitcherItem
               properties:

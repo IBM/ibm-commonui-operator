@@ -196,6 +196,12 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUISpec(ref common.ReferenceCall
 							Ref: ref("github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.License"),
 						},
 					},
+					"iframeDomain": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 				},
 			},
 		},

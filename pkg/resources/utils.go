@@ -17,8 +17,10 @@
 package resources
 
 import (
+	"bytes"
 	"encoding/json"
 	"strings"
+	"text/template"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
@@ -125,6 +127,24 @@ var CallbackIngressAnnotations = map[string]string{
 	"kubernetes.io/ingress.class":            "ibm-icp-management",
 	"icp.management.ibm.com/upstream-uri":    "/auth/liberty/callback",
 	"icp.management.ibm.com/secure-backends": "true",
+}
+
+//nolint
+const templFrame = `
+add_header 'X-XSS-Protection' '1' always;
+add_header Content-Security-Policy "default-src 'none'; font-src * 'unsafe-inline' 'self' data:; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com; frame-ancestors 'self' {{.Domain}}";`
+
+func BuildAnnotation(data interface{}) string {
+	reqLogger := log.WithValues("func", "BuildAnnotation", "DomainAnnotation")
+	t := template.Must(template.New("").Parse(templFrame))
+	buf := bytes.Buffer{}
+	err := t.Execute(&buf, data)
+	if err != nil {
+		reqLogger.Info("Domain Annotation template build error")
+		return ""
+	}
+	reqLogger.Info("Domain Annotation template build success")
+	return buf.String()
 }
 
 var CommonUIIngressAnnotations = map[string]string{
@@ -590,6 +610,19 @@ func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(NavIngress)
 	Annotations := CommonUIIngressAnnotations
+	if instance.Spec.IframeDomain != "" {
+		var domainName = map[string]string{
+			"Domain": instance.Spec.IframeDomain,
+		}
+		Annotations = map[string]string{
+			"kubernetes.io/ingress.class":            "ibm-icp-management",
+			"icp.management.ibm.com/auth-type":       "access-token",
+			"icp.management.ibm.com/secure-backends": "true",
+			"icp.management.ibm.com/app-root":        "/common-nav?root=true",
+			//nolint
+			"icp.management.ibm.com/configuration-snippet": BuildAnnotation(domainName),
+		}
+	}
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        NavIngress,
