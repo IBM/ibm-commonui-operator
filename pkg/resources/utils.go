@@ -324,7 +324,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "ibm-license-service-reporter",
 			  "serviceName": "ibm-license-service-reporter",
-			  "target": "_blank",
 			  "url": "/license-service-reporter"
 			},
 			{
@@ -449,7 +448,6 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "ibm-license-service-reporter",
 			  "serviceName": "ibm-license-service-reporter",
-			  "target": "_blank",
 			  "url": "/license-service-reporter"
 			}
 		  ]
