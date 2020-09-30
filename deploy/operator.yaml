@@ -56,7 +56,7 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-commonui-operator"
             - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-              value: "sha256:ed69ba9a2faf1257d77bc8e3d41a8f3b495853e56d3ac9c5d01d10f51edb2ca2"             
+              value: "sha256:52e42f24f41748b3555ddc5d20102f8d3b028653857fa0ae28230d8616fbff82"             
             - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
               value: "sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46"
             - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
