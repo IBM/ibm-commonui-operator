@@ -223,17 +223,6 @@ var CommonContainer = corev1.Container{
 			},
 		},
 		{
-			Name: "PREFERRED_LOGIN",
-			ValueFrom: &corev1.EnvVarSource{
-				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "platform-auth-idp",
-					},
-					Key: "PREFERRED_LOGIN",
-				},
-			},
-		},
-		{
 			Name:  "CLOUDPAK_VERSION",
 			Value: "1.0.0",
 		},
@@ -264,6 +253,17 @@ var CommonContainer = corev1.Container{
 		{
 			Name:  "SESSION_POLLING_INTERVAL",
 			Value: "300",
+		},
+		{
+			Name: "PREFERRED_LOGIN",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "platform-auth-idp",
+					},
+					Key: "PREFERRED_LOGIN",
+				},
+			},
 		},
 		{
 			Name: "ROKS_ENABLED",
