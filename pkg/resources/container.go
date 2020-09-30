@@ -255,6 +255,17 @@ var CommonContainer = corev1.Container{
 			Value: "300",
 		},
 		{
+			Name: "PREFERRED_LOGIN",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "platform-auth-idp",
+					},
+					Key: "PREFERRED_LOGIN",
+				},
+			},
+		},
+		{
 			Name: "ROKS_ENABLED",
 			ValueFrom: &corev1.EnvVarSource{
 				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
