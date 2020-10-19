@@ -1,0 +1,80 @@
+
+---
+apiVersion: apiextensions.k8s.io/v1beta1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.3.0
+  creationTimestamp: null
+  name: switcheritems.operator.ibm.com
+spec:
+  group: operator.ibm.com
+  names:
+    kind: SwitcherItem
+    listKind: SwitcherItemList
+    plural: switcheritems
+    singular: switcheritem
+  scope: Namespaced
+  subresources:
+    status: {}
+  validation:
+    openAPIV3Schema:
+      description: SwitcherItem is the Schema for the switcheritems API
+      properties:
+        apiVersion:
+          description: 'APIVersion defines the versioned schema of this representation
+            of an object. Servers should convert recognized schemas to the latest
+            internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources'
+          type: string
+        kind:
+          description: 'Kind is a string value representing the REST resource this
+            object represents. Servers may infer this from the endpoint the client
+            submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds'
+          type: string
+        metadata:
+          type: object
+        spec:
+          description: SwitcherItemSpec defines the desired state of SwitcherItem
+          properties:
+            cloudPakInfo:
+              properties:
+                display:
+                  type: string
+                label:
+                  type: string
+                landingPage:
+                  type: string
+                logoURL:
+                  type: string
+              type: object
+            license:
+              properties:
+                accept:
+                  type: boolean
+              type: object
+            operatorVersion:
+              type: string
+            version:
+              type: string
+          type: object
+        status:
+          description: SwitcherItemStatus defines the observed state of SwitcherItem
+          properties:
+            versions:
+              properties:
+                reconciled:
+                  type: string
+              type: object
+          type: object
+      type: object
+  version: v1alpha1
+  versions:
+  - name: v1alpha1
+    served: true
+    storage: true
+status:
+  acceptedNames:
+    kind: ""
+    plural: ""
+  conditions: []
+  storedVersions: []
