@@ -25,6 +25,7 @@ spec:
     osAuth: ''
   commonWebUIConfig:
     ingressPath: /common-nav
+    landingPage: ''
     cpuLimits: "300"
     cpuMemory: "256"
     requestLimits: "300"

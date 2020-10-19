@@ -314,6 +314,10 @@ var CommonContainer = corev1.Container{
 			Name:  "UI_SSL_KEY",
 			Value: "/certs/common-web-ui/tls.key",
 		},
+		{
+			Name:  "LANDING_PAGE",
+			Value: "",
+		},
 	},
 }
 

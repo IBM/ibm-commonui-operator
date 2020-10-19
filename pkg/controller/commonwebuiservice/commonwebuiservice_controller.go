@@ -415,6 +415,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Env[11].Value = instance.Spec.GlobalUIConfig.EnterpriseLDAP
 	commonwebuiContainer.Env[12].Value = instance.Spec.GlobalUIConfig.EnterpriseSAML
 	commonwebuiContainer.Env[13].Value = instance.Spec.GlobalUIConfig.OSAuth
+	commonwebuiContainer.Env[23].Value = instance.Spec.CommonWebUIConfig.LandingPage
 	commonwebuiContainer.Resources.Limits["cpu"] = *resource.NewMilliQuantity(cpuLimits, resource.DecimalSI)
 	commonwebuiContainer.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
