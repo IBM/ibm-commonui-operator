@@ -1,16 +1,25 @@
+#!/bin/bash
+#
 # Copyright 2020 IBM Corporation
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
 #
-#     http://www.apache.org/licenses/LICENSE-2.0
+# http://www.apache.org/licenses/LICENSE-2.0
 #
 # Unless required by applicable law or agreed to in writing, software
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+#
+
+.DEFAULT_GOAL:=help
+
+OPERATOR_SDK ?= $(shell which operator-sdk)
+CONTROLLER_GEN ?= $(shell which controller-gen)
+KUSTOMIZE ?= $(shell which kustomize)
 
 # This repo is build locally for dev/test by default;
 # Override this variable in CI env.
@@ -23,8 +32,7 @@ REGISTRY ?= "hyc-cloud-private-integration-docker-local.artifactory.swg-devops.c
 REGISTRY_DEV ?= quay.io/ericabr
 CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
-LEGACY_TAG ?= 3.2.5
-COMMON_TAG ?= 1.3.3
+COMMON_TAG ?= 1.3.4
 DASHBOARD_TAG ?= 1.0.1
 
 # Set the registry and tag for the operand/operator images
@@ -45,6 +53,15 @@ GIT_HOST ?= github.com/IBM
 PWD := $(shell pwd)
 BASE_DIR := $(shell basename $(PWD))
 
+# Options for 'bundle-build'
+ifneq ($(origin CHANNELS), undefined)
+BUNDLE_CHANNELS := --channels=$(CHANNELS)
+endif
+ifneq ($(origin DEFAULT_CHANNEL), undefined)
+BUNDLE_DEFAULT_CHANNEL := --default-channel=$(DEFAULT_CHANNEL)
+endif
+BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
+
 # Keep an existing GOPATH, make a private one if it is undefined
 GOPATH_DEFAULT := $(PWD)/.go
 export GOPATH ?= $(GOPATH_DEFAULT)
@@ -54,6 +71,9 @@ TESTARGS_DEFAULT := "-v"
 export TESTARGS ?= $(TESTARGS_DEFAULT)
 DEST := $(GOPATH)/src/$(GIT_HOST)/$(BASE_DIR)
 VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
+
+# Produce CRDs that work back to Kubernetes 1.11 (no version conversion)
+CRD_OPTIONS ?= "crd:trivialVersions=true"
 
 LOCAL_OS := $(shell uname)
 ifeq ($(LOCAL_OS),Linux)
@@ -96,14 +116,12 @@ IMAGE_RELEASE=$(VCS_REF)
 GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
 $(eval DOCKER_BUILD_OPTS := --build-arg "IMAGE_NAME=$(IMAGE_NAME)" --build-arg "IMAGE_DISPLAY_NAME=$(IMAGE_DISPLAY_NAME)" --build-arg "IMAGE_MAINTAINER=$(IMAGE_MAINTAINER)" --build-arg "IMAGE_VENDOR=$(IMAGE_VENDOR)" --build-arg "IMAGE_VERSION=$(IMAGE_VERSION)" --build-arg "IMAGE_RELEASE=$(IMAGE_RELEASE)" --build-arg "IMAGE_DESCRIPTION=$(IMAGE_DESCRIPTION)" --build-arg "IMAGE_SUMMARY=$(IMAGE_SUMMARY)" --build-arg "IMAGE_OPENSHIFT_TAGS=$(IMAGE_OPENSHIFT_TAGS)" --build-arg "VCS_REF=$(VCS_REF)" --build-arg "VCS_URL=$(GIT_REMOTE_URL)" --build-arg "SELF_METER_IMAGE_TAG=$(SELF_METER_IMAGE_TAG)")
 
-
-all: fmt check test coverage build images
-
 ifneq ("$(realpath $(DEST))", "$(realpath $(PWD))")
     $(error Please run 'make' from $(DEST). Current directory is $(PWD))
 endif
 
 include common/Makefile.common.mk
+
 ############################################################
 # SHA section
 ############################################################
@@ -190,7 +208,7 @@ lint: lint-all
 ############################################################
 
 test:
-	@go test ${TESTARGS} ./...
+	@go test ${TESTARGS} ./controllers/...
 
 ############################################################
 # coverage section
@@ -210,115 +228,93 @@ install-operator-sdk:
 # build section
 ############################################################
 
-build: build-amd64 build-ppc64le build-s390x
+build:
+	@echo "Building the ${IMG} binary..."
+	@CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o manager main.go
 
-build-amd64:
-	@echo "Building the ${IMG} amd64 binary..."
-	@GOARCH=amd64 common/scripts/gobuild.sh build/_output/bin/$(IMG) ./cmd/manager
 
-build-ppc64le:
-	@echo "Building the ${IMG} ppc64le binary..."
-	@GOARCH=ppc64le common/scripts/gobuild.sh build/_output/bin/$(IMG)-ppc64le ./cmd/manager
+# Build manager binary
+manager: generate fmt vet
+	go build -o bin/manager main.go
 
-build-s390x:
-	@echo "Building the ${IMG} s390x binary..."
-	@GOARCH=s390x common/scripts/gobuild.sh build/_output/bin/$(IMG)-s390x ./cmd/manager
+# Run against the configured Kubernetes cluster in ~/.kube/config
+run: generate fmt vet manifests
+	go run ./main.go
 
-local:
-	@GOOS=darwin common/scripts/gobuild.sh build/_output/bin/$(IMG) ./cmd/manager
+# Install CRDs into a cluster
+install: manifests kustomize
+	$(KUSTOMIZE) build config/crd | kubectl apply -f -
 
-############################################################
-# images section
-############################################################
+# Uninstall CRDs from a cluster
+uninstall: manifests kustomize
+	$(KUSTOMIZE) build config/crd | kubectl delete -f -
 
-ifeq ($(BUILD_LOCALLY),0)
-    export CONFIG_DOCKER_TARGET = config-docker
-config-docker:
+# Deploy controller in the configured Kubernetes cluster in ~/.kube/config
+deploy: manifests kustomize
+	cd config/manager && $(KUSTOMIZE) edit set image controller=${IMG}
+	$(KUSTOMIZE) build config/default | kubectl apply -f -
+
+# Generate manifests e.g. CRD, RBAC etc.
+manifests: controller-gen
+	$(CONTROLLER_GEN) $(CRD_OPTIONS) rbac:roleName=manager-role webhook paths="./..." output:crd:artifacts:config=config/crd/bases
+
+# Run go vet against code
+vet:
+	go vet $$(go list ./...)
+
+# Generate code
+generate: controller-gen
+	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
+
+# Build the docker image
+docker-build: test
+	docker build . -t ${IMG}
+
+# Push the docker image
+docker-push:
+	docker push ${IMG}
+
+# find or download controller-gen
+# download controller-gen if necessary
+controller-gen:
+ifeq (, $(shell which controller-gen))
+	@{ \
+	set -e ;\
+	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$CONTROLLER_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.3.0 ;\
+	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+	}
+CONTROLLER_GEN=$(GOBIN)/controller-gen
+else
+CONTROLLER_GEN=$(shell which controller-gen)
 endif
 
-image-dev: build-image-amd64
-	docker tag $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(REGISTRY_DEV)/$(IMG):$(VERSION)
-	docker push $(REGISTRY_DEV)/$(IMG):$(VERSION)
-build-image-amd64: build-amd64
-	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-amd64" -f build/Dockerfile .
+kustomize:
+ifeq (, $(shell which kustomize))
+	@{ \
+	set -e ;\
+	KUSTOMIZE_GEN_TMP_DIR=$$(mktemp -d) ;\
+	cd $$KUSTOMIZE_GEN_TMP_DIR ;\
+	go mod init tmp ;\
+	go get sigs.k8s.io/kustomize/kustomize/v3@v3.5.4 ;\
+	rm -rf $$KUSTOMIZE_GEN_TMP_DIR ;\
+	}
+KUSTOMIZE=$(GOBIN)/kustomize
+else
+KUSTOMIZE=$(shell which kustomize)
+endif
 
-build-image-ppc64le: build-ppc64le
-	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	@docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-ppc64le" -f build/Dockerfile.ppc64le .
+# Generate bundle manifests and metadata, then validate generated files.
+.PHONY: bundle
+bundle: manifests
+	operator-sdk generate kustomize manifests -q
+	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
+	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+	operator-sdk bundle validate ./bundle
 
-build-image-s390x: build-s390x
-	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	@docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-s390x" -f build/Dockerfile.s390x .
-
-push-image-amd64: $(CONFIG_DOCKER_TARGET) build-image-amd64
-	@docker push $(REGISTRY)/$(IMG)-amd64:$(VERSION)
-
-push-image-ppc64le: $(CONFIG_DOCKER_TARGET) build-image-ppc64le
-	@docker push $(REGISTRY)/$(IMG)-ppc64le:$(VERSION)
-
-push-image-s390x: $(CONFIG_DOCKER_TARGET) build-image-s390x
-	@docker push $(REGISTRY)/$(IMG)-s390x:$(VERSION)
-
-############################################################
-# multiarch-image section
-############################################################
-
-images: push-image-amd64 push-image-ppc64le push-image-s390x multiarch-image
-
-multiarch-image:
-	@curl -L -o /tmp/manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.0/manifest-tool-linux-amd64
-	@chmod +x /tmp/manifest-tool
-	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG) --ignore-missing
-	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG):$(VERSION) --ignore-missing
-
-############################################################
-# clean section
-############################################################
-clean:
-	rm -rf build/_output
-
-############################################################
-# CSV section
-############################################################
-csv: ## Push CSV package to the catalog
-	@RELEASE=${CSV_VERSION} common/scripts/push-csv.sh
-
-############################################################
-# CSV section
-############################################################
-delete-csv: ## Delete CSV package to the catalog
-	@RELEASE=${CSV_VERSION} common/scripts/delete-csv.sh
-
-.PHONY: all work build check lint test coverage images multiarch-image
-
-############################################################
-# Install/uninstall
-############################################################
-
-install: ## Install all resources (CR/CRD's, RBCA and Operator)
-	@echo ....... Set environment variables ......
-	- export DEPLOY_DIR=deploy/crds
-	- export WATCH_NAMESPACE=${NAMESPACE}
-	@echo ....... Applying CRDS and Operator .......
-	- for crd in $(shell ls deploy/crds/*_crd.yaml); do kubectl apply -f $${crd}; done
-	@echo ....... Applying RBAC .......
-	- kubectl apply -f deploy/service_account.yaml -n ${NAMESPACE}
-	- kubectl apply -f deploy/role.yaml -n ${NAMESPACE}
-	- kubectl apply -f deploy/role_binding.yaml -n ${NAMESPACE}
-	@echo ....... Applying Operator .......
-	- kubectl apply -f deploy/olm-catalog/${BASE_DIR}/${CSV_VERSION}/${BASE_DIR}.v${CSV_VERSION}.clusterserviceversion.yaml -n ${NAMESPACE}
-	@echo ....... Creating the Instance .......
-	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl apply -f $${cr} -n ${NAMESPACE}; done
-
-uninstall: ## Uninstall all that all performed in the $ make install
-	@echo ....... Uninstalling .......
-	@echo ....... Deleting CR .......
-	- for cr in $(shell ls deploy/crds/*_cr.yaml); do kubectl delete -f $${cr} -n ${NAMESPACE}; done
-	@echo ....... Deleting Operator .......
-	- kubectl delete -f deploy/olm-catalog/${BASE_DIR}/${CSV_VERSION}/${BASE_DIR}.v${CSV_VERSION}.clusterserviceversion.yaml -n ${NAMESPACE}
-	@echo ....... Deleting CRDs.......
-	- for crd in $(shell ls deploy/crds/*_crd.yaml); do kubectl delete -f $${crd}; done
-	@echo ....... Deleting Rules and Service Account .......
-	- kubectl delete -f deploy/role_binding.yaml -n ${NAMESPACE}
-	- kubectl delete -f deploy/service_account.yaml -n ${NAMESPACE}
-	- kubectl delete -f deploy/role.yaml -n ${NAMESPACE}
+# Build the bundle image.
+.PHONY: bundle-build
+bundle-build:
+	docker build -f bundle.Dockerfile -t $(BUNDLE_IMG) .
