@@ -43,6 +43,7 @@ type CommonWebUIConfig struct {
 	RequestLimits string        `json:"requestLimits,omitempty"`
 	RequestMemory string        `json:"requestMemory,omitempty"`
 	IngressPath   string        `json:"ingressPath,omitempty"`
+	LandingPage   string        `json:"landingPage,omitempty"`
 	DashboardData DashboardData `json:"dashboardData,omitempty"`
 }
 
