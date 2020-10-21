@@ -78,6 +78,9 @@ rules:
   - switcheritems
   - switcheritems/finalizers
   - switcheritems/status
+  - navconfigurations
+  - navconfigurations/finalizers
+  - navconfigurations/status
   verbs:
   - '*'
 - apiGroups:
@@ -115,21 +118,6 @@ metadata:
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
 rules:
-- apiGroups: ["*"]
-  resources: ["*"]
-  verbs: ["get", "list"]
-- apiGroups:
-  - apiextensions.k8s.io
-  resources:
-  - customresourcedefinitions
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
 - apiGroups:
   - certmanager.k8s.io
   resources:
