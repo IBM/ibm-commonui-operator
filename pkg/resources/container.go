@@ -193,7 +193,7 @@ var CommonContainer = corev1.Container{
 		},
 		{
 			Name:  "cfcRouterUrl",
-			Value: "https://icp-management-ingress:8443",
+			Value: "https://icp-management-ingress:443",
 		},
 		{
 			Name:  "NODE_EXTRA_CA_CERTS",
@@ -201,11 +201,11 @@ var CommonContainer = corev1.Container{
 		},
 		{
 			Name:  "PLATFORM_IDENTITY_PROVIDER_URL",
-			Value: "https://icp-management-ingress:8443/idprovider",
+			Value: "https://icp-management-ingress:443/idprovider",
 		},
 		{
 			Name:  "PLATFORM_AUTH_SERVICE_URL",
-			Value: "https://icp-management-ingress:8443/idauth",
+			Value: "https://icp-management-ingress:443/idauth",
 		},
 		{
 			Name:  "NAV_PORT",
