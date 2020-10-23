@@ -25,16 +25,65 @@ import (
 
 // NavConfigurationSpec defines the desired state of NavConfiguration
 type NavConfigurationSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	LogoutRedirects []string   `json:"logoutRedirects,omitempty"`
+	About           About      `json:"about,omitempty"`
+	Header          Header     `json:"header,omitempty"`
+	Login           Login      `json:"login,omitempty"`
+	NavItems        []NavItems `json:"navItems,omitempty"`
+	OperatorVersion string     `json:"operatorVersion,omitempty"`
+	Version         string     `json:"version,omitempty"`
+	License         License    `json:"license,omitempty"`
 }
 
 // NavConfigurationStatus defines the observed state of NavConfiguration
 type NavConfigurationStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "operator-sdk generate k8s" to regenerate code after modifying this file
-	// Add custom validation using kubebuilder tags: https://book-v1.book.kubebuilder.io/beyond_basics/generating_crd.html
+	Versions Versions `json:"versions,omitempty"`
+}
+
+type About struct {
+	LogoURL   string   `json:"logoUrl,omitempty"`
+	Licenses  []string `json:"licenses,omitempty"`
+	Copyright string   `json:"copyright,omitempty"`
+	Version   string   `json:"version,omitempty"`
+	Edition   string   `json:"edition,omitempty"`
+}
+
+type Header struct {
+	LogoURL       string   `json:"logoUrl,omitempty"`
+	LogoWidth     string   `json:"logoWidth,omitempty"`
+	LogoHeight    string   `json:"logoHeight,omitempty"`
+	LogoAltText   string   `json:"logoAltText,omitempty"`
+	DocURLMapping string   `json:"docUrlMapping,omitempty"`
+	DisabledItems []string `json:"disabledItems,omitempty"`
+}
+
+type Login struct {
+	LogoAltText string      `json:"logoAltText,omitempty"`
+	LogoURL     string      `json:"logoUrl,omitempty"`
+	LogoWidth   string      `json:"logoWidth,omitempty"`
+	LogoHeight  string      `json:"logoHeight,omitempty"`
+	LoginDialog LoginDialog `json:"loginDialog,omitempty"`
+}
+
+type LoginDialog struct {
+	Enable     bool   `json:"enable,omitempty"`
+	HeaderText string `json:"headerText,omitempty"`
+	DialogText string `json:"dialogText,omitempty"`
+	AcceptText string `json:"acceptText,omitempty"`
+}
+
+type NavItems struct {
+	ID                   string   `json:"id,omitempty"`
+	Label                string   `json:"label,omitempty"`
+	URL                  string   `json:"url,omitempty"`
+	IconURL              string   `json:"iconUrl,omitempty"`
+	Target               string   `json:"target,omitempty"`
+	ParentID             string   `json:"parentId,omitempty"`
+	Namespace            string   `json:"namespace,omitempty"`
+	ServiceName          string   `json:"serviceName,omitempty"`
+	ServiceID            string   `json:"serviceId,omitempty"`
+	DetectionServiceName bool     `json:"detectionServiceName,omitempty"`
+	IsAuthorized         []string `json:"isAuthorized,omitempty"`
 }
 
 // +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
