@@ -49,12 +49,24 @@ type About struct {
 }
 
 type Header struct {
-	LogoURL       string   `json:"logoUrl,omitempty"`
-	LogoWidth     string   `json:"logoWidth,omitempty"`
-	LogoHeight    string   `json:"logoHeight,omitempty"`
-	LogoAltText   string   `json:"logoAltText,omitempty"`
-	DocURLMapping string   `json:"docUrlMapping,omitempty"`
-	DisabledItems []string `json:"disabledItems,omitempty"`
+	LogoURL           string            `json:"logoUrl,omitempty"`
+	LogoWidth         string            `json:"logoWidth,omitempty"`
+	LogoHeight        string            `json:"logoHeight,omitempty"`
+	LogoAltText       string            `json:"logoAltText,omitempty"`
+	DocURLMapping     string            `json:"docUrlMapping,omitempty"`
+	DisabledItems     []string          `json:"disabledItems,omitempty"`
+	DetectHeaderItems DetectHeaderItems `json:"detectHeaderItems,omitempty"`
+}
+
+type DetectHeaderItems struct {
+	AdditionalProperties AdditionalProperties `json:"additionalProperties,omitempty"`
+}
+
+type AdditionalProperties struct {
+	DetectionNamespace     string   `json:"detectionNamespace,omitempty"`
+	DetectionServiceName   string   `json:"detectionServiceName,omitempty"`
+	DetectionLabelSelector string   `json:"detectionLabelSelector,omitempty"`
+	IsAuthorized           []string `json:"isAuthorized,omitempty"`
 }
 
 type Login struct {

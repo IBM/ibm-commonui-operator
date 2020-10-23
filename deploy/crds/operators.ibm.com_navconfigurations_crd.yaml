@@ -32,6 +32,7 @@ spec:
           description: NavConfigurationSpec defines the desired state of NavConfiguration
           properties:
             about:
+              description: Customizations for the about modal
               properties:
                 copyright:
                   description: Copyright string for the cloud pak
@@ -52,7 +53,25 @@ spec:
                   type: string
               type: object
             header:
+              description: Customizations for the common web ui header
               properties:
+                detectHeaderItems:
+                  description: An object that maps header items to service detection values, such as service name, label selector, and namespace. The only supported header item is 'search'.
+                  properties:
+                    additionalProperties:
+                      properties:
+                        detectionLabelSelector:
+                          type: string
+                        detectionNamespace:
+                          type: string
+                        detectionServiceName:
+                          type: string
+                        isAuthorized:
+                          items:
+                            type: string
+                          type: array
+                      type: object
+                  type: object
                 disabledItems:
                   description: An array of header items that should be disabled when running within this CR context. Valid values are 'catalog', 'createResource', 'bookmark'
                   items:
@@ -81,6 +100,7 @@ spec:
                   type: boolean
               type: object
             login:
+              description: Customizations for the login page
               properties:
                 loginDialog:
                   properties:
@@ -116,6 +136,7 @@ spec:
                 type: string
               type: array
             navItems:
+              description: Navigation items for the common web ui header as defined by the cloud paks
               items:
                 properties:
                   detectionServiceName:
