@@ -114,7 +114,7 @@ spec:
   navItems:
     - id: "home"
       label: "Home"
-      iconUrl: "{{ .Values.ingressPath }}/graphics/monitor-health.svg"
+      url: "/common-nav/dashboard"
     - id: "id-access"
       label: "Identity and Access"
       url: "/common-nav/identity-access"
