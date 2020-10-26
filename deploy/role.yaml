@@ -84,18 +84,6 @@ rules:
   verbs:
   - '*'
 - apiGroups:
-  - foundation.ibm.com
-  resources:
-  - navconfigurations
-  verbs:
-  - create
-  - delete
-  - get
-  - list
-  - patch
-  - update
-  - watch
-- apiGroups:
   - certmanager.k8s.io
   resources:
   - '*'
