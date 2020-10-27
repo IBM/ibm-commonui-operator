@@ -539,20 +539,7 @@ spec:
   install:
     spec:
       clusterPermissions:
-      - rules:
-        - apiGroups:
-          - '*'
-          resources:
-          - '*'
-          verbs:
-          - get
-          - list
-        - apiGroups:
-          - certmanager.k8s.io
-          resources:
-          - clusterissuers
-          verbs:
-          - use
+      - rules: null
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
