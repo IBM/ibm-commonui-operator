@@ -29,7 +29,7 @@ import (
 const DefaultImageRegistry = "quay.io/opencloudio"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.2.1"
-const DefaultClusterIssuer = "cs-ca-issuer"
+const DefaultClusterIssuer = "cs-ca-clusterissuer"
 const DefaultNamespace = "ibm-common-services"
 
 const DasboardDefaultImageName = "ibm-dashboard-data-collector"

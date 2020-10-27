@@ -105,3 +105,10 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
+rules:
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - clusterissuers
+  verbs:
+  - use

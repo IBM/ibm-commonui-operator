@@ -735,7 +735,7 @@ func BuildCertificate(instanceNamespace, instanceClusterIssuer string, certData 
 			Organization: []string{"IBM"},
 			IssuerRef: certmgr.ObjectReference{
 				Name: clusterIssuer,
-				Kind: certmgr.IssuerKind,
+				Kind: certmgr.ClusterIssuerKind,
 			},
 		},
 	}
