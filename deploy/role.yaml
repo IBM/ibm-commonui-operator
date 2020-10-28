@@ -112,3 +112,10 @@ rules:
   - clusterissuers
   verbs:
   - use
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  verbs:
+  - get
+  - list

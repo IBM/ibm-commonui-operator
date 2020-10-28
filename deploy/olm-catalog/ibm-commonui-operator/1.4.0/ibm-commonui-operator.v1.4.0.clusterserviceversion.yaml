@@ -546,6 +546,13 @@ spec:
           - clusterissuers
           verbs:
           - use
+        - apiGroups:
+          - ""
+          resources:
+          - configmaps
+          verbs:
+          - get
+          - list
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
