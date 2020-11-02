@@ -118,9 +118,3 @@ rules:
   verbs: 
   - get
   - list
-- apiGroups:
-  - certmanager.k8s.io
-  resources:
-  - clusterissuers
-  verbs:
-  - use

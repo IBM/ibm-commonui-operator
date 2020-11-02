@@ -547,12 +547,6 @@ spec:
           verbs:
           - get
           - list
-        - apiGroups:
-          - certmanager.k8s.io
-          resources:
-          - clusterissuers
-          verbs:
-          - use
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
