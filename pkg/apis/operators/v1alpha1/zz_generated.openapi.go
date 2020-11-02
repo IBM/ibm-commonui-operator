@@ -138,6 +138,12 @@ func schema_pkg_apis_operators_v1alpha1_CommonWebUIConfig(ref common.ReferenceCa
 							Format: "",
 						},
 					},
+					"landingPage": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
 					"dashboardData": {
 						SchemaProps: spec.SchemaProps{
 							Ref: ref("github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1.DashboardData"),
