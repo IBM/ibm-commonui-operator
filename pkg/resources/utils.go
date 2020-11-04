@@ -309,13 +309,15 @@ var CrTemplates = `[
 			{
 			  "id": "home",
 			  "label": "Home",
-			  "url": "/common-nav/dashboard"
+			  "url": "/common-nav/dashboard",
+			  "iconUrl": "/common-nav/graphics/home.svg"
 			},
 			{
 			  "id": "id-access",
 			  "label": "Identity and Access",
 			  "serviceId": "webui-nav",
-			  "url": "/common-nav/identity-access"
+			  "url": "/common-nav/identity-access",
+			  "iconUrl": "/common-nav/graphics/password.svg"
 			},
 			{
 			  "detectionServiceName": true,
@@ -324,7 +326,8 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "ibm-license-service-reporter",
 			  "serviceName": "ibm-license-service-reporter",
-			  "url": "/license-service-reporter"
+			  "url": "/license-service-reporter",
+			  "iconUrl": "/common-nav/graphics/identification.svg"
 			},
 			{
 			  "detectionServiceName": true,
@@ -333,7 +336,8 @@ var CrTemplates = `[
 			  "namespace": "ibm-common-services",
 			  "serviceId": "metering-ui",
 			  "serviceName": "metering-ui",
-			  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
+			  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main",
+			  "iconUrl": "/common-nav/graphics/meter--alt.svg"
 			},
 			{
 			  "detectionServiceName": true,
@@ -348,7 +352,8 @@ var CrTemplates = `[
 			  "serviceId": "monitoring-ui",
 			  "serviceName": "ibm-monitoring-grafana",
 			  "target": "_blank",
-			  "url": "/grafana"
+			  "url": "/grafana",
+			  "iconUrl": "/common-nav/graphics/activity.svg"
 			},
 			{
 			  "detectionServiceName": true,
@@ -358,7 +363,8 @@ var CrTemplates = `[
 			  "serviceId": "kibana",
 			  "serviceName": "kibana",
 			  "target": "_blank",
-			  "url": "/kibana"
+			  "url": "/kibana",
+			  "iconUrl": "/common-nav/graphics/catalog.svg"
 			}
 		  ]
 		}
