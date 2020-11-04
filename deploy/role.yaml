@@ -16,6 +16,7 @@ rules:
   - services/finalizers
   - configmaps
   - secrets
+  - serviceaccounts
   verbs:
   - '*'
 - apiGroups:
@@ -115,6 +116,27 @@ rules:
   - ""
   resources:
   - configmaps
+  - statefulsets
+  - persistentvolumeclaims
+  - pods
+  - nodes
+  - events
   verbs: 
   - get
   - list
+- apiGroups:
+  - route.openshift.io
+  resources:
+    - routes
+  verbs:
+    - get
+    - list
+- apiGroups:
+  - apps
+  resources:
+    - deployments
+    - daemonsets
+    - statefulsets
+  verbs:
+    - get
+    - list
