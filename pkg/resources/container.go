@@ -329,6 +329,14 @@ var CommonContainer = corev1.Container{
 				},
 			},
 		},
+		{
+			Name: "POD_NAMESPACE",
+			ValueFrom: &corev1.EnvVarSource{
+				FieldRef: &corev1.ObjectFieldSelector{
+					FieldPath: "metadata.namespace",
+				},
+			},
+		},
 	},
 }
 
