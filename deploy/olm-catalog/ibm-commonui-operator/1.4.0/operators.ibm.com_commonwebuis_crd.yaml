@@ -68,6 +68,8 @@ spec:
                   type: string
                 ingressPath:
                   type: string
+                landingPage:
+                  type: string
                 requestLimits:
                   type: string
                 requestMemory:
