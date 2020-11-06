@@ -318,6 +318,25 @@ var CommonContainer = corev1.Container{
 			Name:  "LANDING_PAGE",
 			Value: "",
 		},
+		{
+			Name: "WATCH_NAMESPACE",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "namespace-scope",
+					},
+					Key: "namespaces",
+				},
+			},
+		},
+		{
+			Name: "POD_NAMESPACE",
+			ValueFrom: &corev1.EnvVarSource{
+				FieldRef: &corev1.ObjectFieldSelector{
+					FieldPath: "metadata.namespace",
+				},
+			},
+		},
 	},
 }
 

@@ -464,7 +464,7 @@ var CrTemplates = `[
 // returns the labels associated with the resource being created
 func LabelsForMetadata(deploymentName string) map[string]string {
 	return map[string]string{"app.kubernetes.io/instance": "ibm-commonui-operator",
-		"app.kubernetes.io/name": deploymentName, "app.kubernetes.io/managed-by": "ibm-commonui-operator"}
+		"app.kubernetes.io/name": deploymentName, "app.kubernetes.io/managed-by": "ibm-commonui-operator", "intent": "projected"}
 }
 
 // returns the labels for selecting the resources belonging to the given metering CR name
