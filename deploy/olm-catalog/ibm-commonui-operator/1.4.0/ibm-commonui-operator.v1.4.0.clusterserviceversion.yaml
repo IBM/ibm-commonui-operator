@@ -549,6 +549,7 @@ spec:
           - pods
           - nodes
           - events
+          - services
           verbs:
           - get
           - list
