@@ -121,6 +121,7 @@ rules:
   - pods
   - nodes
   - events
+  - services
   verbs: 
   - get
   - list
