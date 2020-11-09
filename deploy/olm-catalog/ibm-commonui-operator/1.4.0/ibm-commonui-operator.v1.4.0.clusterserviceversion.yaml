@@ -569,6 +569,13 @@ spec:
           verbs:
           - get
           - list
+        - apiGroups:
+          - extensions
+          resources:
+          - ingresses
+          verbs:
+          - get
+          - list
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
