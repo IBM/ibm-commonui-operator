@@ -141,3 +141,10 @@ rules:
   verbs:
     - get
     - list
+- apiGroups:
+  - extensions
+  resources:
+    - ingresses
+  verbs:
+    - get
+    - list
