@@ -9,7 +9,7 @@ metadata:
     default: "true"
 spec:
   about:
-    logoUrl: "IBM Cloud Pak"
+    logoUrl: "IBM Cloud Pak Administration Hub"
     licenses:
       - "yq, version 3.3.0, MIT+GPL"
       - "MongoDB, version 4.0.16 Community Edition, SSPL"
@@ -90,8 +90,6 @@ spec:
       - "logrotate, v3.8.6, GPL v2"
       - "checker-qual, version 2.0.0, GPLv2"
     copyright: "© 2018, 2019 IBM. All rights reserved."
-    version: "3.5.4"
-    edition: "Enterprise"
   header:
     logoUrl: "/common-nav/graphics/ibm-cloudpack-logo.svg"
     logoWidth: "190px"

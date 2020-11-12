@@ -205,7 +205,6 @@ var CrTemplates = `[
 		"spec": {
 		  "about": {
 			"copyright": "© 2018, 2020 IBM. All rights reserved.",
-			"edition": "Enterprise",
 			"licenses": [
 				"yq, version 3.3.0, MIT+GPL",
 				"MongoDB, version 4.0.16 Community Edition, SSPL",
@@ -281,9 +280,8 @@ var CrTemplates = `[
 			  "logrotate, v3.8.6, GPL v2",
 			  "checker-qual, version 2.0.0, GPLv2"
 			],
-			"logoAltText": "IBM Cloud Pak",
-			"logoUrl": "IBM Cloud Pak",
-			"version": "3.5.4"
+			"logoAltText": "IBM Cloud Pak Administration Hub",
+			"logoUrl": "IBM Cloud Pak Administration Hub"
 		  },
 		  "header": {
 			"logoAltText": "IBM Cloud Pak Administration Hub",
