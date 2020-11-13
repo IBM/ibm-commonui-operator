@@ -31,11 +31,11 @@ spec:
     requestLimits: "300"
     requestMemory: "256"
     imageRegistry: quay.io/opencloudio
-    imageTag: 1.4.0
+    imageTag: 1.4.1
     serviceName: common-web-ui
     dashboardData:
       imageRegistry: quay.io/opencloudio
-      imageTag: 1.1.0
+      imageTag: 1.1.1
       resources:
         requests:
           memory: 400Mi
@@ -43,5 +43,5 @@ spec:
         limits:
           memory: 400Mi
           cpu: 300m
-  operatorVersion: 1.4.0
-  version: 1.4.0
+  operatorVersion: 1.4.1
+  version: 1.4.1
