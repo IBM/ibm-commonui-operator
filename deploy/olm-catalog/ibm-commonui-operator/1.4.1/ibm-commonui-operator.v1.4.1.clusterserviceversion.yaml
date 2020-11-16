@@ -107,7 +107,6 @@ metadata:
           "spec": {
             "about": {
               "copyright": "© 2018, 2019 IBM. All rights reserved.",
-              "edition": "Enterprise",
               "licenses": [
                 "yq, version 3.3.0, MIT+GPL",
                 "MongoDB, version 4.0.16 Community Edition, SSPL",
@@ -182,8 +181,8 @@ metadata:
                 "logrotate, v3.8.6, GPL v2",
                 "checker-qual, version 2.0.0, GPLv2"
               ],
-              "logoUrl": "IBM Cloud Pak",
-              "version": "3.6.0"
+              "logoUrl": "IBM Cloud Pak Administration Hub",
+              "logoAltText": "IBM Cloud Pak Administration Hub"
             },
             "header": {
               "disabledItems": [
@@ -212,13 +211,15 @@ metadata:
               {
                 "id": "home",
                 "label": "Home",
-                "url": "/common-nav/dashboard"
+                "url": "/common-nav/dashboard",
+                "iconUrl": "/common-nav/graphics/home.svg"
               },
               {
                 "id": "id-access",
                 "label": "Identity and Access",
                 "serviceId": "webui-nav",
-                "url": "/common-nav/identity-access"
+                "url": "/common-nav/identity-access",
+                "iconUrl": "/common-nav/graphics/password.svg"
               },
               {
                 "detectionServiceName": true,
@@ -226,7 +227,8 @@ metadata:
                 "label": "Licensing",
                 "namespace": "ibm-common-services",
                 "serviceId": "ibm-license-service-reporter",
-                "url": "/license-service-reporter"
+                "url": "/license-service-reporter",
+                "iconUrl": "/common-nav/graphics/identification.svg"
               },
               {
                 "detectionServiceName": true,
@@ -235,7 +237,8 @@ metadata:
                 "namespace": "ibm-common-services",
                 "serviceId": "metering-ui",
                 "serviceName": "metering-ui",
-                "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
+                "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main",
+                "iconUrl": "/common-nav/graphics/meter--alt.svg"
               },
               {
                 "detectionServiceName": true,
@@ -250,7 +253,8 @@ metadata:
                 "serviceId": "monitoring-ui",
                 "serviceName": "ibm-monitoring-grafana",
                 "target": "_blank",
-                "url": "/grafana"
+                "url": "/grafana",
+                "iconUrl": "/common-nav/graphics/activity.svg"
               },
               {
                 "detectionServiceName": true,
@@ -260,7 +264,8 @@ metadata:
                 "serviceId": "kibana",
                 "serviceName": "kibana",
                 "target": "_blank",
-                "url": "/kibana"
+                "url": "/kibana",
+                "iconUrl": "/common-nav/graphics/catalog.svg"
               }
             ]
           }
