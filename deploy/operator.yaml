@@ -57,11 +57,11 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-commonui-operator"
             - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-              value: "sha256:46ff8e8b797504c42fe1f720c0270246b4383ad094b912cfb43c4c0c28ec253e"             
+              value: "sha256:ceaf75d1a5944249695bbc50b3b9fd1afd422f33cad47230786473e24d01a646"             
             - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
               value: "sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46"
             - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
-              value: "sha256:478def24355bb8e653135df8fbf113c14d750d2c5192bc64de7cb338ca088ba5"
+              value: "sha256:6c6874b1567a63a06bd6e26ccd55aa75f9f951d9e3f03f5cfdef3823390fc03c"
           resources:
             limits:
               cpu: 40m
