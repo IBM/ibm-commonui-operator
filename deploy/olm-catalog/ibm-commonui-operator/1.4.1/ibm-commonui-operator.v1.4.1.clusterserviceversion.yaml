@@ -322,7 +322,7 @@ metadata:
                 "id": "id-access",
                 "label": "Identity and Access",
                 "serviceId": "webui-nav",
-                "url": "/common-nav/identity-access"
+                "url": "/common-nav/identity-access?useNav=icp4i"
               },
               {
                 "detectionServiceName": true,
