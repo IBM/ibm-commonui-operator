@@ -37,7 +37,7 @@ spec:
         - "Operator"
     - id: "id-access"
       label: "Identity and Access"
-      url: "/common-nav/identity-access"
+      url: "/common-nav/identity-access?useNav=icp4i"
       serviceId: "webui-nav"
     - id: "logging"
       label: "Logging"
