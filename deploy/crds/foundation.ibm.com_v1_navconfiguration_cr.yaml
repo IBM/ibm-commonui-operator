@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     default: "true"
+    name: common-web-ui-config
 spec:
   about:
     logoUrl: "IBM Cloud Pak Administration Hub"

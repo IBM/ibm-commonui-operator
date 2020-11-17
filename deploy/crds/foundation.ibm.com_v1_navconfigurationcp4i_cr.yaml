@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/instance: icp4i
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
+    name: icp4i
 spec:
   header:
     logoUrl: "/common-nav/graphics/ibm-cloudpak-integration.svg"
