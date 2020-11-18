@@ -148,3 +148,9 @@ rules:
   verbs:
     - get
     - list
+- apiGroups:
+    - ""
+  resources:
+    - namespaces
+  verbs:
+    - get
