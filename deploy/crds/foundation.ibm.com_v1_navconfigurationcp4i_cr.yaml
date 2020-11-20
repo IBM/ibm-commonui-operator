@@ -6,6 +6,7 @@ metadata:
     app.kubernetes.io/instance: icp4i
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
+    name: icp4i
 spec:
   header:
     logoUrl: "/common-nav/graphics/ibm-cloudpak-integration.svg"
@@ -26,7 +27,7 @@ spec:
       label: "Monitoring"
       url: "/grafana"
       namespace: "ibm-common-services"
-      serviceName: "monitoring-prometheus"
+      serviceName: "ibm-monitoring-grafana"
       serviceId: "monitoring-ui"
       target: "_blank"
       detectionServiceName: true
@@ -36,7 +37,7 @@ spec:
         - "Operator"
     - id: "id-access"
       label: "Identity and Access"
-      url: "/common-nav/identity-access"
+      url: "/common-nav/identity-access?useNav=icp4i"
       serviceId: "webui-nav"
     - id: "logging"
       label: "Logging"

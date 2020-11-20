@@ -49,7 +49,7 @@ metadata:
               "cpuMemory": "256",
               "dashboardData": {
                 "imageRegistry": "quay.io/opencloudio",
-                "imageTag": "1.1.0",
+                "imageTag": "1.1.1",
                 "resources": {
                   "limits": {
                     "cpu": "300m",
@@ -62,14 +62,14 @@ metadata:
                 }
               },
               "imageRegistry": "quay.io/opencloudio",
-              "imageTag": "1.4.0",
+              "imageTag": "1.4.1",
               "ingressPath": "/common-nav",
               "requestLimits": "300",
               "requestMemory": "256",
               "serviceName": "common-web-ui"
             },
             "globalUIConfig": {
-              "cloudPakVersion": "3.5.3",
+              "cloudPakVersion": "3.6.0",
               "defaultAdminUser": "admin",
               "defaultAuth": "",
               "enterpriseLDAP": "",
@@ -77,7 +77,7 @@ metadata:
               "osAuth": "",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "1.4.0",
+            "operatorVersion": "1.4.1",
             "replicas": 1,
             "resources": {
               "limits": {
@@ -89,7 +89,7 @@ metadata:
                 "memory": "256Mi"
               }
             },
-            "version": "1.4.0"
+            "version": "1.4.1"
           }
         },
         {
@@ -100,7 +100,8 @@ metadata:
               "app.kubernetes.io/instance": "common-web-ui-config",
               "app.kubernetes.io/managed-by": "ibm-commonui-operator",
               "app.kubernetes.io/name": "ibm-commonui-operator",
-              "default": "true"
+              "default": "true",
+              "name": "common-web-ui-config"
             },
             "name": "common-web-ui-config"
           },
@@ -277,7 +278,8 @@ metadata:
             "labels": {
               "app.kubernetes.io/instance": "icp4i",
               "app.kubernetes.io/managed-by": "ibm-commonui-operator",
-              "app.kubernetes.io/name": "ibm-commonui-operator"
+              "app.kubernetes.io/name": "ibm-commonui-operator",
+              "name": "icp4i"
             },
             "name": "icp4i"
           },
@@ -320,7 +322,7 @@ metadata:
                 "id": "id-access",
                 "label": "Identity and Access",
                 "serviceId": "webui-nav",
-                "url": "/common-nav/identity-access"
+                "url": "/common-nav/identity-access?useNav=icp4i"
               },
               {
                 "detectionServiceName": true,
@@ -380,13 +382,13 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.4.0
+    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.4.1
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
-    olm.skipRange: '>=1.1.0 <1.4.0'
+    olm.skipRange: '>=1.1.0 <1.4.1'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
-  name: ibm-commonui-operator.v1.4.0
+  name: ibm-commonui-operator.v1.4.1
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -540,7 +542,7 @@ spec:
    operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak, for a list of IBM Cloud Paks, see 
    [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks). \n- If you are using the operator with an IBM Containerized Software, 
    see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall)."
-  displayName: Ibm Common UI
+  displayName: Ibm Common UI Operator
   install:
     spec:
       clusterPermissions:
@@ -581,6 +583,12 @@ spec:
           verbs:
           - get
           - list
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
@@ -630,12 +638,12 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-                  value: sha256:46ff8e8b797504c42fe1f720c0270246b4383ad094b912cfb43c4c0c28ec253e
+                  value: sha256:ceaf75d1a5944249695bbc50b3b9fd1afd422f33cad47230786473e24d01a646
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
-                  value: sha256:478def24355bb8e653135df8fbf113c14d750d2c5192bc64de7cb338ca088ba5
-                image: quay.io/opencloudio/ibm-commonui-operator:1.4.0
+                  value: sha256:6c6874b1567a63a06bd6e26ccd55aa75f9f951d9e3f03f5cfdef3823390fc03c
+                image: quay.io/opencloudio/ibm-commonui-operator:1.4.1
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
@@ -781,5 +789,5 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-commonui-operator.v1.3.3
-  version: 1.4.0
+  replaces: ibm-commonui-operator.v1.4.0
+  version: 1.4.1

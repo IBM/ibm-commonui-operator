@@ -7,9 +7,10 @@ metadata:
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     default: "true"
+    name: common-web-ui-config
 spec:
   about:
-    logoUrl: "IBM Cloud Pak"
+    logoUrl: "IBM Cloud Pak Administration Hub"
     licenses:
       - "yq, version 3.3.0, MIT+GPL"
       - "MongoDB, version 4.0.16 Community Edition, SSPL"
@@ -90,8 +91,6 @@ spec:
       - "logrotate, v3.8.6, GPL v2"
       - "checker-qual, version 2.0.0, GPLv2"
     copyright: "© 2018, 2019 IBM. All rights reserved."
-    version: "3.5.4"
-    edition: "Enterprise"
   header:
     logoUrl: "/common-nav/graphics/ibm-cloudpack-logo.svg"
     logoWidth: "190px"
@@ -115,19 +114,23 @@ spec:
     - id: "home"
       label: "Home"
       url: "/common-nav/dashboard"
+      iconUrl: "/common-nav/graphics/home.svg"
     - id: "id-access"
       label: "Identity and Access"
       url: "/common-nav/identity-access"
+      iconUrl: "/common-nav/graphics/password.svg"
       serviceId: "webui-nav"
     - id: "licensing"
       label: "Licensing"
       url: "/license-service-reporter"
+      iconUrl: "/common-nav/graphics/identification.svg"
       serviceId: "ibm-license-service-reporter"
       namespace: "ibm-common-services"
       detectionServiceName: true
     - id: "metering"
       label: "Metering"
       url: "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
+      iconUrl: "/common-nav/graphics/meter--alt.svg"
       namespace: "ibm-common-services"
       serviceName: "metering-ui"
       serviceId: "metering-ui"
@@ -135,8 +138,9 @@ spec:
     - id: "monitoring"
       label: "Monitoring"
       url: "/grafana"
+      iconUrl: "/common-nav/graphics/activity.svg"
       namespace: "ibm-common-services"
-      serviceName: "monitoring-prometheus"
+      serviceName: "ibm-monitoring-grafana"
       serviceId: "monitoring-ui"
       target: "_blank"
       detectionServiceName: true
@@ -147,6 +151,7 @@ spec:
     - id: "logging"
       label: "Logging"
       url: "/kibana"
+      iconUrl: "/common-nav/graphics/catalog.svg"
       serviceId: "kibana"
       target: "_blank"
       serviceName: "kibana"

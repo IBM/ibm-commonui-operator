@@ -118,7 +118,8 @@ var APIIngressAnnotations = map[string]string{
 	//nolint
 	"icp.management.ibm.com/configuration-snippet": `
 		add_header 'X-XSS-Protection' '1' always;
-        add_header Content-Security-Policy "default-src 'none'; font-src 'unsafe-inline' 'self'; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com; frame-ancestors 'self'";`,
+        add_header Content-Security-Policy "default-src 'none'; font-src 'unsafe-inline' 'self'; script-src 'unsafe-inline' 'self' blob: cdn.segment.com fast.appcues.com; connect-src 'self' https://api.segment.io wss://api.appcues.net https://notify.bugsnag.com; img-src * data:; frame-src 'self' https://my.appcues.com; style-src 'unsafe-inline' 'self' https://fast.appcues.com; frame-ancestors 'self'";
+        port_in_redirect off;`,
 }
 
 var CallbackIngressAnnotations = map[string]string{
@@ -205,7 +206,6 @@ var CrTemplates = `[
 		"spec": {
 		  "about": {
 			"copyright": "© 2018, 2020 IBM. All rights reserved.",
-			"edition": "Enterprise",
 			"licenses": [
 				"yq, version 3.3.0, MIT+GPL",
 				"MongoDB, version 4.0.16 Community Edition, SSPL",
@@ -281,9 +281,8 @@ var CrTemplates = `[
 			  "logrotate, v3.8.6, GPL v2",
 			  "checker-qual, version 2.0.0, GPLv2"
 			],
-			"logoAltText": "IBM Cloud Pak",
-			"logoUrl": "IBM Cloud Pak",
-			"version": "3.5.4"
+			"logoAltText": "IBM Cloud Pak Administration Hub",
+			"logoUrl": "IBM Cloud Pak Administration Hub"
 		  },
 		  "header": {
 			"logoAltText": "IBM Cloud Pak Administration Hub",
