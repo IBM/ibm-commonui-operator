@@ -540,7 +540,7 @@ spec:
    operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud Pak, for a list of IBM Cloud Paks, see 
    [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks). \n- If you are using the operator with an IBM Containerized Software, 
    see the IBM Cloud Platform Common Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall)."
-  displayName: Ibm Common UI
+  displayName: Ibm Common UI Operator
   install:
     spec:
       clusterPermissions:
