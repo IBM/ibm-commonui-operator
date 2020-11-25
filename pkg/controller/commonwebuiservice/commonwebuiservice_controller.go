@@ -500,7 +500,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 									{
 										MatchExpressions: []corev1.NodeSelectorRequirement{
 											{
-												Key:      "beta.kubernetes.io/arch",
+												Key:      "kubernetes.io/arch",
 												Operator: corev1.NodeSelectorOpIn,
 												Values:   res.ArchitectureList,
 											},
