@@ -90,7 +90,7 @@ spec:
       - "inotify-tools, v3.14, GPL v2"
       - "logrotate, v3.8.6, GPL v2"
       - "checker-qual, version 2.0.0, GPLv2"
-    copyright: "© 2018, 2019 IBM. All rights reserved."
+    copyright: "© 2018, 2020 IBM. All rights reserved."
   header:
     logoUrl: "/common-nav/graphics/ibm-cloudpack-logo.svg"
     logoWidth: "190px"
