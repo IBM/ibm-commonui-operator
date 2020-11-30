@@ -107,7 +107,7 @@ metadata:
           },
           "spec": {
             "about": {
-              "copyright": "© 2018, 2019 IBM. All rights reserved.",
+              "copyright": "© 2018, 2020 IBM. All rights reserved.",
               "licenses": [
                 "yq, version 3.3.0, MIT+GPL",
                 "MongoDB, version 4.0.16 Community Edition, SSPL",
