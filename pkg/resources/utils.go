@@ -309,7 +309,10 @@ var CrTemplates = `[
 			  "id": "home",
 			  "label": "Home",
 			  "url": "/common-nav/dashboard",
-			  "iconUrl": "/common-nav/graphics/home.svg"
+			  "iconUrl": "/common-nav/graphics/home.svg",
+				"isAuthorized": [
+					"ClusterAdministrator"
+			  ]
 			},
 			{
 			  "id": "id-access",
