@@ -576,6 +576,7 @@ func (r *ReconcileCommonWebUI) serviceForUI(instance *operatorsv1alpha1.CommonWe
 			Labels:    metaLabels,
 		},
 		Spec: corev1.ServiceSpec{
+			Type: corev1.ServiceTypeLoadBalancer,
 			Ports: []corev1.ServicePort{
 				{
 					Name: instance.Spec.CommonWebUIConfig.ServiceName,
