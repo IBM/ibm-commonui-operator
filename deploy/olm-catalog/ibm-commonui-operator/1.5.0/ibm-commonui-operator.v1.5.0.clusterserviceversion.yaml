@@ -6,6 +6,23 @@ metadata:
       [
         {
           "apiVersion": "operator.ibm.com/v1alpha1",
+          "kind": "OperandBindInfo",
+          "metadata": {
+            "name": "ibm-commonui-bindinfo"
+          },
+          "spec": {
+            "operand": "ibm-commonui-operator",
+            "registry": "common-service",
+            "description": "Binding information that should be accessible to Zen AdminHub adopters",
+            "bindings": {
+              "public": {
+                "configmap": "common-webui-ui-extensions"
+              }
+            }
+          }
+        },
+        {
+          "apiVersion": "operator.ibm.com/v1alpha1",
           "kind": "OperandRequest",
           "metadata": {
             "name": "ibm-commonui-request"
@@ -385,14 +402,14 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.5.0
+    containerImage: quay.io/ericabr/ibm-commonui-operator:1.5.0
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
     olm.skipRange: '>=1.1.0 <1.5.0'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.5.0
-  namespace: placeholder
+  namespace: ibm-common-services
 spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
@@ -570,6 +587,7 @@ spec:
           verbs:
           - get
           - list
+          - watch
         - apiGroups:
           - apps
           resources:
@@ -646,7 +664,7 @@ spec:
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
                   value: sha256:cd58bab5d6f4aebbcd17c02a8c935df0e71756e66bf74317269a8da9dec50de9
-                image: quay.io/opencloudio/ibm-commonui-operator:1.5.0
+                image: quay.io/ericabr/ibm-commonui-operator:1.5.0
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:

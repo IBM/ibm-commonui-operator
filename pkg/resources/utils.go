@@ -46,6 +46,7 @@ type CertificateData struct {
 
 const ReleaseName = "common-web-ui"
 const Log4jsConfigMap = "common-web-ui-log4js"
+const ExtensionsConfigMap = "common-webui-ui-extensions"
 const CommonConfigMap = "common-web-ui-config"
 const DaemonSetName = "common-web-ui"
 const DeploymentName = "common-web-ui"
@@ -482,6 +483,22 @@ func LabelsForPodMetadata(deploymentName string, crType string, crName string) m
 		podLabels[key] = value
 	}
 	return podLabels
+}
+
+func ExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[string]string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI", "Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
+	metaLabels["icpdata_addon"] = "true"
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      ExtensionsConfigMap,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Data: data,
+	}
+	return configmap
 }
 
 func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
