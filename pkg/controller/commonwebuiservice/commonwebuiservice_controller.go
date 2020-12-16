@@ -281,8 +281,8 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 
 			var ExtensionsData = map[string]string{
-				"add-ons.json": strings.Replace(addons, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
-				"extensions":   strings.Replace(extensions, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
+				"add-ons.json": strings.Replace(res.Addons, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
+				"extensions":   strings.Replace(res.Extensions, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
 			}
 
 			newConfigMap = res.ExtensionsConfigMapUI(instance, ExtensionsData)
@@ -723,50 +723,3 @@ func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.Commo
 		reqLogger.Error(err, "Failed to get old DaemonSet")
 	}
 }
-
-var extensions = `
-[
-	{
-		"extension_point_id": "left_menu_item",
-		"extension_name": "dap-admin-hub",
-		"display_name": "Administration Hub",
-		"order_hint": 100,
-		"match_permissions": "administrator",
-		"meta": {},
-		"details": {
-			"parent_folder": "dap-header-administer",
-			"href": "/common-nav/dashboard",
-			"target": "adminhub"
-		}
-	}
-]`
-
-var addons = `
-			{
-			 "commonui":{
-					 "access_management_enable":false,
-					 "category":"zcs",
-					 "add_on_type":"application",
-					 "details":{
-						 "short_description":"IBM Administration Hub",
-						 "long_description":"This application delivers the IBM Administration Hub view for Cloud pak administrators.",
-						 "images":[
-								 "https://raw.githubusercontent.com/prashant182/res/master/g1.png",
-								 "https://raw.githubusercontent.com/prashant182/res/master/g2.png"
-						 ],
-						 "openURL":"/common-nav/dashboard",
-						 "external_open_url_target": "adminhub"
-					 },
-					 "display_name":"IBM Administration Hub",
-					 "extensions":{
-		
-					 },
-					 "max_instances":"1",
-					 "vendor":"IBM",
-					 "versions":{
-						 "3.5.0":{
-								 "state":"enabled"
-						 }
-					 }
-				 }
-			 }`
