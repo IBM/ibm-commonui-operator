@@ -384,7 +384,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	if imageTag == "" {
 		imageTag = res.DefaultImageTag
 	}
-	image := res.GetImageID(imageRegistry, res.DefaultImageName, imageTag, "", "COMMON_WEB_UI_IMAGE_TAG_OR_SHA")
+	image := res.GetImageID(imageRegistry, res.DefaultImageName, imageTag, "", "COMMON_WEB_UI_IMAGE")
 	reqLogger.Info("CS??? default Image=" + image)
 
 	commonVolume = append(commonVolume, res.Log4jsVolume)
