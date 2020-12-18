@@ -18,9 +18,10 @@ package commonwebuiservice
 import (
 	"context"
 	"strconv"
+	"strings"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
-
+	routesv1 "github.com/openshift/api/route/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
@@ -180,7 +181,12 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		}
 	}
 	// Check if the config maps already exist. If not, create a new one.
-	err = r.reconcileConfigMaps(instance, &needToRequeue)
+	err = r.reconcileConfigMaps(instance, res.Log4jsConfigMap, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	err = r.reconcileConfigMaps(instance, res.ExtensionsConfigMap, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -253,16 +259,35 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking log4js config map Service")
 	// Check if the log4js config map already exists, if not create a new one
 	currentConfigMap := &corev1.ConfigMap{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.Log4jsConfigMap, Namespace: instance.Namespace}, currentConfigMap)
+	err := r.client.Get(context.TODO(), types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, currentConfigMap)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new ConfigMap
-		newConfigMap := res.Log4jsConfigMapUI(instance)
+		newConfigMap := &corev1.ConfigMap{}
+		if nameOfCM == res.Log4jsConfigMap {
+			newConfigMap = res.Log4jsConfigMapUI(instance)
+		} else if nameOfCM == res.ExtensionsConfigMap {
+			currentRoute := &routesv1.Route{}
+			//Get the cp-console route and add it to the configmap below
+			err2 := r.client.Get(context.TODO(), types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
+			if err2 != nil {
+				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+			}
+			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+
+			var ExtensionsData = map[string]string{
+				"add-ons.json": strings.Replace(res.Addons, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
+				"extensions":   strings.Replace(res.Extensions, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
+			}
+
+			newConfigMap = res.ExtensionsConfigMapUI(instance, ExtensionsData)
+
+		}
 
 		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)
 		if err != nil {
