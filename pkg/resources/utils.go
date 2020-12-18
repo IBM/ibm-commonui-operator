@@ -45,6 +45,7 @@ type CertificateData struct {
 
 const ReleaseName = "common-web-ui"
 const Log4jsConfigMap = "common-web-ui-log4js"
+const ExtensionsConfigMap = "common-webui-ui-extensions"
 const CommonConfigMap = "common-web-ui-config"
 const DaemonSetName = "common-web-ui"
 const DeploymentName = "common-web-ui"
@@ -178,6 +179,53 @@ var UICertificateData = CertificateData{
 	App:       "common-web-ui",
 	Component: "common-web-ui",
 }
+
+var Extensions = `
+[
+	{
+		"extension_point_id": "left_menu_item",
+		"extension_name": "dap-admin-hub",
+		"display_name": "Administration Hub",
+		"order_hint": 100,
+		"match_permissions": "administrator",
+		"meta": {},
+		"details": {
+			"parent_folder": "dap-header-administer",
+			"href": "/common-nav/dashboard",
+			"target": "adminhub"
+		}
+	}
+]`
+
+var Addons = `
+{
+	"commonui":{
+			"access_management_enable":false,
+			"category":"zcs",
+			"add_on_type":"application",
+			"details":{
+				"short_description":"IBM Administration Hub",
+				"long_description":"This application delivers the IBM Administration Hub view for Cloud pak administrators.",
+				"images":[
+						"https://raw.githubusercontent.com/prashant182/res/master/g1.png",
+						"https://raw.githubusercontent.com/prashant182/res/master/g2.png"
+				],
+				"openURL":"/common-nav/dashboard",
+				"external_open_url_target": "adminhub"
+			},
+			"display_name":"IBM Administration Hub",
+			"extensions":{
+
+			},
+			"max_instances":"1",
+			"vendor":"IBM",
+			"versions":{
+				"3.5.0":{
+						"state":"enabled"
+				}
+			}
+		}
+	}`
 
 //nolint
 var CrTemplates = `[
@@ -470,6 +518,22 @@ func LabelsForPodMetadata(deploymentName string, crType string, crName string) m
 		podLabels[key] = value
 	}
 	return podLabels
+}
+
+func ExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[string]string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI", "Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
+	metaLabels["icpdata_addon"] = "true"
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      ExtensionsConfigMap,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Data: data,
+	}
+	return configmap
 }
 
 func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
