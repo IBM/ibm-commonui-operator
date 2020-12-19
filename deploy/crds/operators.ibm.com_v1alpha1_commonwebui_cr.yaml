@@ -15,6 +15,7 @@ spec:
     limits:
       memory: 256Mi
       cpu: 300m
+  iframeDomain: https://*.multicloud-ibm.com
   globalUIConfig:
     cloudPakVersion: 3.5.3
     defaultAdminUser: admin

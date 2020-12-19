@@ -30,6 +30,7 @@ type CommonWebUISpec struct {
 	Replicas          int32             `json:"replicas,omitempty"`
 	Resources         Resources         `json:"resources,omitempty"`
 	License           License           `json:"license,omitempty"`
+	IframeDomain      string            `json:"iframeDomain,omitempty"`
 }
 
 // CommonWebUIConfig defines the desired state of CommonWebUIConfig
