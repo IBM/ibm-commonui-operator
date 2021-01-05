@@ -484,7 +484,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	if dashboardImageTag == "" {
 		dashboardImageTag = res.DasboardDefaultImageTag
 	}
-	dashboardImage := res.GetImageID(dashboardImageRegistry, res.DasboardDefaultImageName, dashboardImageTag, "", "DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA")
+	dashboardImage := res.GetImageID(dashboardImageRegistry, res.DasboardDefaultImageName, dashboardImageTag, "", "IBM_DASHBOARD_DATA_COLLECTOR_IMAGE")
 	reqLogger.Info("Dashboard data collector Image=" + dashboardImage)
 
 	dashboardDataCollectorContainer := res.DashboardDataContainer
