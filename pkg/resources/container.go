@@ -337,6 +337,17 @@ var CommonContainer = corev1.Container{
 				},
 			},
 		},
+		{
+			Name: "REDIS_CLIENT_CERTS",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "redis-client-certs",
+					},
+					Key: "service-ca.crt",
+				},
+			},
+		},
 	},
 }
 

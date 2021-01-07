@@ -44,6 +44,7 @@ type CertificateData struct {
 }
 
 const ReleaseName = "common-web-ui"
+const RedisCertsConfigMap = "redis-client-certs"
 const Log4jsConfigMap = "common-web-ui-log4js"
 const ExtensionsConfigMap = "common-webui-ui-extensions"
 const CommonConfigMap = "common-web-ui-config"
@@ -85,6 +86,10 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 	reqLogger.Info("imageID: " + imageID)
 
 	return imageID
+}
+
+var RedisCertsAnnotations = map[string]string{
+	"service.beta.openshift.io/inject-cabundle": "true",
 }
 
 var DeamonSetAnnotations = map[string]string{
@@ -547,6 +552,23 @@ func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMa
 			Labels:    metaLabels,
 		},
 		Data: Log4jsData,
+	}
+
+	return configmap
+}
+
+func RedisCertsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "redisCertsConfigMap", "Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(RedisCertsConfigMap)
+	Annotations := RedisCertsAnnotations
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        RedisCertsConfigMap,
+			Annotations: Annotations,
+			Namespace:   instance.Namespace,
+			Labels:      metaLabels,
+		},
 	}
 
 	return configmap

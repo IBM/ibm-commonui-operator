@@ -191,6 +191,11 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
+	err = r.reconcileConfigMaps(instance, res.RedisCertsConfigMap, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
 	// Check if the UI Deployment already exists, if not create a new one
 	newDeployment, err := r.deploymentForUI(instance)
 	if err != nil {
@@ -287,6 +292,8 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 
 			newConfigMap = res.ExtensionsConfigMapUI(instance, ExtensionsData)
 
+		} else if nameOfCM == res.RedisCertsConfigMap {
+			newConfigMap = res.RedisCertsConfigMapUI(instance)
 		}
 
 		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)
