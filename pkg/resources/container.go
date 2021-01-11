@@ -348,6 +348,14 @@ var CommonContainer = corev1.Container{
 				},
 			},
 		},
+		{
+			Name:  "REDIS_PASS",
+			Value: "changeme",
+		},
+		{
+			Name:  "REDIS_PORT",
+			Value: "16000",
+		},
 	},
 }
 

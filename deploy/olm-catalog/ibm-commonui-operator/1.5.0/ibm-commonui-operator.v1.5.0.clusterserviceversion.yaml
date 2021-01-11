@@ -42,6 +42,9 @@ metadata:
                   },
                   {
                     "name": "ibm-cert-manager-operator"
+                  }, 
+                  {
+                    "name": "ibm-cloud-databases-redis-operator"
                   }
                 ],
                 "registry": "common-service"

@@ -233,6 +233,108 @@ var Addons = `
 	}`
 
 //nolint
+var RedisSentinelCr = `
+{
+	"kind": "RedisSentinel",
+	"apiVersion": "redis.databases.cloud.ibm.com/v1",
+	"metadata": {
+	  "name": "example-redis",
+	  "annotations": {
+		"pods.redis.databases.cloud.ibm.com/productID": "some-id",
+		"pods.redis.databases.cloud.ibm.com/productName": "some-name",
+		"pods.redis.databases.cloud.ibm.com/productVersion": "some-version",
+		"pods.redis.databases.cloud.ibm.com/example-annotation": "true"
+	  },
+	  "labels": {
+		"app.kubernetes.io/instance": "example-redis",
+		"app.kubernetes.io/managed-by": "ibm-cloud-databases-redis-operator",
+		"app.kubernetes.io/name": "redis"
+	  }
+	},
+	"spec": {
+	  "version": "5.0.5",
+	  "license": {
+		"accept": true
+	  },
+	  "persistence": {
+		"enabled": true,
+		"disk": "1Gi",
+		"storageClass": "icd-empty-dir"
+	  },
+	  "resources": {
+		"requests": {
+		  "memory": "1Gi",
+		  "cpu": "1"
+		},
+		"limits": {
+		  "memory": "2Gi",
+		  "cpu": "2"
+		}
+	  },
+	  "size": 3,
+	  "environment": {
+		"adminPassword": "changeme"
+	  },
+	  "members": {
+		"labels": {
+		  "app.kubernetes.io/example-label": "members-value1"
+		},
+		"annotations": {
+		  "app.kubernetes.io/example-annotation": "members-value2"
+		},
+		"affinity": {
+		  "podAntiAffinity": {
+			"requiredDuringSchedulingIgnoredDuringExecution": [
+			  {
+				"labelSelector": {
+				  "matchExpressions": [
+					{
+					  "key": "app.kubernetes.io/example-label",
+					  "operator": "In",
+					  "values": [
+						"members-value1"
+					  ]
+					}
+				  ]
+				},
+				"topologyKey": "kubernetes.io/hostname"
+			  }
+			]
+		  }
+		}
+	  },
+	  "sentinels": {
+		"labels": {
+		  "app.kubernetes.io/example-label": "sentinel-value1"
+		},
+		"annotations": {
+		  "app.kubernetes.io/example-annotation": "sentinel-value2"
+		},
+		"affinity": {
+		  "podAffinity": {
+			"requiredDuringSchedulingIgnoredDuringExecution": [
+			  {
+				"labelSelector": {
+				  "matchExpressions": [
+					{
+					  "key": "app.kubernetes.io/example-label",
+					  "operator": "In",
+					  "values": [
+						"members-value1"
+					  ]
+					}
+				  ]
+				},
+				"topologyKey": "kubernetes.io/hostname"
+			  }
+			]
+		  }
+		}
+	  }
+	}
+  }`
+
+//nolint
 var CrTemplates = `[
 	{
 		"apiVersion": "foundation.ibm.com/v1",
