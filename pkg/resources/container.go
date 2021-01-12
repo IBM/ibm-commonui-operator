@@ -356,6 +356,10 @@ var CommonContainer = corev1.Container{
 			Name:  "REDIS_PORT",
 			Value: "16000",
 		},
+		{
+			Name:  "REDIS_HOST",
+			Value: "c-example-redis-p",
+		},
 	},
 }
 

@@ -42,9 +42,6 @@ metadata:
                   },
                   {
                     "name": "ibm-cert-manager-operator"
-                  }, 
-                  {
-                    "name": "ibm-cloud-databases-redis-operator"
                   }
                 ],
                 "registry": "common-service"
@@ -613,6 +610,13 @@ spec:
           - namespaces
           verbs:
           - get
+        - apiGroups:
+          - redis.databases.cloud.ibm.com
+          resources:
+          - redissentinels
+          verbs:
+          - get
+          - create
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator

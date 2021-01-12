@@ -155,3 +155,10 @@ rules:
     - namespaces
   verbs:
     - get
+- apiGroups:
+    - redis.databases.cloud.ibm.com
+  resources:
+    - redissentinels
+  verbs:
+    - get
+    - create
