@@ -154,7 +154,6 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 
 	// Fetch the CommonWebUIService CR instance
 	instance := &operatorsv1alpha1.CommonWebUI{}
-
 	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
