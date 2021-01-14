@@ -155,3 +155,15 @@ rules:
     - namespaces
   verbs:
     - get
+- apiGroups:
+  - console.openshift.io
+  resources:
+  - consolelinks
+  - consolelinks/finalizers
+  - consolelinks/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - update

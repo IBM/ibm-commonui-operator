@@ -447,6 +447,9 @@ spec:
       - kind: Deployment
         name: ''
         version: v1
+      - kind: ConsoleLink
+        name: ''
+        version: v1
       - kind: Certificate
         name: ''
         version: v1alpha1
@@ -779,6 +782,18 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - console.openshift.io
+          resources:
+          - consolelinks
+          - consolelinks/finalizers
+          - consolelinks/status
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - update
         serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:
