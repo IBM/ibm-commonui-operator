@@ -630,6 +630,18 @@ spec:
           - create
           - delete
           - update
+        - apiGroups:
+          - console.openshift.io
+          resources:
+          - consolelinks
+          - consolelinks/finalizers
+          - consolelinks/status
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - update
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
@@ -799,18 +811,6 @@ spec:
           - patch
           - update
           - watch
-        - apiGroups:
-          - console.openshift.io
-          resources:
-          - consolelinks
-          - consolelinks/finalizers
-          - consolelinks/status
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - update
         serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:
