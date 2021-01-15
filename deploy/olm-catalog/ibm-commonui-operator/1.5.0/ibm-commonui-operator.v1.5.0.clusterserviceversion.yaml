@@ -42,6 +42,9 @@ metadata:
                   },
                   {
                     "name": "ibm-cert-manager-operator"
+                  },
+                  {
+                    "name": "ibm-cloud-databases-redis-operator"
                   }
                 ],
                 "registry": "common-service"
@@ -450,6 +453,9 @@ spec:
       - kind: ConsoleLink
         name: ''
         version: v1
+      - kind: RedisSentinel
+        name: ''
+        version: v1
       - kind: Certificate
         name: ''
         version: v1alpha1
@@ -613,6 +619,17 @@ spec:
           - namespaces
           verbs:
           - get
+        - apiGroups:
+          - redis.databases.cloud.ibm.com
+          resources:
+          - redissentinels
+          - redissentinels/finalizers
+          - redissentinels/status
+          verbs:
+          - get
+          - create
+          - delete
+          - update
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator

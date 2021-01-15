@@ -44,6 +44,7 @@ type CertificateData struct {
 }
 
 const ReleaseName = "common-web-ui"
+const RedisCertsConfigMap = "redis-client-certs"
 const Log4jsConfigMap = "common-web-ui-log4js"
 const ExtensionsConfigMap = "common-webui-ui-extensions"
 const CommonConfigMap = "common-web-ui-config"
@@ -85,6 +86,10 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 	reqLogger.Info("imageID: " + imageID)
 
 	return imageID
+}
+
+var RedisCertsAnnotations = map[string]string{
+	"service.beta.openshift.io/inject-cabundle": "true",
 }
 
 var DeamonSetAnnotations = map[string]string{
@@ -228,6 +233,107 @@ var Addons = `
 	}`
 
 //nolint
+var RedisSentinelCr = `
+{
+	"kind": "RedisSentinel",
+	"apiVersion": "redis.databases.cloud.ibm.com/v1",
+	"metadata": {
+	  "name": "example-redis",
+	  "annotations": {
+		"pods.redis.databases.cloud.ibm.com/productID": "some-id",
+		"pods.redis.databases.cloud.ibm.com/productName": "some-name",
+		"pods.redis.databases.cloud.ibm.com/productVersion": "some-version",
+		"pods.redis.databases.cloud.ibm.com/example-annotation": "true"
+	  },
+	  "labels": {
+		"app.kubernetes.io/instance": "example-redis",
+		"app.kubernetes.io/managed-by": "ibm-cloud-databases-redis-operator",
+		"app.kubernetes.io/name": "redis"
+	  }
+	},
+	"spec": {
+	  "version": "5.0.5",
+	  "license": {
+		"accept": true
+	  },
+	  "persistence": {
+		"enabled": true,
+		"disk": "1Gi",
+		"storageClass": "icd-empty-dir"
+	  },
+	  "resources": {
+		"requests": {
+		  "memory": "1Gi",
+		  "cpu": "1"
+		},
+		"limits": {
+		  "memory": "2Gi",
+		  "cpu": "2"
+		}
+	  },
+	  "size": 3,
+	  "environment": {
+		"adminPassword": "changeme"
+	  },
+	  "members": {
+		"labels": {
+		  "app.kubernetes.io/example-label": "members-value1"
+		},
+		"annotations": {
+		  "app.kubernetes.io/example-annotation": "members-value2"
+		},
+		"affinity": {
+		  "podAntiAffinity": {
+			"requiredDuringSchedulingIgnoredDuringExecution": [
+			  {
+				"labelSelector": {
+				  "matchExpressions": [
+					{
+					  "key": "app.kubernetes.io/example-label",
+					  "operator": "In",
+					  "values": [
+						"members-value1"
+					  ]
+					}
+				  ]
+				},
+				"topologyKey": "kubernetes.io/hostname"
+			  }
+			]
+		  }
+		}
+	  },
+	  "sentinels": {
+		"labels": {
+		  "app.kubernetes.io/example-label": "sentinel-value1"
+		},
+		"annotations": {
+		  "app.kubernetes.io/example-annotation": "sentinel-value2"
+		},
+		"affinity": {
+		  "podAffinity": {
+			"requiredDuringSchedulingIgnoredDuringExecution": [
+			  {
+				"labelSelector": {
+				  "matchExpressions": [
+					{
+					  "key": "app.kubernetes.io/example-label",
+					  "operator": "In",
+					  "values": [
+						"members-value1"
+					  ]
+					}
+				  ]
+				},
+				"topologyKey": "kubernetes.io/hostname"
+			  }
+			]
+		  }
+		}
+	  }
+	}
+  }`
+
 var CrTemplates = `{
 	"apiVersion": "console.openshift.io/v1",
 	"kind": "ConsoleLink",
@@ -289,6 +395,23 @@ func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMa
 			Labels:    metaLabels,
 		},
 		Data: Log4jsData,
+	}
+
+	return configmap
+}
+
+func RedisCertsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "redisCertsConfigMap", "Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(RedisCertsConfigMap)
+	Annotations := RedisCertsAnnotations
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        RedisCertsConfigMap,
+			Annotations: Annotations,
+			Namespace:   instance.Namespace,
+			Labels:      metaLabels,
+		},
 	}
 
 	return configmap

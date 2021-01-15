@@ -156,14 +156,25 @@ rules:
   verbs:
     - get
 - apiGroups:
-  - console.openshift.io
+    - redis.databases.cloud.ibm.com
   resources:
-  - consolelinks
-  - consolelinks/finalizers
-  - consolelinks/status
+    - redissentinels
+    - redissentinels/finalizers
+    - redissentinels/status
   verbs:
-  - create
-  - delete
-  - get
-  - list
-  - update
+    - get
+    - create
+    - delete
+    - update
+- apiGroups:
+    - console.openshift.io
+  resources:
+    - consolelinks
+    - consolelinks/finalizers
+    - consolelinks/status
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - update
