@@ -224,6 +224,12 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		return reconcile.Result{}, err
 	}
 
+	//Check if CR already exists. If not, create a new one
+	err = r.reconcileCr(instance)
+	if err != nil {
+		reqLogger.Error(err, "Error creating custom resource")
+	}
+
 	// Check if the Certificates already exist, if not create new ones
 	err = r.reconcileCertificates(instance, &needToRequeue)
 	if err != nil {
@@ -689,6 +695,168 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.Co
 	return nil
 }
 
+func (r *ReconcileCommonWebUI) reconcileCr(instance *operatorsv1alpha1.CommonWebUI) error {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("RECONCILING CR")
+
+	namespace := instance.Namespace
+	var crTemplate map[string]interface{}
+	// Unmarshal or Decode the JSON to the interface.
+	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplate)
+	if crTemplatesErr != nil {
+		reqLogger.Info("Failed to unmarshall crTemplates")
+		return crTemplatesErr
+	}
+	var unstruct unstructured.Unstructured
+	unstruct.Object = crTemplate
+	name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
+
+	//Get CR and see if it exists
+	getError := r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}, &unstruct)
+
+	err1 := r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
+	if err1 == nil {
+		r.finalizerCr(instance, unstruct)
+	}
+
+	if getError != nil && !errors.IsNotFound(getError) {
+		reqLogger.Error(getError, "Failed to get CR")
+	} else if errors.IsNotFound(getError) {
+		//If CR was not found, create it
+		//Get the cp-console route
+		currentRoute := &routesv1.Route{}
+		err2 := r.client.Get(context.TODO(), types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
+		if err2 != nil {
+			reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+		}
+		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+		//Will hold href for admin hub console link
+		var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
+
+		// Create Custom resource
+		if createErr := r.createCustomResource(unstruct, name, href); createErr != nil {
+			reqLogger.Error(createErr, "Failed to create CR")
+			return createErr
+		}
+	} else {
+		reqLogger.Info("Skipping CR creation")
+	}
+
+	return nil
+}
+
+func (r *ReconcileCommonWebUI) createCustomResource(unstruct unstructured.Unstructured, name, href string) error {
+	reqLogger := log.WithValues("CR name", name)
+	reqLogger.Info("creating a CR ", name)
+
+	unstruct.Object["spec"].(map[string]interface{})["href"] = href
+	crCreateErr := r.client.Create(context.TODO(), &unstruct)
+	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
+		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
+		return crCreateErr
+	}
+	return nil
+}
+
+func (r *ReconcileCommonWebUI) reconcileRedisSentinelCr(instance *operatorsv1alpha1.CommonWebUI) error {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("RECONCILING REDIS SENTINEL CR")
+
+	namespace := instance.Namespace
+
+	var crTemplate map[string]interface{}
+	// Unmarshal or Decode the JSON to the interface.
+	crTemplateErr := json.Unmarshal([]byte(res.RedisSentinelCr), &crTemplate)
+	if crTemplateErr != nil {
+		reqLogger.Info("Failed to unmarshall crTemplates")
+		return crTemplateErr
+	}
+	var unstruct unstructured.Unstructured
+	unstruct.Object = crTemplate
+	name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
+	getError := r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}, &unstruct)
+
+	// commonuiErr := r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
+	// if commonuiErr == nil {
+	// 	r.finalizerCr(instance, unstruct)
+	// }
+
+	if getError != nil && !errors.IsNotFound(getError) {
+		reqLogger.Error(getError, "Failed to get the CR")
+	} else if errors.IsNotFound(getError) {
+		// Create Custom resource
+		if createErr := r.createRedisCustomResource(unstruct, name, namespace); createErr != nil {
+			reqLogger.Error(createErr, "Failed to create CR")
+			return createErr
+		}
+	} else {
+		reqLogger.Info("Skipping CR creation")
+	}
+	return nil
+}
+
+func (r *ReconcileCommonWebUI) finalizerCr(instance *operatorsv1alpha1.CommonWebUI, unstruct unstructured.Unstructured) {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+
+	finalizerName := "commonui.operators.ibm.com"
+
+	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
+		// Add the finalizer to the metadata of the instance and update the object.
+		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) {
+			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName)
+			if err := r.client.Update(context.Background(), instance); err != nil {
+				reqLogger.Error(err, "Failed to create finalizer")
+			} else {
+				reqLogger.Info("Created Finalizer")
+			}
+		}
+	} else {
+		// When the instance is being deleted. If finalizer is present
+		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
+			// Finalizer is present, so lets handle any external dependency - remove console link CR
+			if err := r.client.Delete(context.TODO(), &unstruct); err != nil {
+				// if fails to delete the external dependency here, return with error
+				reqLogger.Error(err, "Failed to delete CR")
+			} else {
+				reqLogger.Info("Deleted CR")
+			}
+
+			// Remove our finalizer from the metadata of the object and update it.
+			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
+			if err := r.client.Update(context.Background(), instance); err != nil {
+				reqLogger.Error(err, "Failed to delete finalizer")
+			} else {
+				reqLogger.Info("Deleted Finalizer")
+			}
+		}
+	}
+}
+
+func containsString(slice []string, s string) bool {
+	for _, item := range slice {
+		if item == s {
+			return true
+		}
+	}
+	return false
+}
+
+func removeString(slice []string, s string) (result []string) {
+	for _, item := range slice {
+		if item == s {
+			continue
+		}
+		result = append(result, item)
+	}
+	return
+}
+
 func (r *ReconcileCommonWebUI) reconcileCertificates(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileCertificates", "instance.Name", instance.Name)
 
@@ -739,42 +907,7 @@ func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.Commo
 	}
 }
 
-func (r *ReconcileCommonWebUI) reconcileRedisSentinelCr(instance *operatorsv1alpha1.CommonWebUI) error {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-	reqLogger.Info("RECONCILING REDIS SENTINEL CR")
-
-	namespace := instance.Namespace
-
-	var crTemplate map[string]interface{}
-	// Unmarshal or Decode the JSON to the interface.
-	crTemplateErr := json.Unmarshal([]byte(res.RedisSentinelCr), &crTemplate)
-	if crTemplateErr != nil {
-		reqLogger.Info("Failed to unmarshall crTemplates")
-		return crTemplateErr
-	}
-	var unstruct unstructured.Unstructured
-	unstruct.Object = crTemplate
-	name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
-	getError := r.client.Get(context.TODO(), types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}, &unstruct)
-
-	if getError != nil && !errors.IsNotFound(getError) {
-		reqLogger.Error(getError, "Failed to get the CR")
-	} else if errors.IsNotFound(getError) {
-		// Create Custom resource
-		if createErr := r.createCustomResource(unstruct, name, namespace); createErr != nil {
-			reqLogger.Error(createErr, "Failed to create CR")
-			return createErr
-		}
-	} else {
-		reqLogger.Info("Skipping CR creation")
-	}
-	return nil
-}
-
-func (r *ReconcileCommonWebUI) createCustomResource(unstruct unstructured.Unstructured, name, namespace string) error {
+func (r *ReconcileCommonWebUI) createRedisCustomResource(unstruct unstructured.Unstructured, name, namespace string) error {
 	reqLogger := log.WithValues("CR namespace", namespace, "CR name", name)
 	reqLogger.Info("creating a CR ", name)
 	unstruct.Object["metadata"].(map[string]interface{})["namespace"] = namespace
