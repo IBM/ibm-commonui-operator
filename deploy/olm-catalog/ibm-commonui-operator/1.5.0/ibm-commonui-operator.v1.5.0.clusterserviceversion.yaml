@@ -811,6 +811,12 @@ spec:
           - patch
           - update
           - watch
+        - apiGroups:
+          - batch
+          resources:
+          - jobs
+          verbs:
+          - get
         serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:
