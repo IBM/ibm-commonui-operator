@@ -408,7 +408,7 @@ metadata:
     containerImage: quay.io/opencloudio/ibm-commonui-operator:1.5.0
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
-    olm.skipRange: '>=1.1.0 <1.5.0'
+    olm.skipRange: '<1.5.0'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.5.0
@@ -848,5 +848,4 @@ spec:
   maturity: alpha
   provider:
     name: IBM
-  replaces: ibm-commonui-operator.v1.4.1
   version: 1.5.0
