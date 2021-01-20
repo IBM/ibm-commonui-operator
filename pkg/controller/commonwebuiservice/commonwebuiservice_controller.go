@@ -539,6 +539,28 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 					HostPID:                       false,
 					HostIPC:                       false,
 					TerminationGracePeriodSeconds: &res.Seconds60,
+					TopologySpreadConstraints: []corev1.TopologySpreadConstraint{
+						{
+							MaxSkew:           1,
+							TopologyKey:       "topology.kubernetes.io/zone",
+							WhenUnsatisfiable: corev1.ScheduleAnyway,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"k8s-app": res.DeploymentName,
+								},
+							},
+						},
+						{
+							MaxSkew:           1,
+							TopologyKey:       "topology.kubernetes.io/region",
+							WhenUnsatisfiable: corev1.ScheduleAnyway,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"k8s-app": res.DeploymentName,
+								},
+							},
+						},
+					},
 					Affinity: &corev1.Affinity{
 						NodeAffinity: &corev1.NodeAffinity{
 							RequiredDuringSchedulingIgnoredDuringExecution: &corev1.NodeSelector{
