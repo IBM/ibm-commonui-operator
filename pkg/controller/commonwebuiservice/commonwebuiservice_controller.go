@@ -963,6 +963,7 @@ func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.
 			return err
 		}
 		var updatedNavItems []map[string]interface{}
+		//nolint
 		navItemsErr := json.Unmarshal([]byte(jsonData), &updatedNavItems)
 		if navItemsErr != nil {
 			reqLogger.Info("Failed to unmarshall nav items array")
@@ -979,8 +980,6 @@ func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.
 		if updateErr != nil {
 			reqLogger.Error(err, "Failed to update navitems in cr")
 			return updateErr
-		} else {
-			reqLogger.Info("NAV CONFIG CR UPDATED")
 		}
 	}
 	return nil
