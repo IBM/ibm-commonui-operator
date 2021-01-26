@@ -784,7 +784,7 @@ func (r *ReconcileCommonWebUI) reconcileRedisSentinelCr(instance *operatorsv1alp
 
 	commonuiErr := r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
 	if commonuiErr == nil {
-		r.finalizerRedisSentinelCr(instance, unstruct)
+		r.finalizerCr(instance, unstruct)
 	}
 
 	if getError != nil && !errors.IsNotFound(getError) {
@@ -805,15 +805,16 @@ func (r *ReconcileCommonWebUI) finalizerCr(instance *operatorsv1alpha1.CommonWeb
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 
 	finalizerName := "commonui.operators.ibm.com"
+	finalizerName1 := "commonui1.operators.ibm.com"
 
 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
 		// Add the finalizer to the metadata of the instance and update the object.
-		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName)
+		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) && !containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
+			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName, finalizerName1)
 			if err := r.client.Update(context.Background(), instance); err != nil {
 				reqLogger.Error(err, "Failed to create finalizer")
 			} else {
-				reqLogger.Info("Created Finalizer")
+				reqLogger.Info("Created Finalizers")
 			}
 		}
 	} else {
@@ -822,17 +823,33 @@ func (r *ReconcileCommonWebUI) finalizerCr(instance *operatorsv1alpha1.CommonWeb
 			// Finalizer is present, so lets handle any external dependency - remove console link CR
 			if err := r.client.Delete(context.TODO(), &unstruct); err != nil {
 				// if fails to delete the external dependency here, return with error
-				reqLogger.Error(err, "Failed to delete CR")
+				reqLogger.Error(err, "Failed to delete Console Link CR")
 			} else {
-				reqLogger.Info("Deleted CR")
+				reqLogger.Info("Deleted Console link CR")
 			}
 
 			// Remove our finalizer from the metadata of the object and update it.
 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
 			if err := r.client.Update(context.Background(), instance); err != nil {
-				reqLogger.Error(err, "Failed to delete finalizer")
+				reqLogger.Error(err, "Failed to delete  Console link finalizer")
 			} else {
-				reqLogger.Info("Deleted Finalizer")
+				reqLogger.Info("Deleted Console link Finalizer")
+			}
+		} else if containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
+			// Finalizer is present, so lets handle any external dependency - remove console link CR
+			if err := r.client.Delete(context.TODO(), &unstruct); err != nil {
+				// if fails to delete the external dependency here, return with error
+				reqLogger.Error(err, "Failed to delete Redis CR")
+			} else {
+				reqLogger.Info("Deleted Redis CR")
+			}
+
+			// Remove our finalizer from the metadata of the object and update it.
+			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName1)
+			if err := r.client.Update(context.Background(), instance); err != nil {
+				reqLogger.Error(err, "Failed to delete Redis finalizer")
+			} else {
+				reqLogger.Info("Deleted Redis Finalizer")
 			}
 		}
 	}
@@ -917,41 +934,4 @@ func (r *ReconcileCommonWebUI) createRedisCustomResource(unstruct unstructured.U
 		return crCreateErr
 	}
 	return nil
-}
-
-func (r *ReconcileCommonWebUI) finalizerRedisSentinelCr(instance *operatorsv1alpha1.CommonWebUI, unstruct unstructured.Unstructured) {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-
-	finalizerName := "commonui1.operators.ibm.com"
-
-	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
-		// Add the finalizer to the metadata of the instance and update the object.
-		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName)
-			if err := r.client.Update(context.Background(), instance); err != nil {
-				reqLogger.Error(err, "Failed to create Redis finalizer")
-			} else {
-				reqLogger.Info("Created Redis Finalizer")
-			}
-		}
-	} else {
-		// When the instance is being deleted. If finalizer is present
-		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-			// Finalizer is present, so lets handle any external dependency - remove redis CR
-			if err := r.client.Delete(context.TODO(), &unstruct); err != nil {
-				// if fails to delete the external dependency here, return with error
-				reqLogger.Error(err, "Failed to delete Redis CR")
-			} else {
-				reqLogger.Info("Deleted Redis CR")
-			}
-
-			// Remove our finalizer from the metadata of the object and update it.
-			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
-			if err := r.client.Update(context.Background(), instance); err != nil {
-				reqLogger.Error(err, "Failed to delete Redis finalizer")
-			} else {
-				reqLogger.Info("Deleted Redis Finalizer")
-			}
-		}
-	}
 }
