@@ -242,6 +242,16 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		reqLogger.Error(err, "Error creating Redis Sentinel custom resource")
 	}
 
+	err = r.updateCustomResource(instance, res.CommonWebUICr)
+	if err != nil {
+		reqLogger.Error(err, "Failed updating navconfig CR")
+	}
+
+	err = r.updateCustomResource(instance, res.Cp4iCr)
+	if err != nil {
+		reqLogger.Error(err, "Failed updating icp4i navconfig CR")
+	}
+
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(instance)
 
@@ -915,6 +925,63 @@ func (r *ReconcileCommonWebUI) createRedisCustomResource(unstruct unstructured.U
 	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
 		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
 		return crCreateErr
+	}
+	return nil
+}
+
+func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.CommonWebUI, nameOfCR string) error {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("UPDATE CUSTOM RESOURCE")
+	namespace := instance.Namespace
+	var crTemplate map[string]interface{}
+	var jsonStringCr string
+	// Unmarshal or Decode the JSON to the interface.
+	if nameOfCR == res.CommonWebUICr {
+		jsonStringCr = res.NavConfigCR
+	} else {
+		jsonStringCr = res.NavConfigCP4ICR
+	}
+	crTemplateErr := json.Unmarshal([]byte(jsonStringCr), &crTemplate)
+	if crTemplateErr != nil {
+		reqLogger.Info("Failed to unmarshall nav config cr")
+		return crTemplateErr
+	}
+	var unstruct unstructured.Unstructured
+	unstruct.Object = crTemplate
+	getError := r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      nameOfCR,
+		Namespace: namespace,
+	}, &unstruct)
+
+	if getError == nil {
+		reqLogger.Info("FOUND NAV CONFIG CR TRYING TO UPDATE")
+		navItems := crTemplate["spec"].(map[string]interface{})["navItems"]
+		var jsonData []byte
+		jsonData, err := json.Marshal(navItems)
+		if err != nil {
+			reqLogger.Info("Failed to marshall navitems")
+			return err
+		}
+		var updatedNavItems []map[string]interface{}
+		navItemsErr := json.Unmarshal([]byte(jsonData), &updatedNavItems)
+		if navItemsErr != nil {
+			reqLogger.Info("Failed to unmarshall nav items array")
+			return navItemsErr
+		}
+		for _, item := range updatedNavItems {
+			if item["namespace"] != "" {
+				item["namespace"] = namespace
+			}
+		}
+		crTemplate["spec"].(map[string]interface{})["navItems"] = updatedNavItems
+		unstruct.Object = crTemplate
+		updateErr := r.client.Update(context.TODO(), &unstruct)
+		if updateErr != nil {
+			reqLogger.Error(err, "Failed to update navitems in cr")
+			return updateErr
+		} else {
+			reqLogger.Info("NAV CONFIG CR UPDATED")
+		}
 	}
 	return nil
 }
