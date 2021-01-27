@@ -117,6 +117,7 @@ spec:
       iconUrl: "/common-nav/graphics/home.svg"
       isAuthorized:
         - "ClusterAdministrator"
+        - "CloudPakAdministrator"
     - id: "id-access"
       label: "Identity and Access"
       url: "/common-nav/identity-access"
@@ -146,6 +147,7 @@ spec:
       isAuthorized:
         - "Administrator"
         - "ClusterAdministrator"
+        - "CloudPakAdministrator"
         - "Operator"
     - id: "logging"
       label: "Logging"
