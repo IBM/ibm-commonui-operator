@@ -184,3 +184,11 @@ rules:
     - get
     - list
     - update
+- apiGroups:
+    - foundation.ibm.com
+  resources:
+    - navconfigurations
+    - navconfigurations/finalizers
+    - navconfigurations/status
+  verbs:
+    - update

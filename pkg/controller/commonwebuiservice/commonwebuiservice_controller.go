@@ -955,7 +955,7 @@ func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.
 
 	if getError == nil {
 		reqLogger.Info("FOUND NAV CONFIG CR TRYING TO UPDATE")
-		navItems := crTemplate["spec"].(map[string]interface{})["navItems"]
+		navItems := unstruct.Object["spec"].(map[string]interface{})["navItems"]
 		var jsonData []byte
 		jsonData, err := json.Marshal(navItems)
 		if err != nil {
@@ -974,12 +974,10 @@ func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.
 				item["namespace"] = namespace
 			}
 		}
-		crTemplate["spec"].(map[string]interface{})["navItems"] = updatedNavItems
-		unstruct.Object = crTemplate
+		unstruct.Object["spec"].(map[string]interface{})["navItems"] = updatedNavItems
 		updateErr := r.client.Update(context.TODO(), &unstruct)
-		if updateErr != nil {
-			reqLogger.Error(err, "Failed to update navitems in cr")
-			return updateErr
+		if updateErr == nil {
+			reqLogger.Info("CLIENT UPDATED NAV CONFIG CR ")
 		}
 	}
 	return nil

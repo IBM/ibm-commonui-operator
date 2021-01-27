@@ -487,7 +487,6 @@ var NavConfigCR = `
 		  "detectionServiceName": true,
 		  "id": "licensing",
 		  "label": "Licensing",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "ibm-license-service-reporter",
 		  "url": "/license-service-reporter",
 		  "iconUrl": "/common-nav/graphics/identification.svg"
@@ -496,7 +495,6 @@ var NavConfigCR = `
 		  "detectionServiceName": true,
 		  "id": "metering",
 		  "label": "Metering",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "metering-ui",
 		  "serviceName": "metering-ui",
 		  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main",
@@ -511,7 +509,6 @@ var NavConfigCR = `
 			"Operator"
 		  ],
 		  "label": "Monitoring",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "monitoring-ui",
 		  "serviceName": "ibm-monitoring-grafana",
 		  "target": "_blank",
@@ -522,7 +519,6 @@ var NavConfigCR = `
 		  "detectionServiceName": true,
 		  "id": "logging",
 		  "label": "Logging",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "kibana",
 		  "serviceName": "kibana",
 		  "target": "_blank",
@@ -563,7 +559,6 @@ var NavConfigCP4ICR = `
 		  "detectionServiceName": true,
 		  "id": "metering",
 		  "label": "Metering",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "metering-ui",
 		  "serviceName": "metering-ui",
 		  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
@@ -577,7 +572,6 @@ var NavConfigCP4ICR = `
 			"Operator"
 		  ],
 		  "label": "Monitoring",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "monitoring-ui",
 		  "serviceName": "ibm-monitoring-grafana",
 		  "target": "_blank",
@@ -593,7 +587,6 @@ var NavConfigCP4ICR = `
 		  "detectionServiceName": true,
 		  "id": "logging",
 		  "label": "Logging",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "kibana",
 		  "serviceName": "kibana",
 		  "target": "_blank",
@@ -603,7 +596,6 @@ var NavConfigCP4ICR = `
 		  "detectionServiceName": true,
 		  "id": "releases",
 		  "label": "Helm Releases",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "catalog-ui",
 		  "serviceName": "catalog-ui",
 		  "url": "/catalog/instances?useNav=icp4i"
@@ -612,7 +604,6 @@ var NavConfigCP4ICR = `
 		  "detectionServiceName": true,
 		  "id": "repos",
 		  "label": "Helm Repositories",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "catalog-ui",
 		  "serviceName": "catalog-ui",
 		  "url": "/catalog/repositories?useNav=icp4i"
@@ -621,7 +612,6 @@ var NavConfigCP4ICR = `
 		  "detectionServiceName": true,
 		  "id": "licensing",
 		  "label": "Licensing",
-		  "namespace": "ibm-common-services",
 		  "serviceId": "ibm-license-service-reporter",
 		  "url": "/license-service-reporter"
 		}
