@@ -127,13 +127,11 @@ spec:
       url: "/license-service-reporter"
       iconUrl: "/common-nav/graphics/identification.svg"
       serviceId: "ibm-license-service-reporter"
-      namespace: "ibm-common-services"
       detectionServiceName: true
     - id: "metering"
       label: "Metering"
       url: "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
       iconUrl: "/common-nav/graphics/meter--alt.svg"
-      namespace: "ibm-common-services"
       serviceName: "metering-ui"
       serviceId: "metering-ui"
       detectionServiceName: true
@@ -141,7 +139,6 @@ spec:
       label: "Monitoring"
       url: "/grafana"
       iconUrl: "/common-nav/graphics/activity.svg"
-      namespace: "ibm-common-services"
       serviceName: "ibm-monitoring-grafana"
       serviceId: "monitoring-ui"
       target: "_blank"
@@ -157,5 +154,4 @@ spec:
       serviceId: "kibana"
       target: "_blank"
       serviceName: "kibana"
-      namespace: "ibm-common-services"
       detectionServiceName: true 
