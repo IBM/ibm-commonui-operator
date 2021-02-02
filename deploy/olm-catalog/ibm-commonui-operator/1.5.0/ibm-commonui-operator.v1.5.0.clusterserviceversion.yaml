@@ -67,23 +67,10 @@ metadata:
             "commonWebUIConfig": {
               "cpuLimits": "300",
               "cpuMemory": "256",
-              "dashboardData": {
-                "imageRegistry": "quay.io/opencloudio",
-                "imageTag": "1.1.1",
-                "resources": {
-                  "limits": {
-                    "cpu": "300m",
-                    "memory": "400Mi"
-                  },
-                  "requests": {
-                    "cpu": "300m",
-                    "memory": "400Mi"
-                  }
-                }
-              },
               "imageRegistry": "quay.io/opencloudio",
               "imageTag": "1.5.0",
               "ingressPath": "/common-nav",
+              "landingPage": "",
               "requestLimits": "300",
               "requestMemory": "256",
               "serviceName": "common-web-ui"

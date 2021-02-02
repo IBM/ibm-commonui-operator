@@ -463,69 +463,6 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
-	var collCPULimits, collCPUMemory, collReqLimits, collReqMemory int64
-	var collErrLim error
-
-	if instance.Spec.CommonWebUIConfig.DashboardData.Resources.Limits.CPULimits != "" {
-		limits := instance.Spec.CommonWebUIConfig.DashboardData.Resources.Limits.CPULimits
-		collCPULimits, collErrLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
-		if collErrLim != nil {
-			collCPULimits = 300
-		}
-	} else {
-		collCPULimits = 300
-	}
-
-	if instance.Spec.CommonWebUIConfig.DashboardData.Resources.Limits.CPUMemory != "" {
-		memory := instance.Spec.CommonWebUIConfig.DashboardData.Resources.Limits.CPUMemory
-		collCPUMemory, collErrLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
-		if collErrLim != nil {
-			collCPUMemory = 400
-		}
-	} else {
-		collCPUMemory = 400
-	}
-
-	if instance.Spec.CommonWebUIConfig.DashboardData.Resources.Requests.RequestLimits != "" {
-		limits := instance.Spec.CommonWebUIConfig.DashboardData.Resources.Requests.RequestLimits
-		collReqLimits, collErrLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
-		if collErrLim != nil {
-			collReqLimits = 300
-		}
-	} else {
-		collReqLimits = 300
-	}
-
-	if instance.Spec.CommonWebUIConfig.DashboardData.Resources.Requests.RequestMemory != "" {
-		memory := instance.Spec.CommonWebUIConfig.DashboardData.Resources.Requests.RequestMemory
-		collReqMemory, collErrLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
-		if collErrLim != nil {
-			collReqMemory = 400
-		}
-	} else {
-		collReqMemory = 400
-	}
-
-	dashboardImageRegistry := instance.Spec.CommonWebUIConfig.DashboardData.ImageRegistry
-	dashboardImageTag := instance.Spec.CommonWebUIConfig.DashboardData.ImageTag
-	if dashboardImageRegistry == "" {
-		dashboardImageRegistry = res.DefaultImageRegistry
-	}
-	if dashboardImageTag == "" {
-		dashboardImageTag = res.DasboardDefaultImageTag
-	}
-	dashboardImage := res.GetImageID(dashboardImageRegistry, res.DasboardDefaultImageName, dashboardImageTag, "", "IBM_DASHBOARD_DATA_COLLECTOR_IMAGE")
-	reqLogger.Info("Dashboard data collector Image=" + dashboardImage)
-
-	dashboardDataCollectorContainer := res.DashboardDataContainer
-	dashboardDataCollectorContainer.VolumeMounts = commonUIVolumeMounts
-	dashboardDataCollectorContainer.Image = dashboardImage
-	dashboardDataCollectorContainer.Name = res.DasboardDefaultImageName
-	dashboardDataCollectorContainer.Resources.Limits["cpu"] = *resource.NewMilliQuantity(collCPULimits, resource.DecimalSI)
-	dashboardDataCollectorContainer.Resources.Limits["memory"] = *resource.NewQuantity(collCPUMemory*1024*1024, resource.BinarySI)
-	dashboardDataCollectorContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(collReqLimits, resource.DecimalSI)
-	dashboardDataCollectorContainer.Resources.Requests["memory"] = *resource.NewQuantity(collReqMemory*1024*1024, resource.BinarySI)
-
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      res.DeploymentName,
