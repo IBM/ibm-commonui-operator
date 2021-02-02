@@ -60,6 +60,17 @@ func ReconcileDeployment(client client.Client, instanceNamespace string, deploym
 	} else {
 		// Found deployment, so determine if the resource has changed
 		logger.Info("Comparing Deployments")
+
+		// Preserve cert-manager added labels in metadata
+		if val, ok := currentDeployment.ObjectMeta.Labels[certRestartLabel]; ok {
+			newDeployment.ObjectMeta.Labels[certRestartLabel] = val
+		}
+
+		// Preserve cert-manager added labels in spec
+		if val, ok := currentDeployment.Spec.Template.ObjectMeta.Labels[certRestartLabel]; ok {
+			newDeployment.Spec.Template.ObjectMeta.Labels[certRestartLabel] = val
+		}
+
 		if !IsDeploymentEqual(currentDeployment, newDeployment) {
 			logger.Info("Updating Deployment", "Deployment.Name", currentDeployment.Name)
 			currentDeployment.ObjectMeta.Name = newDeployment.ObjectMeta.Name
