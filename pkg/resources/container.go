@@ -106,6 +106,7 @@ var ClusterCaVolume = corev1.Volume{
 // UI certificate definition
 const UICertName = "common-web-ui-ca-cert"
 const UICertCommonName = "common-web-ui"
+const certRestartLabel = "certmanager.k8s.io/time-restarted"
 
 // use concatenation so linter won't complain about "Secret" vars
 const UICertSecretName = "common-web-ui-cert" + ""
