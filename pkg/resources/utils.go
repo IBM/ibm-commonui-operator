@@ -473,7 +473,8 @@ var NavConfigCR = `
 		  "url": "/common-nav/dashboard",
 		  "iconUrl": "/common-nav/graphics/home.svg",
 		  "isAuthorized": [
-			"ClusterAdministrator"
+			"ClusterAdministrator",
+			"CloudPakAdministrator"
 		  ]
 		},
 		{
@@ -506,6 +507,7 @@ var NavConfigCR = `
 		  "isAuthorized": [
 			"Administrator",
 			"ClusterAdministrator",
+			"CloudPakAdministrator",
 			"Operator"
 		  ],
 		  "label": "Monitoring",

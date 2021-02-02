@@ -446,7 +446,6 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonVolume = append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 	commonVolumes = append(commonVolumes, res.UICertVolume)
-	commonVolumes2 := append(commonVolumes, res.DashboardDataVolume)
 
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
@@ -618,10 +617,9 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 							Operator: corev1.TolerationOpExists,
 						},
 					},
-					Volumes: commonVolumes2,
+					Volumes: commonVolumes,
 					Containers: []corev1.Container{
 						commonwebuiContainer,
-						dashboardDataCollectorContainer,
 					},
 				},
 			},
