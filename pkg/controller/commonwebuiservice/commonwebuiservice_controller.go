@@ -361,10 +361,6 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 			Name:      res.UICertVolumeName,
 			MountPath: "/certs/common-web-ui",
 		},
-		{
-			Name:      res.DashboardDataVolumeName,
-			MountPath: "/tmp/dashboardData",
-		},
 	}
 	var commonVolume = []corev1.Volume{}
 	reqLogger := log.WithValues("func", "newDeploymentForUI", "instance.Name", instance.Name)
