@@ -42,9 +42,6 @@ metadata:
                   },
                   {
                     "name": "ibm-cert-manager-operator"
-                  },
-                  {
-                    "name": "ibm-cloud-databases-redis-operator"
                   }
                 ],
                 "registry": "common-service"
@@ -681,8 +678,6 @@ spec:
                   value: quay.io/opencloudio/common-web-ui:1.5.0
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
-                - name: IBM_DASHBOARD_DATA_COLLECTOR_IMAGE
-                  value: quay.io/opencloudio/ibm-dashboard-data-collector:1.1.1
                 image: quay.io/opencloudio/ibm-commonui-operator:1.5.0
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
