@@ -225,10 +225,23 @@ metadata:
               },
               {
                 "id": "id-access",
-                "label": "Identity and Access",
+                "label": "Identity and access",
                 "serviceId": "webui-nav",
-                "url": "/common-nav/identity-access",
                 "iconUrl": "/common-nav/graphics/password.svg"
+              },
+              {
+                "id": "providers",
+                "parentId": "id-access",
+                "label": "Identity providers",
+                "serviceId": "webui-nav",
+                "url": "/common-nav/identity-access/realms"
+              },
+              {
+                "id": "teams-ids",
+                "parentId": "id-access",
+                "label": "Teams and service IDs",
+                "serviceId": "webui-nav",
+                "url": "/common-nav/identity-access/teams"
               },
               {
                 "detectionServiceName": true,
@@ -323,9 +336,22 @@ metadata:
               },
               {
                 "id": "id-access",
-                "label": "Identity and Access",
+                "label": "Identity and access",
+                "serviceId": "webui-nav"
+              },
+              {
+                "id": "providers",
+                "parentId": "id-access",
+                "label": "Identity providers",
                 "serviceId": "webui-nav",
-                "url": "/common-nav/identity-access?useNav=icp4i"
+                "url": "/common-nav/identity-access/realms?useNav=icp4i"
+              },
+              {
+                "id": "teams-ids",
+                "parentId": "id-access",
+                "label": "Teams and service IDs",
+                "serviceId": "webui-nav",
+                "url": "/common-nav/identity-access/teams?useNav=icp4i"
               },
               {
                 "detectionServiceName": true,

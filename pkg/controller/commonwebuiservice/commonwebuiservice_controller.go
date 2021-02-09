@@ -20,6 +20,7 @@ import (
 	"encoding/json"
 	"strconv"
 	"strings"
+	"time"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
 	routesv1 "github.com/openshift/api/route/v1"
@@ -190,7 +191,7 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 
 	err = r.reconcileConfigMaps(instance, res.ExtensionsConfigMap, &needToRequeue)
 	if err != nil {
-		return reconcile.Result{}, err
+		return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
 	}
 
 	err = r.reconcileConfigMaps(instance, res.RedisCertsConfigMap, &needToRequeue)
@@ -306,6 +307,8 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 			err2 := r.client.Get(context.TODO(), types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
 			if err2 != nil {
 				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+				*needToRequeue = true
+				return err2
 			}
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 
