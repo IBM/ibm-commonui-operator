@@ -478,11 +478,24 @@ var NavConfigCR = `
 		  ]
 		},
 		{
-		  "id": "id-access",
-		  "label": "Identity and Access",
-		  "serviceId": "webui-nav",
-		  "url": "/common-nav/identity-access",
-		  "iconUrl": "/common-nav/graphics/password.svg"
+			"id": "id-access",
+			"label": "Identity and access",
+			"serviceId": "webui-nav",
+			"iconUrl": "/common-nav/graphics/password.svg"
+		},
+		{
+			"id": "providers",
+			"parentId": "id-access",
+			"label": "Identity providers",
+			"serviceId": "webui-nav",
+			"url": "/common-nav/identity-access/realms"
+		},
+		{
+			"id": "teams-ids",
+			"parentId": "id-access",
+			"label": "Teams and service IDs",
+			"serviceId": "webui-nav",
+			"url": "/common-nav/identity-access/teams"
 		},
 		{
 		  "detectionServiceName": true,
@@ -580,10 +593,23 @@ var NavConfigCP4ICR = `
 		  "url": "/grafana"
 		},
 		{
-		  "id": "id-access",
-		  "label": "Identity and Access",
-		  "serviceId": "webui-nav",
-		  "url": "/common-nav/identity-access?useNav=icp4i"
+			"id": "id-access",
+			"label": "Identity and access",
+			"serviceId": "webui-nav"
+		},
+		{
+			"id": "providers",
+			"parentId": "id-access",
+			"label": "Identity providers",
+			"serviceId": "webui-nav",
+			"url": "/common-nav/identity-access/realms?useNav=icp4i"
+		},
+		{
+			"id": "teams-ids",
+			"parentId": "id-access",
+			"label": "Teams and service IDs",
+			"serviceId": "webui-nav",
+			"url": "/common-nav/identity-access/teams?useNav=icp4i"
 		},
 		{
 		  "detectionServiceName": true,
