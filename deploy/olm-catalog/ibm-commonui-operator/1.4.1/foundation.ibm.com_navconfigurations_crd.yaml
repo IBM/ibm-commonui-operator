@@ -141,7 +141,7 @@ spec:
                 properties:
                   detectionServiceName:
                     description: Informs the shared web console detection service to use the serviceName for auto discovery. Value should be true or false
-                    type: boolean
+                    x-kubernetes-preserve-unknown-fields: true
                   iconUrl:
                     description: URL of the icon that will display for the top level parents.
                     type: string
