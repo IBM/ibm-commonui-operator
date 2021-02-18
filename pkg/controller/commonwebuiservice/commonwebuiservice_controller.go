@@ -928,7 +928,15 @@ func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.
 
 	if getError == nil {
 		reqLogger.Info("FOUND NAV CONFIG CR TRYING TO UPDATE")
-		navItems := unstruct.Object["spec"].(map[string]interface{})["navItems"]
+		var currentTemplate map[string]interface{}
+		crTemplateErr2 := json.Unmarshal([]byte(jsonStringCr), &currentTemplate)
+		if crTemplateErr2 != nil {
+			reqLogger.Info("Failed to unmarshall current nav config cr")
+			return crTemplateErr2
+		}
+		var unstruct2 unstructured.Unstructured
+		unstruct2.Object = currentTemplate
+		navItems := unstruct2.Object["spec"].(map[string]interface{})["navItems"]
 		var jsonData []byte
 		jsonData, err := json.Marshal(navItems)
 		if err != nil {
