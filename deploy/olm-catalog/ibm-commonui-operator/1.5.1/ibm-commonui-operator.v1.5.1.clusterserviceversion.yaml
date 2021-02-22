@@ -856,4 +856,5 @@ spec:
   maturity: alpha
   provider:
     name: IBM
+  replaces: ibm-commonui-operator.v1.5.0
   version: 1.5.1
