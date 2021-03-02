@@ -5,11 +5,9 @@ go 1.13
 require (
 	github.com/go-openapi/spec v0.19.2
 	github.com/jetstack/cert-manager v0.10.1
-	github.com/jstemmer/go-junit-report v0.9.1 // indirect
 	github.com/openshift/api v3.9.1-0.20190924102528-32369d4db2ad+incompatible
 	github.com/operator-framework/operator-sdk v0.13.0
 	github.com/spf13/pflag v1.0.5
-	golang.org/x/tools v0.0.0-20200204074204-1cc6d1ef6c74 // indirect
 	k8s.io/api v0.0.0
 	k8s.io/apiextensions-apiserver v0.0.0
 	k8s.io/apimachinery v0.0.0
@@ -21,6 +19,7 @@ require (
 // Pinned to kubernetes-1.16.2
 replace (
 	github.com/Azure/go-autorest => github.com/Azure/go-autorest v13.3.4-0.20200207053602-7439e774c9e9+incompatible
+	github.com/gogo/protobuf => github.com/gogo/protobuf v1.3.2
 	k8s.io/api => k8s.io/api v0.0.0-20191016110408-35e52d86657a
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.0.0-20191016113550-5357c4baaf65
 	k8s.io/apimachinery => k8s.io/apimachinery v0.0.0-20191004115801-a2eda9f80ab8
