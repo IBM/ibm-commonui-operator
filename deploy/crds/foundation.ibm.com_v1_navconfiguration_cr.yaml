@@ -10,7 +10,7 @@ metadata:
     name: common-web-ui-config
 spec:
   about:
-    logoUrl: "IBM Cloud Pak Administration Hub"
+    logoUrl: "IBM Cloud Pak | Administration Hub"
     licenses:
       - "yq, version 3.3.0, MIT+GPL"
       - "MongoDB, version 4.0.16 Community Edition, SSPL"
@@ -101,7 +101,7 @@ spec:
       - "createResource"
       - "catalog"
   login:
-    logoAltText: "Cloud Pak Administration Hub"
+    logoAltText: "Cloud Pak | Administration Hub"
     logoUrl: "/common-nav/api/graphics/logincloudpak.svg"
     logoWidth: "190px"
     logoHeight: "47px"
