@@ -440,8 +440,8 @@ var NavConfigCR = `
 		  "logrotate, v3.8.6, GPL v2",
 		  "checker-qual, version 2.0.0, GPLv2"
 		],
-		"logoUrl": "IBM Cloud Pak Administration Hub",
-		"logoAltText": "IBM Cloud Pak Administration Hub"
+		"logoUrl": "IBM Cloud Pak | Administration Hub",
+		"logoAltText": "IBM Cloud Pak | Administration Hub"
 	  },
 	  "header": {
 		"disabledItems": [
@@ -461,7 +461,7 @@ var NavConfigCR = `
 		  "enable": false,
 		  "headerText": "Header text here"
 		},
-		"logoAltText": "Cloud Pak Administration Hub",
+		"logoAltText": "Cloud Pak | Administration Hub",
 		"logoHeight": "47px",
 		"logoUrl": "/common-nav/api/graphics/logincloudpak.svg",
 		"logoWidth": "190px"
