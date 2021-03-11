@@ -384,7 +384,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	if imageTag == "" {
 		imageTag = res.DefaultImageTag
 	}
-	image := res.GetImageID(imageRegistry, res.DefaultImageName, imageTag, "", "COMMON_WEB_UI_IMAGE_TAG_OR_SHA")
+	image := res.GetImageID(imageRegistry, res.DefaultImageName, imageTag, "", "COMMON_WEB_UI_IMAGE")
 	reqLogger.Info("CS??? default Image=" + image)
 
 	commonVolume = append(commonVolume, res.Log4jsVolume)
@@ -459,7 +459,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	if dashboardImageTag == "" {
 		dashboardImageTag = res.DasboardDefaultImageTag
 	}
-	dashboardImage := res.GetImageID(dashboardImageRegistry, res.DasboardDefaultImageName, dashboardImageTag, "", "DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA")
+	dashboardImage := res.GetImageID(dashboardImageRegistry, res.DasboardDefaultImageName, dashboardImageTag, "", "IBM_DASHBOARD_DATA_COLLECTOR_IMAGE")
 	reqLogger.Info("Dashboard data collector Image=" + dashboardImage)
 
 	dashboardDataCollectorContainer := res.DashboardDataContainer
