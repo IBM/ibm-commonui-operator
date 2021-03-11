@@ -628,8 +628,8 @@ spec:
                   value: quay.io/opencloudio/common-web-ui:1.4.2
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
-                - name: DASHBOARD_DATA_COLL_IMAGE_TAG_OR_SHA
-                  value: sha256:478def24355bb8e653135df8fbf113c14d750d2c5192bc64de7cb338ca088ba5
+                - name: IBM_DASHBOARD_DATA_COLLECTOR_IMAGE
+                  value: quay.io/opencloudio/ibm-dashboard-data-collector:1.1.1
                 image: quay.io/opencloudio/ibm-commonui-operator:1.4.2
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
