@@ -20,7 +20,7 @@ RUN wget -O /qemu-s390x-static https://github.com/multiarch/qemu-user-static/rel
 
 RUN chmod +x /qemu-s390x-static
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:8782de8892bd10bbfa0220442fc71d45e660f0e8a811000f0f5d729ebffff645
+FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:173d76727cbd68fd39b2399b31f10988eafba28de1cd627998ef81d4e1e84edd
 
 ARG IMAGE_NAME
 ARG IMAGE_DISPLAY_NAME
