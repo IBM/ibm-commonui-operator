@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:f19c5b5d417cad1452ced0d174bca363ac41554190406c9147488b58394e2c56
+FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:e1c7bdf07069e249506c09f90aa8b0856a51c9ca46f31d3a612d132f9ceccbe8
 
 ARG IMAGE_NAME
 ARG IMAGE_DISPLAY_NAME
