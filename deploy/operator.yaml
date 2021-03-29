@@ -57,7 +57,7 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-commonui-operator"
             - name: COMMON_WEB_UI_IMAGE
-              value: "quay.io/opencloudio/common-web-ui:1.5.1"             
+              value: "quay.io/opencloudio/common-web-ui:1.6.0"             
             - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
               value: "sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46"
           resources:
