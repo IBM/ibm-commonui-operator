@@ -576,6 +576,28 @@ spec:
           verbs:
           - get
           - list
+        - apiGroups:
+          - internal.open-cluster-management.io
+          resources:
+          - managedclusterinfos
+          verbs:
+          - get
+          - list
+        - apiGroups:
+          - operator.open-cluster-management.io
+          resources:
+          - multiclusterhubs
+          verbs:
+          - get
+          - list
+        - apiGroups:
+          - action.open-cluster-management.io
+          resources:
+          - managedclusteractions
+          verbs:
+          - get
+          - list
+          - create
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
