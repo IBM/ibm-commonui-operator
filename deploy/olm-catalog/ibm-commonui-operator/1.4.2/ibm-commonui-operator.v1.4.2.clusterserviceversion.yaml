@@ -598,6 +598,12 @@ spec:
           - get
           - list
           - create
+        - apiGroups:
+          - ""
+          resources:
+          - namespaces
+          verbs:
+          - get
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
