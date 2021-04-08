@@ -383,26 +383,20 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 		limits := instance.Spec.Resources.Limits.CPULimits
 		cpuLimits, errLim = strconv.ParseInt(limits[0:len(limits)-1], 10, 64)
 		if errLim != nil {
-			cpuLimits = 300
+			cpuLimits = 1000
 		}
 	} else {
-		cpuLimits, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPULimits, 10, 64)
-		if errLim != nil {
-			cpuLimits = 300
-		}
+		cpuLimits = 1000
 	}
 
 	if instance.Spec.Resources.Limits.CPUMemory != "" {
 		memory := instance.Spec.Resources.Limits.CPUMemory
 		cpuMemory, errLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
 		if errLim != nil {
-			cpuMemory = 256
+			cpuMemory = 512
 		}
 	} else {
-		cpuMemory, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.CPUMemory, 10, 64)
-		if errLim != nil {
-			cpuMemory = 256
-		}
+		cpuMemory = 512
 	}
 
 	if instance.Spec.Resources.Requests.RequestLimits != "" {
@@ -412,23 +406,17 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 			reqLimits = 300
 		}
 	} else {
-		reqLimits, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestLimits, 10, 64)
-		if errLim != nil {
-			reqLimits = 300
-		}
+		reqLimits = 300
 	}
 
 	if instance.Spec.Resources.Requests.RequestMemory != "" {
 		memory := instance.Spec.Resources.Requests.RequestMemory
 		reqMemory, errLim = strconv.ParseInt(memory[0:len(memory)-2], 10, 64)
 		if errLim != nil {
-			reqMemory = 256
+			reqMemory = 512
 		}
 	} else {
-		reqMemory, errLim = strconv.ParseInt(instance.Spec.CommonWebUIConfig.RequestMemory, 10, 64)
-		if errLim != nil {
-			reqMemory = 256
-		}
+		reqMemory = 512
 	}
 
 	imageRegistry := instance.Spec.CommonWebUIConfig.ImageRegistry
