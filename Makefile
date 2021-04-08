@@ -27,6 +27,12 @@ LEGACY_TAG ?= 3.2.5
 COMMON_TAG ?= 1.6.0
 DASHBOARD_TAG ?= 1.1.1
 
+# set these variables to the tag or SHA for the ubi image used in the Dockerfile.
+# use 'docker manifest inspect registry.access.redhat.com/ubi8/ubi-minimal:<tag>' to get the SHA values
+UBI_IMAGE_TAG_AMD=8.3-298
+UBI_IMAGE_SHA_PPC=7c3f8a353a25b4a3265526b22fb1eca61f1be4fae6b18be9f4263f4a8d5fbebd
+UBI_IMAGE_SHA_390=7e7e3802f4f4bc1082eb859ad08bafed535e5777e3c265319de35caee6ce5176
+
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
 COMMON_WEB_UI_OPERAND_TAG ?= $(COMMON_TAG)
@@ -203,7 +209,7 @@ coverage:
 # install operator sdk section
 ############################################################
 
-install-operator-sdk: 
+install-operator-sdk:
 	@operator-sdk version 2> /dev/null ; if [ $$? -ne 0 ]; then ./common/scripts/install-operator-sdk.sh; fi
 
 ############################################################
@@ -240,15 +246,15 @@ image-dev: build-image-amd64
 	docker tag $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(REGISTRY_DEV)/$(IMG):$(VERSION)
 	docker push $(REGISTRY_DEV)/$(IMG):$(VERSION)
 build-image-amd64: build-amd64
-	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-amd64" -f build/Dockerfile .
+	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-amd64" --build-arg "UBI_IMAGE_TAG_AMD=$(UBI_IMAGE_TAG_AMD)" -f build/Dockerfile .
 
 build-image-ppc64le: build-ppc64le
 	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	@docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-ppc64le" -f build/Dockerfile.ppc64le .
+	@docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-ppc64le" --build-arg "UBI_IMAGE_SHA_PPC=$(UBI_IMAGE_SHA_PPC)" -f build/Dockerfile.ppc64le .
 
 build-image-s390x: build-s390x
 	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	@docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-s390x" -f build/Dockerfile.s390x .
+	@docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-s390x" --build-arg "UBI_IMAGE_SHA_390=$(UBI_IMAGE_SHA_390)" -f build/Dockerfile.s390x .
 
 push-image-amd64: $(CONFIG_DOCKER_TARGET) build-image-amd64
 	@docker push $(REGISTRY)/$(IMG)-amd64:$(VERSION)
