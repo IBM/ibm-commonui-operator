@@ -503,7 +503,11 @@ var NavConfigCR = `
 		  "label": "Licensing",
 		  "serviceId": "ibm-license-service-reporter",
 		  "url": "/license-service-reporter",
-		  "iconUrl": "/common-nav/graphics/identification.svg"
+		  "iconUrl": "/common-nav/graphics/identification.svg",
+		  "isAuthorized": [
+			"ClusterAdministrator",
+			"CloudPakAdministrator"
+		  ]
 		},
 		{
 		  "detectionServiceName": true,
@@ -641,7 +645,11 @@ var NavConfigCP4ICR = `
 		  "id": "licensing",
 		  "label": "Licensing",
 		  "serviceId": "ibm-license-service-reporter",
-		  "url": "/license-service-reporter"
+		  "url": "/license-service-reporter",
+		  "isAuthorized": [
+			"ClusterAdministrator",
+			"CloudPakAdministrator"
+		  ]
 		}
 	  ]
 	}

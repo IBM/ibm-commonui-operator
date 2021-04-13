@@ -387,7 +387,11 @@ metadata:
                 "id": "licensing",
                 "label": "Licensing",
                 "serviceId": "ibm-license-service-reporter",
-                "url": "/license-service-reporter"
+                "url": "/license-service-reporter",
+                "isAuthorized": [
+                  "ClusterAdministrator",
+                  "CloudPakAdministrator"
+                ]
               }
             ]
           }
