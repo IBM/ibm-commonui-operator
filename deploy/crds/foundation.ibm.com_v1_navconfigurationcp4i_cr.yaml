@@ -69,4 +69,7 @@ spec:
       label: "Licensing"
       url: "/license-service-reporter"
       serviceId: "ibm-license-service-reporter"
-      detectionServiceName: true 
+      detectionServiceName: true
+      isAuthorized:
+        - "ClusterAdministrator"
+        - "CloudPakAdministrator"
