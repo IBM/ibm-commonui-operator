@@ -18,14 +18,26 @@ rules:
   - secrets
   - serviceaccounts
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - apps
   resources:
   - deployments
   - daemonsets
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - monitoring.coreos.com
   resources:
@@ -80,7 +92,13 @@ rules:
   - switcheritems/finalizers
   - switcheritems/status
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - foundation.ibm.com
   resources:
@@ -88,7 +106,13 @@ rules:
   - navconfigurations/finalizers
   - navconfigurations/status
   verbs:
-  - '*'
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
 - apiGroups:
   - certmanager.k8s.io
   resources:
