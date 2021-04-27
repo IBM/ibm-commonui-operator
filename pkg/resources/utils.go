@@ -203,36 +203,6 @@ var Extensions = `
 	}
 ]`
 
-var Addons = `
-{
-	"commonui":{
-			"access_management_enable":false,
-			"category":"zcs",
-			"add_on_type":"application",
-			"details":{
-				"short_description":"IBM Administration Hub",
-				"long_description":"This application delivers the IBM Administration Hub view for Cloud pak administrators.",
-				"images":[
-						"https://raw.githubusercontent.com/prashant182/res/master/g1.png",
-						"https://raw.githubusercontent.com/prashant182/res/master/g2.png"
-				],
-				"openURL":"/common-nav/dashboard",
-				"external_open_url_target": "adminhub"
-			},
-			"display_name":"IBM Administration Hub",
-			"extensions":{
-
-			},
-			"max_instances":"1",
-			"vendor":"IBM",
-			"versions":{
-				"3.5.0":{
-						"state":"enabled"
-				}
-			}
-		}
-	}`
-
 //nolint
 var RedisSentinelCr = `
 {

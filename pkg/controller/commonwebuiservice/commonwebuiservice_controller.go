@@ -313,8 +313,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 
 			var ExtensionsData = map[string]string{
-				"add-ons.json": strings.Replace(res.Addons, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
-				"extensions":   strings.Replace(res.Extensions, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
+				"extensions": strings.Replace(res.Extensions, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
 			}
 
 			newConfigMap = res.ExtensionsConfigMapUI(instance, ExtensionsData)

@@ -735,14 +735,26 @@ spec:
           - secrets
           - serviceaccounts
           verbs:
-          - '*'
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         - apiGroups:
           - apps
           resources:
           - deployments
           - daemonsets
           verbs:
-          - '*'
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         - apiGroups:
           - monitoring.coreos.com
           resources:
@@ -797,7 +809,13 @@ spec:
           - switcheritems/finalizers
           - switcheritems/status
           verbs:
-          - '*'
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         - apiGroups:
           - foundation.ibm.com
           resources:
@@ -805,7 +823,13 @@ spec:
           - navconfigurations/finalizers
           - navconfigurations/status
           verbs:
-          - '*'
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         - apiGroups:
           - certmanager.k8s.io
           resources:

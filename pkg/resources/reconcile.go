@@ -61,6 +61,11 @@ func ReconcileDeployment(client client.Client, instanceNamespace string, deploym
 		// Found deployment, so determine if the resource has changed
 		logger.Info("Comparing Deployments")
 
+		nssAnnotation := "nss.ibm.com/namespaceList"
+		if val, ok := currentDeployment.Spec.Template.ObjectMeta.Annotations[nssAnnotation]; ok {
+			newDeployment.Spec.Template.ObjectMeta.Annotations[nssAnnotation] = val
+		}
+
 		// Preserve cert-manager added labels in metadata
 		if val, ok := currentDeployment.ObjectMeta.Labels[certRestartLabel]; ok {
 			newDeployment.ObjectMeta.Labels[certRestartLabel] = val
