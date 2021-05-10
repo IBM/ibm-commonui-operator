@@ -418,7 +418,7 @@ var NavConfigCR = `
 		  "createResource",
 		  "catalog"
 		],
-		"docUrlMapping": "http://ibm.biz/cpcs_adminui",
+		"docUrlMapping": "https://ibm.biz/cpcs_adminui",
 		"logoAltText": "IBM Cloud Pak Administration Hub",
 		"logoHeight": "47px",
 		"logoUrl": "/common-nav/graphics/ibm-cloudpack-logo.svg",
