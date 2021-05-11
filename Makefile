@@ -29,9 +29,9 @@ DASHBOARD_TAG ?= 1.1.1
 
 # set these variables to the tag or SHA for the ubi image used in the Dockerfile.
 # use 'docker manifest inspect registry.access.redhat.com/ubi8/ubi-minimal:<tag>' to get the SHA values
-UBI_IMAGE_TAG_AMD=8.3-298
-UBI_IMAGE_SHA_PPC=7c3f8a353a25b4a3265526b22fb1eca61f1be4fae6b18be9f4263f4a8d5fbebd
-UBI_IMAGE_SHA_390=7e7e3802f4f4bc1082eb859ad08bafed535e5777e3c265319de35caee6ce5176
+UBI_IMAGE_TAG_AMD=latest
+UBI_IMAGE_SHA_PPC=0d42603bf9f539f28c133e9a13e74cec8d3baaa0165c6f873ff931d50c708d8c
+UBI_IMAGE_SHA_390=4b3905174e708d2656df72b4800a7abf87284a20ab44b3ef4d7136193caccf9f
 
 # Set the registry and tag for the operand/operator images
 OPERAND_REGISTRY ?= $(REGISTRY)
