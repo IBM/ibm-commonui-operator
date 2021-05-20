@@ -10,8 +10,6 @@ spec:
     plural: switcheritems
     singular: switcheritem
   scope: Namespaced
-  subresources:
-    status: {}
   versions:
   - name: v1alpha1
     served: true
@@ -67,3 +65,5 @@ spec:
                 type: object
             type: object
         type: object
+    subresources:
+      status: {}

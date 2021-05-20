@@ -10,8 +10,6 @@ spec:
     plural: legacyheaders
     singular: legacyheader
   scope: Namespaced
-  subresources:
-    status: {}
   versions:
   - name: v1alpha1
     served: true
@@ -111,3 +109,5 @@ spec:
             - nodes
             type: object
         type: object
+    subresources:
+      status: {}
