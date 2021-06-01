@@ -14,8 +14,7 @@
 # limitations under the License.
 #
 
-ARG UBI_IMAGE_TAG_AMD
-FROM registry.access.redhat.com/ubi8/ubi-minimal:$UBI_IMAGE_TAG_AMD
+FROM hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/build-images/ubi8-minimal:latest-amd64
 
 ARG IMAGE_NAME
 ARG IMAGE_DISPLAY_NAME
