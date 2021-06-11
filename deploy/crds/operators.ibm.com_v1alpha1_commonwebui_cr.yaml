@@ -31,7 +31,7 @@ spec:
     requestLimits: "300"
     requestMemory: "256"
     imageRegistry: quay.io/opencloudio
-    imageTag: 1.6.0
+    imageTag: 1.7.0
     serviceName: common-web-ui
-  operatorVersion: 1.6.0
-  version: 1.6.0
+  operatorVersion: 1.7.0
+  version: 1.7.0
