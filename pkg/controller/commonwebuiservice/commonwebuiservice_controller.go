@@ -363,6 +363,10 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 			Name:      res.UICertVolumeName,
 			MountPath: "/certs/common-web-ui",
 		},
+		{
+			Name:      res.InternalTlsVolumeName,
+			MountPath: "/etc/internal-tls",
+		},
 	}
 	var commonVolume = []corev1.Volume{}
 	reqLogger := log.WithValues("func", "newDeploymentForUI", "instance.Name", instance.Name)
@@ -432,6 +436,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonVolume = append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 	commonVolumes = append(commonVolumes, res.UICertVolume)
+	commonVolumes = append(commonVolumes, res.InternalTlsVolume)
 
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
