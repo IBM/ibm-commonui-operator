@@ -857,6 +857,14 @@ spec:
           - jobs
           verbs:
           - get
+        - apiGroups:
+          - operator.ibm.com
+          resources:
+          - mustgatherjobs
+          verbs:
+          - create
+          - get
+          - list
         serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:

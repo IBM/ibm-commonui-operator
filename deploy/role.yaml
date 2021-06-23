@@ -132,6 +132,14 @@ rules:
   - jobs
   verbs:
   - get
+- apiGroups:
+  - operator.ibm.com
+  resources:
+  - mustgatherjobs
+  verbs:
+  - create
+  - get
+  - list
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
