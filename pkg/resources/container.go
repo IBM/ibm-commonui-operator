@@ -52,7 +52,7 @@ var ArchitectureList = []string{
 
 const Log4jsVolumeName = "log4js"
 const ClusterCaVolumeName = "cluster-ca"
-const InternalTlsVolumeName = "internal-tls"
+const InternalTLSVolumeName = "internal-tls"
 
 var Log4jsVolume = corev1.Volume{
 	Name: Log4jsVolumeName,
@@ -94,8 +94,8 @@ var ClusterCaVolume = corev1.Volume{
 	},
 }
 
-var InternalTlsVolume = corev1.Volume{
-	Name: InternalTlsVolumeName,
+var InternalTLSVolume = corev1.Volume{
+	Name: InternalTLSVolumeName,
 	VolumeSource: corev1.VolumeSource{
 		Secret: &corev1.SecretVolumeSource{
 			SecretName: "internal-tls",

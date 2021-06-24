@@ -364,7 +364,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 			MountPath: "/certs/common-web-ui",
 		},
 		{
-			Name:      res.InternalTlsVolumeName,
+			Name:      res.InternalTLSVolumeName,
 			MountPath: "/etc/internal-tls",
 		},
 	}
@@ -436,7 +436,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonVolume = append(commonVolume, res.Log4jsVolume)
 	commonVolumes := append(commonVolume, res.ClusterCaVolume)
 	commonVolumes = append(commonVolumes, res.UICertVolume)
-	commonVolumes = append(commonVolumes, res.InternalTlsVolume)
+	allCommonVolumes := append(commonVolumes, res.InternalTLSVolume)
 
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
@@ -545,7 +545,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 							Operator: corev1.TolerationOpExists,
 						},
 					},
-					Volumes: commonVolumes,
+					Volumes: allCommonVolumes,
 					Containers: []corev1.Container{
 						commonwebuiContainer,
 					},
