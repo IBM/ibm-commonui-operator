@@ -886,6 +886,7 @@ spec:
   - email: ericabr@us.ibm.com
     name: Erica Brown
   maturity: alpha
+  minKubeVersion: 1.19.0
   provider:
     name: IBM
   replaces: ibm-commonui-operator.v1.6.0
