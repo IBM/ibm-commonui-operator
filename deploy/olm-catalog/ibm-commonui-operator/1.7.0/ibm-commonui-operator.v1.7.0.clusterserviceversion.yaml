@@ -427,7 +427,7 @@ spec:
   apiservicedefinitions: {}
   customresourcedefinitions:
     owned:
-    - description: CommonWebUI is the Schema for the commonwebuis API
+    - description: 'Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
       kind: CommonWebUI
       name: commonwebuis.operators.ibm.com
       version: v1alpha1
@@ -483,7 +483,7 @@ spec:
         - description: Displays names of pods associated with the Common Web UI service
           displayName: Pod Names
           path: nodes
-    - description: LegacyHeader is the Schema for the legacyHeader API
+    - description: 'Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
       kind: LegacyHeader
       name: legacyheaders.operators.ibm.com
       version: v1alpha1
@@ -530,7 +530,7 @@ spec:
         - description: Displays names of pods associated with the Legacy Header service
           displayName: Pod Names
           path: nodes
-    - description: NavConfiguration is the Schema for the navconfigurations API
+    - description: 'Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
       kind: NavConfiguration
       name: navconfigurations.foundation.ibm.com
       version: v1
@@ -551,7 +551,7 @@ spec:
         - description: Navigation items for the common web ui header as defined by the cloud paks
           displayName: Common Web UI left hand nav items customization
           path: navItems
-    - description: SwitcherItem is the Schema for the switcheritems API
+    - description: 'Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install. License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
       kind: SwitcherItem
       name: switcheritems.operators.ibm.com
       version: v1alpha1
