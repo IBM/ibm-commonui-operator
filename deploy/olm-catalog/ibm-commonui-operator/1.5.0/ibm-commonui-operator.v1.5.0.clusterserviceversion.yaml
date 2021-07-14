@@ -326,6 +326,7 @@ metadata:
                 "isAuthorized": [
                   "Administrator",
                   "ClusterAdministrator",
+                  "CloudPakAdministrator",
                   "Operator"
                 ],
                 "label": "Monitoring",
