@@ -28,7 +28,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -132,7 +132,7 @@ type ReconcileLegacyHeader struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileLegacyHeader) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling LegacyHeaderService")
 
@@ -142,7 +142,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	// Fetch the LegacyHeaderService instance
 	instance := &operatorsv1alpha1.LegacyHeader{}
 
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -160,14 +160,14 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	// set a default Status value
 	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR
-		err = r.client.Status().Update(context.TODO(), instance)
+		err = r.client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set LegacyHeader default status")
 			return reconcile.Result{}, err
 		}
 	}
 	// Check if the config maps already exist. If not, create a new one.
-	err = r.reconcileConfigMaps(instance, &needToRequeue)
+	err = r.reconcileConfigMaps(ctx, instance, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -177,7 +177,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = res.ReconcileDaemonSet(r.client, instance.Namespace, res.LegacyReleaseName, newDaemonSet, &needToRequeue)
+	err = res.ReconcileDaemonSet(ctx, r.client, instance.Namespace, res.LegacyReleaseName, newDaemonSet, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -187,12 +187,12 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = res.ReconcileService(r.client, instance.Namespace, res.LegacyReleaseName, newService, &needToRequeue)
+	err = res.ReconcileService(ctx, r.client, instance.Namespace, res.LegacyReleaseName, newService, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 	// Check if the platform header Ingress already exist. If not, create a new one.
-	err = r.reconcileIngress(instance, &needToRequeue)
+	err = r.reconcileIngress(ctx, instance, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -210,7 +210,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 		client.InNamespace(instance.Namespace),
 		client.MatchingLabels(res.LabelsForSelector(res.LegacyReleaseName, legacyheaderCrType, instance.Name)),
 	}
-	if err = r.client.List(context.TODO(), podList, listOpts...); err != nil {
+	if err = r.client.List(ctx, podList, listOpts...); err != nil {
 		reqLogger.Error(err, "Failed to list pods", "LegacyHeader.Namespace", instance.Namespace, "LegacyHeader.Name", res.LegacyReleaseName)
 		return reconcile.Result{}, err
 	}
@@ -219,7 +219,7 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 	//update status.podNames if needed
 	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
 		instance.Status.Nodes = podNames
-		err := r.client.Status().Update(context.TODO(), instance)
+		err := r.client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update LegacyHeader status")
 			return reconcile.Result{}, err
@@ -233,12 +233,12 @@ func (r *ReconcileLegacyHeader) Reconcile(request reconcile.Request) (reconcile.
 
 }
 
-func (r *ReconcileLegacyHeader) reconcileConfigMaps(instance *operatorsv1alpha1.LegacyHeader, needToRequeue *bool) error {
+func (r *ReconcileLegacyHeader) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.LegacyHeader, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
 	// Check if the common config map already exists, if not create a new one
 	currentConfigMap := &corev1.ConfigMap{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: res.CommonConfigMap, Namespace: instance.Namespace}, currentConfigMap)
+	err := r.client.Get(ctx, types.NamespacedName{Name: res.CommonConfigMap, Namespace: instance.Namespace}, currentConfigMap)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new ConfigMap
 		newConfigMap := res.CommonConfigMapUI(instance)
@@ -251,7 +251,7 @@ func (r *ReconcileLegacyHeader) reconcileConfigMaps(instance *operatorsv1alpha1.
 		}
 
 		reqLogger.Info("Creating a common config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
-		err = r.client.Create(context.TODO(), newConfigMap)
+		err = r.client.Create(ctx, newConfigMap)
 		if err != nil {
 			reqLogger.Error(err, "Failed to create a config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
 			return err
@@ -421,7 +421,7 @@ func (r *ReconcileLegacyHeader) serviceForUI(instance *operatorsv1alpha1.LegacyH
 
 // Check if the lagacy header Ingresses already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileLegacyHeader) reconcileIngress(instance *operatorsv1alpha1.LegacyHeader, needToRequeue *bool) error {
+func (r *ReconcileLegacyHeader) reconcileIngress(ctx context.Context, instance *operatorsv1alpha1.LegacyHeader, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileIngress", "instance.Name", instance.Name)
 	// Define a new Ingress
 	newNavIngress := res.IngressForLegacyUI(instance)
@@ -431,7 +431,7 @@ func (r *ReconcileLegacyHeader) reconcileIngress(instance *operatorsv1alpha1.Leg
 		reqLogger.Error(err, "Failed to set owner for Nav ingress")
 		return nil
 	}
-	err = res.ReconcileIngress(r.client, instance.Namespace, res.LegacyReleaseName, newNavIngress, needToRequeue)
+	err = res.ReconcileIngress(ctx, r.client, instance.Namespace, res.LegacyReleaseName, newNavIngress, needToRequeue)
 	if err != nil {
 		return err
 	}
