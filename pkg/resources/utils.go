@@ -23,13 +23,12 @@ import (
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 
 	"os"
 
 	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 )
 
@@ -704,6 +703,7 @@ func APIIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 	IngressPath := instance.Spec.CommonWebUIConfig.IngressPath
 	APIIngressPath := IngressPath + "/api/"
 	LogoutIngressPath := IngressPath + "/logout/"
+	pathType := netv1.PathType("ImplementationSpecific")
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        APIIngress,
@@ -718,22 +718,26 @@ func APIIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: APIIngressPath,
+									Path:     APIIngressPath,
+									PathType: &pathType,
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
-										ServicePort: intstr.IntOrString{
-											Type:   intstr.Int,
-											IntVal: 3000,
+										Service: &netv1.IngressServiceBackend{
+											Name: instance.Spec.CommonWebUIConfig.ServiceName,
+											Port: netv1.ServiceBackendPort{
+												Number: 3000,
+											},
 										},
 									},
 								},
 								{
-									Path: LogoutIngressPath,
+									Path:     LogoutIngressPath,
+									PathType: &pathType,
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
-										ServicePort: intstr.IntOrString{
-											Type:   intstr.Int,
-											IntVal: 3000,
+										Service: &netv1.IngressServiceBackend{
+											Name: instance.Spec.CommonWebUIConfig.ServiceName,
+											Port: netv1.ServiceBackendPort{
+												Number: 3000,
+											},
 										},
 									},
 								},
@@ -753,6 +757,7 @@ func CallbackIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *net
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(CallbackIngress)
 	Annotations := CallbackIngressAnnotations
+	pathType := netv1.PathType("ImplementationSpecific")
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        CallbackIngress,
@@ -767,12 +772,14 @@ func CallbackIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *net
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: "/auth/liberty/callback",
+									Path:     "/auth/liberty/callback",
+									PathType: &pathType,
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
-										ServicePort: intstr.IntOrString{
-											Type:   intstr.Int,
-											IntVal: 3000,
+										Service: &netv1.IngressServiceBackend{
+											Name: instance.Spec.CommonWebUIConfig.ServiceName,
+											Port: netv1.ServiceBackendPort{
+												Number: 3000,
+											},
 										},
 									},
 								},
@@ -792,6 +799,7 @@ func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(NavIngress)
 	Annotations := CommonUIIngressAnnotations
+	pathType := netv1.PathType("ImplementationSpecific")
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        NavIngress,
@@ -806,12 +814,14 @@ func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: instance.Spec.CommonWebUIConfig.IngressPath,
+									Path:     instance.Spec.CommonWebUIConfig.IngressPath,
+									PathType: &pathType,
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.CommonWebUIConfig.ServiceName,
-										ServicePort: intstr.IntOrString{
-											Type:   intstr.Int,
-											IntVal: 3000,
+										Service: &netv1.IngressServiceBackend{
+											Name: instance.Spec.CommonWebUIConfig.ServiceName,
+											Port: netv1.ServiceBackendPort{
+												Number: 3000,
+											},
 										},
 									},
 								},
@@ -875,6 +885,7 @@ func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(NavIngress)
 	Annotations := CommonLegacyIngressAnnotations
+	pathType := netv1.PathType("ImplementationSpecific")
 	ingress := &netv1.Ingress{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        LegacyReleaseName,
@@ -889,12 +900,14 @@ func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: instance.Spec.LegacyConfig.IngressPath,
+									Path:     instance.Spec.LegacyConfig.IngressPath,
+									PathType: &pathType,
 									Backend: netv1.IngressBackend{
-										ServiceName: instance.Spec.LegacyConfig.ServiceName,
-										ServicePort: intstr.IntOrString{
-											Type:   intstr.Int,
-											IntVal: 3000,
+										Service: &netv1.IngressServiceBackend{
+											Name: instance.Spec.LegacyConfig.ServiceName,
+											Port: netv1.ServiceBackendPort{
+												Number: 3000,
+											},
 										},
 									},
 								},

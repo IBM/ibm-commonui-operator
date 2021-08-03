@@ -25,23 +25,23 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Check if a DaemonSet already exists. If not, create a new one.
-func ReconcileDeployment(client client.Client, instanceNamespace string, deploymentName string,
+func ReconcileDeployment(ctx context.Context, client client.Client, instanceNamespace string, deploymentName string,
 	newDeployment *appsv1.Deployment, needToRequeue *bool) error {
 	logger := log.WithValues("func", "ReconcileDeployment")
 
 	currentDeployment := &appsv1.Deployment{}
-	err := client.Get(context.TODO(), types.NamespacedName{Name: deploymentName, Namespace: instanceNamespace}, currentDeployment)
+	err := client.Get(ctx, types.NamespacedName{Name: deploymentName, Namespace: instanceNamespace}, currentDeployment)
 	if err != nil && errors.IsNotFound(err) {
 		// Create a new deployment
 		logger.Info("Creating a new Deployment", "Deployment.Namespace", newDeployment.Namespace, "Deployment.Name", newDeployment.Name)
-		err = client.Create(context.TODO(), newDeployment)
+		err = client.Create(ctx, newDeployment)
 		if err != nil && errors.IsAlreadyExists(err) {
 			// Already exists from previous reconcile, requeue
 			logger.Info("Deployment already exists")
@@ -87,7 +87,7 @@ func ReconcileDeployment(client client.Client, instanceNamespace string, deploym
 				// don't use the default replica count in newDeployment.
 				currentDeployment.Spec.Replicas = &currentReplicas
 			}
-			err = client.Update(context.TODO(), currentDeployment)
+			err = client.Update(ctx, currentDeployment)
 			if err != nil {
 				logger.Error(err, "Failed to update Deployment",
 					"Deployment.Namespace", currentDeployment.Namespace, "Deployment.Name", currentDeployment.Name)
@@ -99,16 +99,16 @@ func ReconcileDeployment(client client.Client, instanceNamespace string, deploym
 }
 
 // Check if a DaemonSet already exists. If not, create a new one.
-func ReconcileDaemonSet(client client.Client, instanceNamespace string, daemonSetName string,
+func ReconcileDaemonSet(ctx context.Context, client client.Client, instanceNamespace string, daemonSetName string,
 	newDaemonSet *appsv1.DaemonSet, needToRequeue *bool) error {
 	logger := log.WithValues("func", "ReconcileDaemonSet")
 
 	currentDaemonSet := &appsv1.DaemonSet{}
-	err := client.Get(context.TODO(), types.NamespacedName{Name: daemonSetName, Namespace: instanceNamespace}, currentDaemonSet)
+	err := client.Get(ctx, types.NamespacedName{Name: daemonSetName, Namespace: instanceNamespace}, currentDaemonSet)
 	if err != nil && errors.IsNotFound(err) {
 		// Create a new DaemonSet
 		logger.Info("Creating a new DaemonSet", "DaemonSet.Namespace", newDaemonSet.Namespace, "DaemonSet.Name", newDaemonSet.Name)
-		err = client.Create(context.TODO(), newDaemonSet)
+		err = client.Create(ctx, newDaemonSet)
 		if err != nil && errors.IsAlreadyExists(err) {
 			// Already exists from previous reconcile, requeue
 			logger.Info(" DaemonSet already exists")
@@ -132,7 +132,7 @@ func ReconcileDaemonSet(client client.Client, instanceNamespace string, daemonSe
 			currentDaemonSet.ObjectMeta.Name = newDaemonSet.ObjectMeta.Name
 			currentDaemonSet.ObjectMeta.Labels = newDaemonSet.ObjectMeta.Labels
 			currentDaemonSet.Spec = newDaemonSet.Spec
-			err = client.Update(context.TODO(), currentDaemonSet)
+			err = client.Update(ctx, currentDaemonSet)
 			if err != nil {
 				logger.Error(err, "Failed to update DaemonSet",
 					"DaemonSet.Namespace", currentDaemonSet.Namespace, "DaemonSet.Name", currentDaemonSet.Name)
@@ -144,16 +144,16 @@ func ReconcileDaemonSet(client client.Client, instanceNamespace string, daemonSe
 }
 
 // Check if a Service already exists. If not, create a new one.
-func ReconcileService(client client.Client, instanceNamespace string, serviceName string,
+func ReconcileService(ctx context.Context, client client.Client, instanceNamespace string, serviceName string,
 	newService *corev1.Service, needToRequeue *bool) error {
 	logger := log.WithValues("func", "ReconcileService")
 
 	currentService := &corev1.Service{}
-	err := client.Get(context.TODO(), types.NamespacedName{Name: serviceName, Namespace: instanceNamespace}, currentService)
+	err := client.Get(ctx, types.NamespacedName{Name: serviceName, Namespace: instanceNamespace}, currentService)
 	if err != nil && errors.IsNotFound(err) {
 		// Create a new Service
 		logger.Info("Creating a new Service", "Service.Namespace", newService.Namespace, "Service.Name", newService.Name)
-		err = client.Create(context.TODO(), newService)
+		err = client.Create(ctx, newService)
 		if err != nil && errors.IsAlreadyExists(err) {
 			// Already exists from previous reconcile, requeue
 			logger.Info(" Service already exists")
@@ -178,7 +178,7 @@ func ReconcileService(client client.Client, instanceNamespace string, serviceNam
 			currentService.ObjectMeta.Labels = newService.ObjectMeta.Labels
 			currentService.Spec.Ports = newService.Spec.Ports
 			currentService.Spec.Selector = newService.Spec.Selector
-			err = client.Update(context.TODO(), currentService)
+			err = client.Update(ctx, currentService)
 			if err != nil {
 				logger.Error(err, "Failed to update Service",
 					"Service.Namespace", currentService.Namespace, "Service.Name", currentService.Name)
@@ -190,16 +190,16 @@ func ReconcileService(client client.Client, instanceNamespace string, serviceNam
 }
 
 // Check if the Ingress already exists, if not create a new one.
-func ReconcileIngress(client client.Client, instanceNamespace string, ingressName string,
+func ReconcileIngress(ctx context.Context, client client.Client, instanceNamespace string, ingressName string,
 	newIngress *netv1.Ingress, needToRequeue *bool) error {
 	logger := log.WithValues("func", "ReconcileIngress")
 
 	currentIngress := &netv1.Ingress{}
-	err := client.Get(context.TODO(), types.NamespacedName{Name: ingressName, Namespace: instanceNamespace}, currentIngress)
+	err := client.Get(ctx, types.NamespacedName{Name: ingressName, Namespace: instanceNamespace}, currentIngress)
 	if err != nil && errors.IsNotFound(err) {
 		// Create a new Ingress
 		logger.Info("Creating a new Ingress", "Ingress.Namespace", newIngress.Namespace, "Ingress.Name", newIngress.Name)
-		err = client.Create(context.TODO(), newIngress)
+		err = client.Create(ctx, newIngress)
 		if err != nil && errors.IsAlreadyExists(err) {
 			// Already exists from previous reconcile, requeue
 			logger.Info("Ingress already exists")
@@ -224,7 +224,7 @@ func ReconcileIngress(client client.Client, instanceNamespace string, ingressNam
 			currentIngress.ObjectMeta.Labels = newIngress.ObjectMeta.Labels
 			currentIngress.ObjectMeta.Annotations = newIngress.ObjectMeta.Annotations
 			currentIngress.Spec = newIngress.Spec
-			err = client.Update(context.TODO(), currentIngress)
+			err = client.Update(ctx, currentIngress)
 			if err != nil {
 				logger.Error(err, "Failed to update Ingress",
 					"Ingress.Namespace", currentIngress.Namespace, "Ingress.Name", currentIngress.Name)
@@ -236,16 +236,16 @@ func ReconcileIngress(client client.Client, instanceNamespace string, ingressNam
 }
 
 // Check if the Certificates already exist, if not create new ones.
-func ReconcileCertificate(client client.Client, instanceNamespace, certificateName string,
+func ReconcileCertificate(ctx context.Context, client client.Client, instanceNamespace, certificateName string,
 	newCertificate *certmgr.Certificate, needToRequeue *bool) error {
 	logger := log.WithValues("func", "ReconcileCertificate")
 
 	currentCertificate := &certmgr.Certificate{}
-	err := client.Get(context.TODO(), types.NamespacedName{Name: certificateName, Namespace: instanceNamespace}, currentCertificate)
+	err := client.Get(ctx, types.NamespacedName{Name: certificateName, Namespace: instanceNamespace}, currentCertificate)
 	if err != nil && errors.IsNotFound(err) {
 		// Create a new Certificate
 		logger.Info("Creating a new Certificate", "Certificate.Namespace", newCertificate.Namespace, "Certificate.Name", newCertificate.Name)
-		err = client.Create(context.TODO(), newCertificate)
+		err = client.Create(ctx, newCertificate)
 		if err != nil && errors.IsAlreadyExists(err) {
 			// Already exists from previous reconcile, requeue
 			logger.Info("Certificate already exists")
@@ -269,7 +269,7 @@ func ReconcileCertificate(client client.Client, instanceNamespace, certificateNa
 			currentCertificate.ObjectMeta.Name = newCertificate.ObjectMeta.Name
 			currentCertificate.ObjectMeta.Labels = newCertificate.ObjectMeta.Labels
 			currentCertificate.Spec = newCertificate.Spec
-			err = client.Update(context.TODO(), currentCertificate)
+			err = client.Update(ctx, currentCertificate)
 			if err != nil {
 				logger.Error(err, "Failed to update Certificate", "Certificate.Namespace", currentCertificate.Namespace,
 					"Certificate.Name", currentCertificate.Name)

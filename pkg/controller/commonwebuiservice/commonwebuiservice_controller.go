@@ -33,7 +33,7 @@ import (
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	netv1 "k8s.io/api/networking/v1beta1"
+	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -149,7 +149,7 @@ type ReconcileCommonWebUI struct {
 // Note:
 // The Controller will requeue the Request to be processed again if the returned error is non-nil or
 // Result.Requeue is true, otherwise upon completion it will remove the work from the queue.
-func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.Result, error) {
+func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.Request) (reconcile.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling CommonWebUI")
 
@@ -159,7 +159,7 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	// Fetch the CommonWebUIService CR instance
 	instance := &operatorsv1alpha1.CommonWebUI{}
 
-	err := r.client.Get(context.TODO(), request.NamespacedName, instance)
+	err := r.client.Get(ctx, request.NamespacedName, instance)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			// Request object not found, could have been deleted after reconcile request.
@@ -177,24 +177,24 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	// set a default Status value
 	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR
-		err = r.client.Status().Update(context.TODO(), instance)
+		err = r.client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set CommonWebUI default status")
 			return reconcile.Result{}, err
 		}
 	}
 	// Check if the config maps already exist. If not, create a new one.
-	err = r.reconcileConfigMaps(instance, res.Log4jsConfigMap, &needToRequeue)
+	err = r.reconcileConfigMaps(ctx, instance, res.Log4jsConfigMap, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
-	err = r.reconcileConfigMaps(instance, res.ExtensionsConfigMap, &needToRequeue)
+	err = r.reconcileConfigMaps(ctx, instance, res.ExtensionsConfigMap, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
 	}
 
-	err = r.reconcileConfigMaps(instance, res.RedisCertsConfigMap, &needToRequeue)
+	err = r.reconcileConfigMaps(ctx, instance, res.RedisCertsConfigMap, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -204,7 +204,7 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = res.ReconcileDeployment(r.client, instance.Namespace, res.DeploymentName, newDeployment, &needToRequeue)
+	err = res.ReconcileDeployment(ctx, r.client, instance.Namespace, res.DeploymentName, newDeployment, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -214,25 +214,25 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	if err != nil {
 		return reconcile.Result{}, err
 	}
-	err = res.ReconcileService(r.client, instance.Namespace, res.ServiceName, newService, &needToRequeue)
+	err = res.ReconcileService(ctx, r.client, instance.Namespace, res.ServiceName, newService, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
 	// Check if the common web ui Ingresses already exist. If not, create a new one.
-	err = r.reconcileIngresses(instance, &needToRequeue)
+	err = r.reconcileIngresses(ctx, instance, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
 
 	//Check if CR already exists. If not, create a new one
-	err = r.reconcileCr(instance)
+	err = r.reconcileCr(ctx, instance)
 	if err != nil {
 		reqLogger.Error(err, "Error creating custom resource")
 	}
 
 	// Check if the Certificates already exist, if not create new ones
-	err = r.reconcileCertificates(instance, &needToRequeue)
+	err = r.reconcileCertificates(ctx, instance, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -243,18 +243,18 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	// 	reqLogger.Error(err, "Error creating Redis Sentinel custom resource")
 	// }
 
-	err = r.updateCustomResource(instance, res.CommonWebUICr)
+	err = r.updateCustomResource(ctx, instance, res.CommonWebUICr)
 	if err != nil {
 		reqLogger.Error(err, "Failed updating navconfig CR")
 	}
 
-	err = r.updateCustomResource(instance, res.Cp4iCr)
+	err = r.updateCustomResource(ctx, instance, res.Cp4iCr)
 	if err != nil {
 		reqLogger.Error(err, "Failed updating icp4i navconfig CR")
 	}
 
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
-	r.deleteDaemonSet(instance)
+	r.deleteDaemonSet(ctx, instance)
 
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
@@ -269,7 +269,7 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 		client.InNamespace(instance.Namespace),
 		client.MatchingLabels(res.LabelsForSelector(res.DeploymentName, commonwebuiserviceCrType, instance.Name)),
 	}
-	if err = r.client.List(context.TODO(), podList, listOpts...); err != nil {
+	if err = r.client.List(ctx, podList, listOpts...); err != nil {
 		reqLogger.Error(err, "Failed to list pods", "CommonWebUI.Namespace", instance.Namespace, "CommonWebUI.Name", res.DeploymentName)
 		return reconcile.Result{}, err
 	}
@@ -278,7 +278,7 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	//update status.Nodes if needed
 	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
 		instance.Status.Nodes = podNames
-		err := r.client.Status().Update(context.TODO(), instance)
+		err := r.client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update CommonWebUI status")
 			return reconcile.Result{}, err
@@ -289,13 +289,13 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking log4js config map Service")
 	// Check if the log4js config map already exists, if not create a new one
 	currentConfigMap := &corev1.ConfigMap{}
-	err := r.client.Get(context.TODO(), types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, currentConfigMap)
+	err := r.client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, currentConfigMap)
 	if err != nil && errors.IsNotFound(err) {
 		// Define a new ConfigMap
 		newConfigMap := &corev1.ConfigMap{}
@@ -304,7 +304,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 		} else if nameOfCM == res.ExtensionsConfigMap {
 			currentRoute := &routesv1.Route{}
 			//Get the cp-console route and add it to the configmap below
-			err2 := r.client.Get(context.TODO(), types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
+			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
 			if err2 != nil {
 				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
 				*needToRequeue = true
@@ -330,7 +330,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(instance *operatorsv1alpha1.C
 		}
 
 		reqLogger.Info("Creating a log4js config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
-		err = r.client.Create(context.TODO(), newConfigMap)
+		err = r.client.Create(ctx, newConfigMap)
 		if err != nil {
 			reqLogger.Error(err, "Failed to create a config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
 			return err
@@ -604,7 +604,7 @@ func (r *ReconcileCommonWebUI) serviceForUI(instance *operatorsv1alpha1.CommonWe
 
 // Check if the common web ui Ingresses already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUI) reconcileIngresses(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileIngresses", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking  common web ui api ingress")
@@ -616,7 +616,7 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.Co
 		reqLogger.Error(err, "Failed to set owner for api ingress")
 		return nil
 	}
-	err = res.ReconcileIngress(r.client, instance.Namespace, res.APIIngress, newAPIIngress, needToRequeue)
+	err = res.ReconcileIngress(ctx, r.client, instance.Namespace, res.APIIngress, newAPIIngress, needToRequeue)
 	if err != nil {
 		return err
 	}
@@ -630,7 +630,7 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.Co
 		reqLogger.Error(callbackErr, "Failed to set owner for callback ingress")
 		return nil
 	}
-	callbackErr = res.ReconcileIngress(r.client, instance.Namespace, res.CallbackIngress, newCallbackIngress, needToRequeue)
+	callbackErr = res.ReconcileIngress(ctx, r.client, instance.Namespace, res.CallbackIngress, newCallbackIngress, needToRequeue)
 	if callbackErr != nil {
 		return err
 	}
@@ -644,7 +644,7 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.Co
 		reqLogger.Error(err, "Failed to set owner for Nav ingress")
 		return nil
 	}
-	navErr = res.ReconcileIngress(r.client, instance.Namespace, res.NavIngress, newNavIngress, needToRequeue)
+	navErr = res.ReconcileIngress(ctx, r.client, instance.Namespace, res.NavIngress, newNavIngress, needToRequeue)
 	if navErr != nil {
 		return err
 	}
@@ -653,7 +653,7 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(instance *operatorsv1alpha1.Co
 	return nil
 }
 
-func (r *ReconcileCommonWebUI) reconcileCr(instance *operatorsv1alpha1.CommonWebUI) error {
+func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) error {
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	reqLogger.Info("RECONCILING CR")
 
@@ -670,14 +670,14 @@ func (r *ReconcileCommonWebUI) reconcileCr(instance *operatorsv1alpha1.CommonWeb
 	name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
 
 	//Get CR and see if it exists
-	getError := r.client.Get(context.TODO(), types.NamespacedName{
+	getError := r.client.Get(ctx, types.NamespacedName{
 		Name:      name,
 		Namespace: namespace,
 	}, &unstruct)
 
-	err1 := r.client.Get(context.TODO(), types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
+	err1 := r.client.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
 	if err1 == nil {
-		r.finalizerCr(instance, unstruct)
+		r.finalizerCr(ctx, instance, unstruct)
 	}
 
 	if getError != nil && !errors.IsNotFound(getError) {
@@ -686,7 +686,7 @@ func (r *ReconcileCommonWebUI) reconcileCr(instance *operatorsv1alpha1.CommonWeb
 		//If CR was not found, create it
 		//Get the cp-console route
 		currentRoute := &routesv1.Route{}
-		err2 := r.client.Get(context.TODO(), types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
+		err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
 		if err2 != nil {
 			reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
 		}
@@ -695,7 +695,7 @@ func (r *ReconcileCommonWebUI) reconcileCr(instance *operatorsv1alpha1.CommonWeb
 		var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
 
 		// Create Custom resource
-		if createErr := r.createCustomResource(unstruct, name, href); createErr != nil {
+		if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
 			reqLogger.Error(createErr, "Failed to create CR")
 			return createErr
 		}
@@ -706,12 +706,12 @@ func (r *ReconcileCommonWebUI) reconcileCr(instance *operatorsv1alpha1.CommonWeb
 	return nil
 }
 
-func (r *ReconcileCommonWebUI) createCustomResource(unstruct unstructured.Unstructured, name, href string) error {
+func (r *ReconcileCommonWebUI) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string) error {
 	reqLogger := log.WithValues("CR name", name)
 	reqLogger.Info("creating a CR ", name)
 
 	unstruct.Object["spec"].(map[string]interface{})["href"] = href
-	crCreateErr := r.client.Create(context.TODO(), &unstruct)
+	crCreateErr := r.client.Create(ctx, &unstruct)
 	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
 		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
 		return crCreateErr
@@ -759,7 +759,7 @@ func (r *ReconcileCommonWebUI) createCustomResource(unstruct unstructured.Unstru
 // 	return nil
 // }
 
-func (r *ReconcileCommonWebUI) finalizerCr(instance *operatorsv1alpha1.CommonWebUI, unstruct unstructured.Unstructured) {
+func (r *ReconcileCommonWebUI) finalizerCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, unstruct unstructured.Unstructured) {
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 
 	finalizerName := "commonui.operators.ibm.com"
@@ -769,7 +769,7 @@ func (r *ReconcileCommonWebUI) finalizerCr(instance *operatorsv1alpha1.CommonWeb
 		// Add the finalizer to the metadata of the instance and update the object.
 		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) && !containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
 			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName, finalizerName1)
-			if err := r.client.Update(context.Background(), instance); err != nil {
+			if err := r.client.Update(ctx, instance); err != nil {
 				reqLogger.Error(err, "Failed to create finalizer")
 			} else {
 				reqLogger.Info("Created Finalizers")
@@ -779,7 +779,7 @@ func (r *ReconcileCommonWebUI) finalizerCr(instance *operatorsv1alpha1.CommonWeb
 		// When the instance is being deleted. If finalizer is present
 		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
 			// Finalizer is present, so lets handle any external dependency - remove console link CR
-			if err := r.client.Delete(context.TODO(), &unstruct); err != nil {
+			if err := r.client.Delete(ctx, &unstruct); err != nil {
 				// if fails to delete the external dependency here, return with error
 				reqLogger.Error(err, "Failed to delete Console Link CR")
 			} else {
@@ -788,14 +788,14 @@ func (r *ReconcileCommonWebUI) finalizerCr(instance *operatorsv1alpha1.CommonWeb
 
 			// Remove our finalizer from the metadata of the object and update it.
 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
-			if err := r.client.Update(context.Background(), instance); err != nil {
+			if err := r.client.Update(ctx, instance); err != nil {
 				reqLogger.Error(err, "Failed to delete  Console link finalizer")
 			} else {
 				reqLogger.Info("Deleted Console link Finalizer")
 			}
 		} else if containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
 			// Finalizer is present, so lets handle any external dependency - remove console link CR
-			if err := r.client.Delete(context.TODO(), &unstruct); err != nil {
+			if err := r.client.Delete(ctx, &unstruct); err != nil {
 				// if fails to delete the external dependency here, return with error
 				reqLogger.Error(err, "Failed to delete Redis CR")
 			} else {
@@ -804,7 +804,7 @@ func (r *ReconcileCommonWebUI) finalizerCr(instance *operatorsv1alpha1.CommonWeb
 
 			// Remove our finalizer from the metadata of the object and update it.
 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName1)
-			if err := r.client.Update(context.Background(), instance); err != nil {
+			if err := r.client.Update(ctx, instance); err != nil {
 				reqLogger.Error(err, "Failed to delete Redis finalizer")
 			} else {
 				reqLogger.Info("Deleted Redis Finalizer")
@@ -832,7 +832,7 @@ func removeString(slice []string, s string) (result []string) {
 	return
 }
 
-func (r *ReconcileCommonWebUI) reconcileCertificates(instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUI) reconcileCertificates(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileCertificates", "instance.Name", instance.Name)
 
 	certificateList := []res.CertificateData{
@@ -849,7 +849,7 @@ func (r *ReconcileCommonWebUI) reconcileCertificates(instance *operatorsv1alpha1
 				"Certificate.Name", newCertificate.Name)
 			return err
 		}
-		err = res.ReconcileCertificate(r.client, instance.Namespace, certData.Name, newCertificate, needToRequeue)
+		err = res.ReconcileCertificate(ctx, r.client, instance.Namespace, certData.Name, newCertificate, needToRequeue)
 		if err != nil {
 			return err
 		}
@@ -858,7 +858,7 @@ func (r *ReconcileCommonWebUI) reconcileCertificates(instance *operatorsv1alpha1
 }
 
 // delete the old common ui daemonset from an older version
-func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.CommonWebUI) {
+func (r *ReconcileCommonWebUI) deleteDaemonSet(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
 	reqLogger := log.WithValues("func", "deleteDaemonSet", "instance.Name", instance.Name)
 	daemonSet := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
@@ -867,11 +867,11 @@ func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.Commo
 		},
 	}
 	// check if the DaemonSet exists
-	err := r.client.Get(context.TODO(),
+	err := r.client.Get(ctx,
 		types.NamespacedName{Name: res.DaemonSetName, Namespace: res.DefaultNamespace}, daemonSet)
 	if err == nil {
 		// DaemonSet found so delete it
-		err := r.client.Delete(context.TODO(), daemonSet)
+		err := r.client.Delete(ctx, daemonSet)
 		if err != nil {
 			reqLogger.Error(err, "Failed to delete old common ui DaemonSet")
 		} else {
@@ -894,7 +894,7 @@ func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.Commo
 // 	return nil
 // }
 
-func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.CommonWebUI, nameOfCR string) error {
+func (r *ReconcileCommonWebUI) updateCustomResource(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCR string) error {
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	reqLogger.Info("UPDATE CUSTOM RESOURCE")
 	namespace := instance.Namespace
@@ -913,7 +913,7 @@ func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.
 	}
 	var unstruct unstructured.Unstructured
 	unstruct.Object = crTemplate
-	getError := r.client.Get(context.TODO(), types.NamespacedName{
+	getError := r.client.Get(ctx, types.NamespacedName{
 		Name:      nameOfCR,
 		Namespace: namespace,
 	}, &unstruct)
@@ -948,7 +948,7 @@ func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.
 			}
 		}
 		unstruct.Object["spec"].(map[string]interface{})["navItems"] = updatedNavItems
-		updateErr := r.client.Update(context.TODO(), &unstruct)
+		updateErr := r.client.Update(ctx, &unstruct)
 		if updateErr == nil {
 			reqLogger.Info("CLIENT UPDATED NAV CONFIG CR ")
 		}
