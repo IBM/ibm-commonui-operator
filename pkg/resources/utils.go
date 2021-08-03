@@ -718,7 +718,7 @@ func APIIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: APIIngressPath,
+									Path:     APIIngressPath,
 									PathType: &pathType,
 									Backend: netv1.IngressBackend{
 										Service: &netv1.IngressServiceBackend{
@@ -730,7 +730,7 @@ func APIIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 									},
 								},
 								{
-									Path: LogoutIngressPath,
+									Path:     LogoutIngressPath,
 									PathType: &pathType,
 									Backend: netv1.IngressBackend{
 										Service: &netv1.IngressServiceBackend{
@@ -772,7 +772,7 @@ func CallbackIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *net
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: "/auth/liberty/callback",
+									Path:     "/auth/liberty/callback",
 									PathType: &pathType,
 									Backend: netv1.IngressBackend{
 										Service: &netv1.IngressServiceBackend{
@@ -814,7 +814,7 @@ func NavIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: instance.Spec.CommonWebUIConfig.IngressPath,
+									Path:     instance.Spec.CommonWebUIConfig.IngressPath,
 									PathType: &pathType,
 									Backend: netv1.IngressBackend{
 										Service: &netv1.IngressServiceBackend{
@@ -900,7 +900,7 @@ func IngressForLegacyUI(instance *operatorsv1alpha1.LegacyHeader) *netv1.Ingress
 						HTTP: &netv1.HTTPIngressRuleValue{
 							Paths: []netv1.HTTPIngressPath{
 								{
-									Path: instance.Spec.LegacyConfig.IngressPath,
+									Path:     instance.Spec.LegacyConfig.IngressPath,
 									PathType: &pathType,
 									Backend: netv1.IngressBackend{
 										Service: &netv1.IngressServiceBackend{
