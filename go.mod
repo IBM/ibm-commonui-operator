@@ -1,6 +1,6 @@
 module github.com/ibm/ibm-commonui-operator
 
-go 1.15
+go 1.16
 
 require (
 	github.com/go-openapi/spec v0.19.2
