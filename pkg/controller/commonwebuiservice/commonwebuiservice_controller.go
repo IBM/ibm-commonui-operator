@@ -728,16 +728,14 @@ func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *oper
 	err := r.client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, adminHubOnZenCM)
 	if err != nil {
 		reqLogger.Info("zen optional install config map not present")
-		return false
 	} else {
 		reqLogger.Info("Got zen optional install config map, name: " + adminHubOnZenCM.Name)
 		reqLogger.Info("Admin hub on zen optional install flag is set to: " + adminHubOnZenCM.Data["adminHubOnZen"])
 		if adminHubOnZenCM.Data["adminHubOnZen"] == "true" {
 			reqLogger.Info("Verified zen optional install flag is set to true, returning")
 			return true
-		} else {
-			reqLogger.Info("Verified zen optional install flag is set to false, returning")
 		}
+		reqLogger.Info("Verified zen optional install flag is set to false, returning")
 	}
 	return false
 }
