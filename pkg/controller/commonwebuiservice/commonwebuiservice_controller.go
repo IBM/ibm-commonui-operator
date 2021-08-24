@@ -189,11 +189,6 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
-	err = r.reconcileConfigMaps(ctx, instance, res.ExtensionsConfigMap, &needToRequeue)
-	if err != nil {
-		return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
-	}
-
 	err = r.reconcileConfigMaps(ctx, instance, res.RedisCertsConfigMap, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
@@ -261,6 +256,11 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
 		if err != nil {
 			return reconcile.Result{}, err
+		}
+	} else {
+		err = r.reconcileConfigMaps(ctx, instance, res.ExtensionsConfigMap, &needToRequeue)
+		if err != nil {
+			return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
 		}
 	}
 	if needToRequeue {
@@ -698,20 +698,37 @@ func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operat
 		reqLogger.Error(getError, "Failed to get CR")
 	} else if errors.IsNotFound(getError) {
 		//If CR was not found, create it
-		//Get the cp-console route
+		//Get the cpd route is zen is true
 		currentRoute := &routesv1.Route{}
-		err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
-		if err2 != nil {
-			reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
-		}
-		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-		//Will hold href for admin hub console link
-		var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
+		useZen := r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
+		if useZen {
+			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cpd-" + instance.Namespace, Namespace: instance.Namespace}, currentRoute)
+			if err2 != nil {
+				reqLogger.Error(err2, "Failed to get route for cpd, try again later")
+			}
+			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+			//Will hold href for admin hub console link
+			var href = "https://" + currentRoute.Spec.Host
 
-		// Create Custom resource
-		if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
-			reqLogger.Error(createErr, "Failed to create CR")
-			return createErr
+			// Create Custom resource
+			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
+				reqLogger.Error(createErr, "Failed to create CR")
+				return createErr
+			}
+		} else { //Get the cp-console route
+			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
+			if err2 != nil {
+				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+			}
+			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+			//Will hold href for admin hub console link
+			var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
+
+			// Create Custom resource
+			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
+				reqLogger.Error(createErr, "Failed to create CR")
+				return createErr
+			}
 		}
 	} else {
 		reqLogger.Info("Skipping CR creation")
