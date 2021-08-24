@@ -14,7 +14,7 @@
 # limitations under the License.
 #
 
-FROM registry.access.redhat.com/ubi8/ubi-minimal@sha256:f42e065cf3bf0a377c14a4afd21454cf0b9cbbf7eded886a82a75d9e433e8d02
+FROM hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/build-images/ubi8-minimal:latest-amd64
 
 ARG IMAGE_NAME
 ARG IMAGE_DISPLAY_NAME
