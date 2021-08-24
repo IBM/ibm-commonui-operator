@@ -351,6 +351,17 @@ var CommonContainer = corev1.Container{
 			},
 		},
 		{
+			Name: "USE_ZEN",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "adminhub-on-zen-cm",
+					},
+					Key: "adminHubOnZen",
+				},
+			},
+		},
+		{
 			Name: "REDIS_CLIENT_CERTS",
 			ValueFrom: &corev1.EnvVarSource{
 				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{

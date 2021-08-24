@@ -256,6 +256,8 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(ctx, instance)
 
+	r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
+
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
@@ -717,6 +719,27 @@ func (r *ReconcileCommonWebUI) createCustomResource(ctx context.Context, unstruc
 		return crCreateErr
 	}
 	return nil
+}
+
+func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string) bool {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("Checking zen optional install condition")
+	adminHubOnZenCM := &corev1.ConfigMap{}
+	err := r.client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, adminHubOnZenCM)
+	if err != nil {
+		reqLogger.Info("zen optional install config map not present")
+		return false
+	} else {
+		reqLogger.Info("Got zen optional install config map, name: " + adminHubOnZenCM.Name)
+		reqLogger.Info("Admin hub on zen optional install flag is set to: " + adminHubOnZenCM.Data["adminHubOnZen"])
+		if adminHubOnZenCM.Data["adminHubOnZen"] == "true" {
+			reqLogger.Info("Verified zen optional install flag is set to true, returning")
+			return true
+		} else {
+			reqLogger.Info("Verified zen optional install flag is set to false, returning")
+		}
+	}
+	return false
 }
 
 // func (r *ReconcileCommonWebUI) reconcileRedisSentinelCr(instance *operatorsv1alpha1.CommonWebUI) error {
