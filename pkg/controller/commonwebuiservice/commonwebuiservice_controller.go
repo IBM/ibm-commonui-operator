@@ -256,8 +256,13 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(ctx, instance)
 
-	r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
-
+	useZen := r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
+	if useZen {
+		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	}
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
@@ -322,6 +327,13 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 
 		} else if nameOfCM == res.RedisCertsConfigMap {
 			newConfigMap = res.RedisCertsConfigMapUI(instance)
+		} else if nameOfCM == res.ZenCardExtensionsConfigMap {
+			reqLogger.Info("Creating zen card extensions config map")
+			var ExtensionsData = map[string]string{
+				"nginx.conf": res.ZenNginxConfig,
+				"extensions": res.ZenCardExtensions,
+			}
+			newConfigMap = res.ZenCardExtensionsConfigMapUI(instance, ExtensionsData)
 		}
 
 		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)

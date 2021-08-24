@@ -46,6 +46,7 @@ const ReleaseName = "common-web-ui"
 const RedisCertsConfigMap = "redis-client-certs"
 const Log4jsConfigMap = "common-web-ui-log4js"
 const ExtensionsConfigMap = "common-webui-ui-extensions"
+const ZenCardExtensionsConfigMap = "common-web-ui-zen-card-extensions"
 const CommonConfigMap = "common-web-ui-config"
 const DaemonSetName = "common-web-ui"
 const DeploymentName = "common-web-ui"
@@ -201,6 +202,309 @@ var Extensions = `
 		}
 	}
 ]`
+
+var ZenNginxConfig = `
+	location /common-nav {
+		access_by_lua_file /nginx_data/checkjwt.lua;
+		set_by_lua $nsdomain 'return os.getenv("NS_DOMAIN")';
+		proxy_set_header Host $host;
+		proxy_set_header zen-namespace-domain $nsdomain;      
+		proxy_pass https://common-web-ui:3000;
+		proxy_read_timeout 10m;
+	}
+`
+var ZenCardExtensions = `
+[
+	  {
+        "extension_point_id": "left_menu_item",
+        "extension_name": "nav-id-providers",
+        "display_name": "{{ .global_adminhub_id_providers }}",
+        "order_hint": 600,
+        "match_permissions": "administrator",
+        "meta": {},
+        "details": {
+			"parent_folder": "dap-header-administer",
+			"href": "/common-nav/zen/id/providers"
+        }
+      },
+      {
+        "extension_point_id": "homepage_quick_navigation",
+        "extension_name": "homepage_quick_navigation_id_providers",
+        "display_name": "{{ .global_zen_homepage_nav_id_providers }}",
+        "order_hint": 100,
+        "match_permissions": "",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {},
+        "details": {
+          "label": "{{ .global_adminhub_id_providers }}",
+          "nav_link": "/common-nav/zen/idproviders"
+        }
+      },
+      {
+        "extension_point_id": "homepage_resource",
+        "extension_name": "homepage_resource_documentation",
+        "display_name": "{{ .global_zen_homepage_nav_documentation }}",
+        "order_hint": 100,
+        "match_permissions": "",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {},
+        "details": {
+          "label": "{{ .global_adminhub_documentation }}",
+          "nav_link": "http://ibm.biz/cpcs_adminui",
+          "carbon_icon": "Document16"
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_memory_usage",
+        "display_name": "{{ .global_zen_homepage_card_memory_usage }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 0,
+            "row": 0
+          }
+        },
+        "details": {
+          "title": "{{ .global_adminhub_memory_usage }}",
+          "description": "{{ .global_zen_homepage_memory_usage_description }}",
+          "drilldown_url": "",
+          "template_type": "donut",
+          "data_url": "/common-nav/zen/api/v1/memory_usage"
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_cluster_inventory",
+        "display_name": "{{ .global_zen_homepage_card_inventory_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 1,
+            "row": 0
+          }
+        },
+        "details": {
+          "title": "{{ .global_adminhub_cluster_inventory }}",
+          "description": "{{ .global_zen_homepage_card_inventory_description }}",
+          "drilldown_url": "",
+          "window_open_target": "ah_cluster_inventory",
+          "template_type": "number_list",
+          "data_url": "/common-nav/zen/api/v1/inventory"
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_deployments",
+        "display_name": "{{ .global_zen_homepage_card_deployments_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 2,
+            "row": 0
+          }
+        },
+        "details": {
+          "title": "{{ .global_adminhub_deployments }}",
+          "description": "{{ .global_zen_homepage_card_deployments_description }}",
+          "drilldown_url": "",
+          "template_type": "number_list",
+          "data_url": "/common-nav/zen/api/v1/deployments",
+          "empty_state": {
+            "main_text": "No Cloud Paks found.",
+            "sub_text": "When data is available, all Cloud Paks in this cluster will appear here."
+          }
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_monitoring_trends",
+        "display_name": "{{ .global_zen_homepage_card_vulnerabilities }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 0,
+            "row": 1
+          }
+        },
+        "details": {
+          "title": "{{ .global_adminhub_monitoring_trends }}",
+          "description": "{{ .global_zen_homepage_vulnerabilities_description }}",
+          "drilldown_url": "",
+          "template_type": "big_number",
+          "data_url": "/common-nav/zen/api/v1/trends",
+          "empty_state": {
+            "main_text": "{{ .global_zen_homepage_card_vulnerabilities_empty_state_main_text }}",
+            "sub_text": "{{ .global_zen_homepage_card_vulnerabilities_empty_state_sub_text }}"
+          }
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_system_utility_status",
+        "display_name": "{{ .global_common_core_homepage_card_system_utility_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 1,
+            "row": 1
+          }
+        },
+        "details": {
+          "title": "{{ .global_adminhub_system_utility_status }}",
+          "description": "{{ .global_common_core_homepage_card_recent_projects_description }}",
+          "drilldown_url": "",
+          "template_type": "condensed_list",
+          "data_url": "/common-nav/zen/api/v1/system_utility_status",
+          "empty_state": {
+            "main_text": "No services found",
+            "sub_text": "When data is available, services in this cluster will appear here.",
+            "button_text": "",
+            "button_url": ""
+          }
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_workload_summary",
+        "display_name": "{{ .global_zen_homepage_card_workload_summary }}",
+        "order_hint": 0,
+        "match_permissions": "",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 2,
+            "row": 1
+          }
+        },
+        "details": {
+          "title": "{{ .global_adminhub_workload_summary }}",
+          "description": "{{ .global_zen_homepage_memory_workload_summary }}",
+          "drilldown_url": "",
+          "template_type": "multi_donut",
+          "data_url": "/common-nav/zen/api/v1/workload-summary"
+        }
+      },
+      {
+       "extension_point_id": "homepage_card",
+       "extension_name": "homepage_card_events",
+       "display_name": "{{ .global_zen_homepage_card_events_name }}",
+       "order_hint": 0,
+       "match_permissions": "administrator",
+       "match_instance_id": "",
+       "match_instance_role": "",
+       "meta": {
+          "preferences": {
+            "column": 0,
+            "row": 2
+          }
+       },
+       "details": {
+         "title": "{{ .global_adminhub_system_events }}",
+         "description": "{{ .global_zen_homepage_card_events_description }}",
+         "drilldown_url": "",
+         "template_type": "text_list",
+         "data_url": "/common-nav/zen/api/v1/events",
+         "empty_state": {
+           "main_text": "No events found",
+           "sub_text": "When data is available, all events in this cluster will appear here."
+         }
+       }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_identity_and_users_access",
+        "display_name": "{{ .global_zen_homepage_card_requests_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 1,
+            "row": 2
+          }
+        },
+        "details": {
+          "title": "{{ .global_adminhub_identity_and_users_access }}",
+          "description": "{{ .global_zen_homepage_card_requests_description }}",
+          "drilldown_url": "",
+          "template_type": "number_list",
+          "data_url": "/common-nav/zen/api/v1/users",
+          "empty_state": {
+            "main_text": "{{ .global_zen_homepage_card_requests_details_empty_state_main_text }}",
+            "sub_text": "{{ .global_zen_homepage_card_requests_details_empty_state_sub_text }}"
+          }
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_license_products",
+        "display_name": "{{ .global_zen_homepage_card_requests_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 2,
+            "row": 2
+          }
+        },
+        "details": {
+          "title": "{{ .global_adminhub_license_products }}",
+          "description": "{{ .global_zen_homepage_card_requests_description }}",
+          "drilldown_url": "",
+          "template_type": "number_list",
+          "data_url": "/common-nav/zen/api/v1/license_products",
+          "empty_state": {
+            "main_text": "{{ .global_zen_homepage_card_requests_details_empty_state_main_text }}",
+            "sub_text": "{{ .global_zen_homepage_card_requests_details_empty_state_sub_text }}"
+          }
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_diagnostics",
+        "display_name": "{{ .global_common_core_homepage_card_diagnostics_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 1,
+            "row": 3
+          }
+        },
+        "details": {
+          "title": "Diagnostics",
+          "description": "{{ .global_common_core_homepage_card_diagnostics_description }}",
+          "template_type": "iframe",
+          "source_url": "/common-nav/zen/api/v1/diagnostics",
+          "refresh_rate": 10
+        }
+      }
+    ]
+`
 
 //nolint
 var RedisSentinelCr = `
@@ -654,6 +958,23 @@ func ExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[str
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ExtensionsConfigMap,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+		Data: data,
+	}
+	return configmap
+}
+
+func ZenCardExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[string]string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI", "Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
+	metaLabels["icpdata_addon"] = "true"
+	metaLabels["icpdata_addon_version"] = "v1"
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      ZenCardExtensionsConfigMap,
 			Namespace: instance.Namespace,
 			Labels:    metaLabels,
 		},
