@@ -194,8 +194,21 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
+	useZen := r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
+	if useZen {
+		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
+	} else {
+		err = r.reconcileConfigMaps(ctx, instance, res.ExtensionsConfigMap, &needToRequeue)
+		if err != nil {
+			return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
+		}
+	}
+
 	// Check if the UI Deployment already exists, if not create a new one
-	newDeployment, err := r.deploymentForUI(instance)
+	newDeployment, err := r.deploymentForUI(instance, useZen)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -251,18 +264,6 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(ctx, instance)
 
-	useZen := r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
-	if useZen {
-		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-	} else {
-		err = r.reconcileConfigMaps(ctx, instance, res.ExtensionsConfigMap, &needToRequeue)
-		if err != nil {
-			return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
-		}
-	}
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
@@ -362,7 +363,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 
 }
 
-func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.Deployment, error) {
+func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI, useZen bool) (*appsv1.Deployment, error) {
 	// CommonMainVolumeMounts will be added by the controller
 	commonUIVolumeMounts := []corev1.VolumeMount{
 		{
@@ -467,6 +468,11 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
+
+	if useZen {
+		//nolint
+		commonwebuiContainer.Env[26].Value = "true"
+	}
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
