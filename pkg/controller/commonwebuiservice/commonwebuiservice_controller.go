@@ -702,7 +702,7 @@ func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operat
 		currentRoute := &routesv1.Route{}
 		useZen := r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
 		if useZen {
-			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cpd-" + instance.Namespace, Namespace: instance.Namespace}, currentRoute)
+			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cpd", Namespace: instance.Namespace}, currentRoute)
 			if err2 != nil {
 				reqLogger.Error(err2, "Failed to get route for cpd, try again later")
 			}
