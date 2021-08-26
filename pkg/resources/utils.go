@@ -971,7 +971,7 @@ func ZenCardExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data 
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
 	metaLabels["icpdata_addon"] = "true"
-	metaLabels["icpdata_addon_version"] = "v1"
+	metaLabels["icpdata_addon_version"] = "v" + instance.Spec.Version
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ZenCardExtensionsConfigMap,
