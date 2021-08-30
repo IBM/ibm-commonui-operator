@@ -351,6 +351,10 @@ var CommonContainer = corev1.Container{
 			},
 		},
 		{
+			Name:  "USE_ZEN",
+			Value: "false",
+		},
+		{
 			Name: "REDIS_CLIENT_CERTS",
 			ValueFrom: &corev1.EnvVarSource{
 				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
