@@ -889,5 +889,10 @@ spec:
   minKubeVersion: 1.19.0
   provider:
     name: IBM
+  relatedImages:
+  - image: quay.io/opencloudio/common-service-operator:3.11.0
+    name: COMMON_WEB_UI_OPERATOR_IMAGE
+  - image: quay.io/opencloudio/common-web-ui:1.9.0
+    name: COMMON_WEB_UI_IMAGE
   replaces: ibm-commonui-operator.v1.8.0
   version: 1.9.0
