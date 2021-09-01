@@ -890,7 +890,7 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: quay.io/opencloudio/common-service-operator:3.11.0
+  - image: quay.io/opencloudio/ibm-commonui-operator:1.9.0
     name: COMMON_WEB_UI_OPERATOR_IMAGE
   - image: quay.io/opencloudio/common-web-ui:1.9.0
     name: COMMON_WEB_UI_IMAGE
