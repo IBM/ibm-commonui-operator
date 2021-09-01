@@ -12,7 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # This repo is build locally for dev/test by default;
 # Override this variable in CI env.
 BUILD_LOCALLY ?= 1
