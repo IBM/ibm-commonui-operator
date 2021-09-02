@@ -473,6 +473,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 		//nolint
 		commonwebuiContainer.Env[26].Value = "true"
 	}
+	commonwebuiContainer.Env[27].Value = instance.Spec.Version
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
