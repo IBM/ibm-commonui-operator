@@ -1020,8 +1020,7 @@ func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *oper
 		Namespace: namespace,
 	}, &unstruct)
 	if err != nil {
-		reqLogger.Info("Zen CR details: ", unstruct)
-		reqLogger.Info("zen optional install CR is not present", err)
+		reqLogger.Error(err, "zen optional install CR is not present")
 	} else {
 		reqLogger.Info("Got zen optional install CR")
 		return true

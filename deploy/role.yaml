@@ -216,3 +216,13 @@ rules:
     - navconfigurations/status
   verbs:
     - update
+- apiGroups:
+    - zen.cpd.ibm.com
+  resources:
+    - zenservices
+    - zenservices/finalizers
+    - zenservices/status
+  verbs:
+    - get
+    - list
+    - watch
