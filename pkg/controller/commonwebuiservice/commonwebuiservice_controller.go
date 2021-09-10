@@ -194,6 +194,13 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
+	// Create common-web-ui-config config map
+	err = r.reconcileConfigMaps(ctx, instance, res.CommonConfigMap, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Create zen extensions config map
 	useZen := r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
 	if useZen {
 		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
@@ -335,6 +342,9 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 				"extensions": res.ZenCardExtensions,
 			}
 			newConfigMap = res.ZenCardExtensionsConfigMapUI(instance, ExtensionsData)
+		} else if nameOfCM == res.CommonConfigMap {
+			reqLogger.Info("Creating common-web-ui-config config map")
+			newConfigMap = res.CommonWebUIConfigMap(instance)
 		}
 
 		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)
@@ -473,6 +483,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 		//nolint
 		commonwebuiContainer.Env[26].Value = "true"
 	}
+	commonwebuiContainer.Env[27].Value = instance.Spec.Version
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
