@@ -194,6 +194,13 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
+	// Create common-web-ui-config
+	err = r.reconcileConfigMaps(ctx, instance, res.CommonConfigMap, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
+	// Create zen resources if zen is enabled
 	useZen := r.adminHubOnZen(ctx, instance, "lite-zen")
 	if useZen {
 		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
@@ -207,6 +214,7 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		}
 	}
 
+	// Update/delete zen resources/classic admin hub resources if zen is enabled
 	if useZen {
 		updateErr := r.updateZenResources(ctx, instance, res.ZenCardExtensionsConfigMap)
 		if updateErr != nil {
