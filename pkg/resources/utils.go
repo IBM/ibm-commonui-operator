@@ -998,6 +998,21 @@ func ZenCardExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data 
 	return configmap
 }
 
+func CommonWebUIConfigMap(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "CommonWebUIConfigMap", "Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(CommonConfigMap)
+	configmap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      CommonConfigMap,
+			Namespace: instance.Namespace,
+			Labels:    metaLabels,
+		},
+	}
+
+	return configmap
+}
+
 func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
 	reqLogger := log.WithValues("func", "log4jsConfigMap", "Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
