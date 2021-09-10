@@ -929,6 +929,21 @@ var NavConfigCP4ICR = `
   }
 `
 
+//nolint
+var ZenLiteCR = `{
+	"apiVersion": "zen.cpd.ibm.com/v1",
+	"kind": "ZenService",
+	"metadata": {
+		"name": "lite-zen"
+	},
+	"spec": {
+		"csNamespace": "ibm-common-services",
+		"iamIntegration": "true",
+		"storageClass": "rook-cephfs",
+		"zenCoreMetaDbStorageClass": "rook-cephfs"
+	}
+}`
+
 // returns the labels associated with the resource being created
 func LabelsForMetadata(deploymentName string) map[string]string {
 	return map[string]string{"app.kubernetes.io/instance": "ibm-commonui-operator",
