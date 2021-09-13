@@ -25,11 +25,14 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"os"
 
 	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 var log = logf.Log.WithName("resource_utils")
@@ -942,21 +945,6 @@ var NavConfigCP4ICR = `
   }
 `
 
-//nolint
-var ZenLiteCR = `{
-	"apiVersion": "zen.cpd.ibm.com/v1",
-	"kind": "ZenService",
-	"metadata": {
-		"name": "lite-zen"
-	},
-	"spec": {
-		"csNamespace": "ibm-common-services",
-		"iamIntegration": "true",
-		"storageClass": "rook-cephfs",
-		"zenCoreMetaDbStorageClass": "rook-cephfs"
-	}
-}`
-
 // returns the labels associated with the resource being created
 func LabelsForMetadata(deploymentName string) map[string]string {
 	return map[string]string{"app.kubernetes.io/instance": "ibm-commonui-operator",
@@ -1024,6 +1012,16 @@ func CommonWebUIConfigMap(instance *operatorsv1alpha1.CommonWebUI) *corev1.Confi
 	}
 
 	return configmap
+}
+
+// NewUnstructuredList returns UnstructuredList object
+func NewUnstructuredList(group, kind, version string) *unstructured.UnstructuredList {
+	ul := &unstructured.UnstructuredList{}
+	ul.SetGroupVersionKind(schema.GroupVersionKind{
+		Group:   group,
+		Kind:    kind,
+		Version: version})
+	return ul
 }
 
 func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {

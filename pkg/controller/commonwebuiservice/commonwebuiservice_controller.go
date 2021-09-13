@@ -201,7 +201,7 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	}
 
 	// Create zen resources if zen is enabled
-	useZen := r.adminHubOnZen(ctx, instance, "lite-zen")
+	useZen := r.adminHubOnZen(ctx, instance)
 	if useZen {
 		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
 		if err != nil {
@@ -735,7 +735,7 @@ func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operat
 		//If CR was not found, create it
 		//Get the cpd route is zen is true
 		currentRoute := &routesv1.Route{}
-		useZen := r.adminHubOnZen(ctx, instance, "lite-zen")
+		useZen := r.adminHubOnZen(ctx, instance)
 		if useZen {
 			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cpd", Namespace: instance.Namespace}, currentRoute)
 			if err2 != nil {
@@ -1022,25 +1022,18 @@ func (r *ReconcileCommonWebUI) updateCustomResource(ctx context.Context, instanc
 	return nil
 }
 
-func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCR string) bool {
+func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) bool {
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	reqLogger.Info("Checking zen optional install condition")
-	namespace := instance.Namespace
-	var crTemplate map[string]interface{}
 
-	crTemplateErr := json.Unmarshal([]byte(res.ZenLiteCR), &crTemplate)
-	if crTemplateErr != nil {
-		reqLogger.Info("Failed to unmarshall ZEN LITE CR")
-	}
-	var unstruct unstructured.Unstructured
-	unstruct.Object = crTemplate
-	err := r.client.Get(ctx, types.NamespacedName{
-		Name:      nameOfCR,
-		Namespace: namespace,
-	}, &unstruct)
+	zenList := res.NewUnstructuredList("zen.cpd.ibm.com", "ZenService", "v1")
+
+	err := r.client.List(ctx, zenList)
 	if err != nil {
+		reqLogger.Info("Could not find items for zen.cpd.ibm.com api group")
 		reqLogger.Error(err, "zen optional install CR is not present")
-	} else {
+	} else if zenList.Items != nil {
+		reqLogger.Info("Found items for zen.cpd.ibm.com api group")
 		reqLogger.Info("Got zen optional install CR")
 		return true
 	}
