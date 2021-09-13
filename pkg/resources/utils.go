@@ -1024,6 +1024,16 @@ func NewUnstructuredList(group, kind, version string) *unstructured.Unstructured
 	return ul
 }
 
+func UnstructuredCR(group, kind, version string) *unstructured.Unstructured {
+	u := &unstructured.Unstructured{}
+	u.SetGroupVersionKind(schema.GroupVersionKind{
+		Kind:    kind,
+		Group:   group,
+		Version: version,
+	})
+	return u
+}
+
 func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
 	reqLogger := log.WithValues("func", "log4jsConfigMap", "Name", instance.Name)
 	reqLogger.Info("CS??? Entry")

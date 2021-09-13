@@ -128,6 +128,12 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		reqLogger.Error(err, "Failed to watch Certificate")
 	}
 
+	// Watch on unstructured objects
+	err = c.Watch(&source.Kind{Type: res.UnstructuredCR("zen.cpd.ibm.com", "ZenService", "v1")}, &handler.EnqueueRequestForObject{})
+	if err != nil {
+		reqLogger.Error(err, "Failed to watch unstructured zen.cpd.ibm.com api group ZenService resource")
+	}
+
 	return nil
 }
 
@@ -183,6 +189,13 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 			return reconcile.Result{}, err
 		}
 	}
+
+	// Fetch unstructured zen instance and requeue accordingly
+	err = r.reconcileUnstructuredResources(ctx, &needToRequeue)
+	if err != nil {
+		return reconcile.Result{}, err
+	}
+
 	// Check if the config maps already exist. If not, create a new one.
 	err = r.reconcileConfigMaps(ctx, instance, res.Log4jsConfigMap, &needToRequeue)
 	if err != nil {
@@ -320,6 +333,24 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 
 	reqLogger.Info("CS??? all done")
 	return reconcile.Result{}, nil
+}
+
+func (r *ReconcileCommonWebUI) reconcileUnstructuredResources(ctx context.Context, needToRequeue *bool) error {
+	reqLogger := log.WithValues("func", "reconcileUnstructuredResources")
+	// Fetch unstructured zen instance and requeue accordingly
+	err := r.client.List(ctx, res.NewUnstructuredList("zen.cpd.ibm.com", "ZenService", "v1"))
+	//nolint
+	if err != nil {
+		reqLogger.Info("I SHOULD NOT SEE THIS ------------ I SHOULD NOT SEE THIS ------------ I SHOULD NOT SEE THIS")
+		if errors.IsNotFound(err) {
+			// Return and don't requeue
+			return nil
+		}
+		// Error reading the object - requeue the request.
+		*needToRequeue = true
+		return err
+	}
+	return nil
 }
 
 func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
