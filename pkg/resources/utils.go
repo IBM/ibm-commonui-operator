@@ -621,6 +621,19 @@ var CrTemplates = `{
 	}
 }`
 
+var CrTemplates2 = `{
+	"apiVersion": "console.openshift.io/v1",
+	"kind": "ConsoleLink",
+	"metadata": {
+		"name": "admin-hub-zen"
+	},
+	"spec": {
+		"href": "https://<cp-console-route>/common-nav/dashboard",
+		"location": "ApplicationMenu",
+		"text": "Cloud Pak Administration Hub"
+	}
+}`
+
 //nolint
 var NavConfigCR = `
 {

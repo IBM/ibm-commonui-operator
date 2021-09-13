@@ -251,10 +251,17 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
-	//Check if CR already exists. If not, create a new one
-	err = r.reconcileCr(ctx, instance)
-	if err != nil {
-		reqLogger.Error(err, "Error creating custom resource")
+	//Check if console link CR already exists. If not, create a new one
+	if useZen {
+		err = r.reconcileCr(ctx, instance, "admin-hub-zen", res.CrTemplates2)
+		if err != nil {
+			reqLogger.Error(err, "Error creating console link cr for zen")
+		}
+	} else {
+		err = r.reconcileCr(ctx, instance, "admin-hub", res.CrTemplates)
+		if err != nil {
+			reqLogger.Error(err, "Error creating console link cr")
+		}
 	}
 
 	// Check if the Certificates already exist, if not create new ones
@@ -695,21 +702,21 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(ctx context.Context, instance 
 	return nil
 }
 
-func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) error {
+func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, crName, template string) error {
 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 	reqLogger.Info("RECONCILING CR")
 
 	namespace := instance.Namespace
 	var crTemplate map[string]interface{}
 	// Unmarshal or Decode the JSON to the interface.
-	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplate)
+	crTemplatesErr := json.Unmarshal([]byte(template), &crTemplate)
 	if crTemplatesErr != nil {
 		reqLogger.Info("Failed to unmarshall crTemplates")
 		return crTemplatesErr
 	}
 	var unstruct unstructured.Unstructured
 	unstruct.Object = crTemplate
-	name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
+	name := crName
 
 	//Get CR and see if it exists
 	getError := r.client.Get(ctx, types.NamespacedName{
@@ -1092,7 +1099,7 @@ func (r *ReconcileCommonWebUI) deleteClassicAdminHubRes(ctx context.Context, ins
 	}
 	var unstruct unstructured.Unstructured
 	unstruct.Object = crTemplate
-	name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
+	name := "admin-hub"
 
 	//Get and delelte classic admin hub console link CR
 	getError := r.client.Get(ctx, types.NamespacedName{
