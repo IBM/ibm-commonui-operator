@@ -128,11 +128,15 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		reqLogger.Error(err, "Failed to watch Certificate")
 	}
 
-	// Watch on unstructured objects
-	err = c.Watch(&source.Kind{Type: res.UnstructuredCR("zen.cpd.ibm.com", "ZenService", "v1")}, &handler.EnqueueRequestForObject{})
-	if err != nil {
-		reqLogger.Error(err, "Failed to watch unstructured zen.cpd.ibm.com api group ZenService resource")
-	}
+	//Watch on unstructured objects
+	// err = c.Watch(&source.Kind{Type: res.UnstructuredCR("zen.cpd.ibm.com", "ZenService", "v1")}, &handler.EnqueueRequestForOwner{
+	// 	IsController: true,
+	// 	OwnerType:    res.UnstructuredCR("zen.cpd.ibm.com", "ZenService", "v1"),
+	// })
+	// if err != nil {
+	// 	reqLogger.Error(err, "Failed to watch unstructured zen.cpd.ibm.com api group ZenService resource")
+	// 	return err
+	// }
 
 	return nil
 }
@@ -191,9 +195,10 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	}
 
 	// Fetch unstructured zen instance and requeue accordingly
-	err = r.reconcileUnstructuredResources(ctx, &needToRequeue)
+	reqLogger.Info("Start reconciling unstructured resources")
+	err = r.reconcileUnstructuredResources(ctx, instance, &needToRequeue)
 	if err != nil {
-		return reconcile.Result{}, err
+		return reconcile.Result{RequeueAfter: time.Minute * 1}, err
 	}
 
 	// Check if the config maps already exist. If not, create a new one.
@@ -235,9 +240,13 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		}
 		deleteErr := r.deleteClassicAdminHubRes(ctx, instance)
 		if deleteErr != nil {
-			reqLogger.Error(updateErr, "Failed deleting classic admin hub resources")
+			reqLogger.Error(deleteErr, "Failed deleting classic admin hub resources")
 		}
 	}
+
+	// Clean up zen admin hub resources (if any)
+	r.deleteZenAdminHubRes(ctx, instance, useZen)
+
 	// Check if the UI Deployment already exists, if not create a new one
 	newDeployment, err := r.deploymentForUI(instance, useZen)
 	if err != nil {
@@ -335,14 +344,16 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileCommonWebUI) reconcileUnstructuredResources(ctx context.Context, needToRequeue *bool) error {
-	reqLogger := log.WithValues("func", "reconcileUnstructuredResources")
+func (r *ReconcileCommonWebUI) reconcileUnstructuredResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+	reqLogger := log.WithValues("func", "reconcileUnstructuredResources", "instance.Name", instance.Name)
+
+	reqLogger.Info("Reconciler function to requeue zen optional install process")
 	// Fetch unstructured zen instance and requeue accordingly
 	err := r.client.List(ctx, res.NewUnstructuredList("zen.cpd.ibm.com", "ZenService", "v1"))
 	//nolint
 	if err != nil {
-		reqLogger.Info("I SHOULD NOT SEE THIS ------------ I SHOULD NOT SEE THIS ------------ I SHOULD NOT SEE THIS")
 		if errors.IsNotFound(err) {
+			reqLogger.Error(err, "Not found")
 			// Return and don't requeue
 			return nil
 		}
@@ -531,6 +542,8 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	if useZen {
 		//nolint
 		commonwebuiContainer.Env[26].Value = "true"
+	} else {
+		commonwebuiContainer.Env[26].Value = "false"
 	}
 	commonwebuiContainer.Env[27].Value = instance.Spec.Version
 
@@ -1071,40 +1084,69 @@ func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *oper
 	return false
 }
 
+func (r *ReconcileCommonWebUI) shouldUpdateZenResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) bool {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("Checking zen upgrade condition")
+
+	currentConfigMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      res.ZenCardExtensionsConfigMap,
+			Namespace: instance.Namespace,
+		},
+	}
+	err := r.client.Get(ctx, types.NamespacedName{Name: res.ZenCardExtensionsConfigMap, Namespace: instance.Namespace}, currentConfigMap)
+
+	if err == nil {
+		reqLogger.Info("Comparing versions")
+		currentVersion := currentConfigMap.Labels["icpdata_addon_version"]
+		newVersion := instance.Spec.Version
+		reqLogger.Info("Old Version: " + currentVersion)
+		reqLogger.Info("New Version: " + newVersion)
+		if currentVersion != newVersion {
+			return true
+		}
+	}
+
+	return false
+}
+
 func (r *ReconcileCommonWebUI) updateZenResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string) error {
 	reqLogger := log.WithValues("func", "updateZenResources", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking if zen card extensions config map exists")
 
-	currentConfigMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      nameOfCM,
-			Namespace: instance.Namespace,
-		},
-	}
-	err := r.client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, currentConfigMap)
-
-	if err == nil {
-		reqLogger.Info("zen card extensions config map exists")
-
-		var ExtensionsData = map[string]string{
-			"nginx.conf": res.ZenNginxConfig,
-			"extensions": res.ZenCardExtensions,
+	if r.shouldUpdateZenResources(ctx, instance) {
+		currentConfigMap := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      nameOfCM,
+				Namespace: instance.Namespace,
+			},
 		}
-		currentConfigMap.Labels["icpdata_addon_version"] = instance.Spec.Version
-		currentConfigMap.Data = ExtensionsData
+		err := r.client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, currentConfigMap)
 
-		reqLogger.Info("Updating zen card extensions CM")
-		updateErr := r.client.Update(ctx, currentConfigMap)
-		if updateErr == nil {
-			reqLogger.Info("Card extensions updated")
+		if err == nil {
+			reqLogger.Info("zen card extensions config map exists")
+
+			var ExtensionsData = map[string]string{
+				"nginx.conf": res.ZenNginxConfig,
+				"extensions": res.ZenCardExtensions,
+			}
+			currentConfigMap.Labels["icpdata_addon_version"] = instance.Spec.Version
+			currentConfigMap.Data = ExtensionsData
+
+			reqLogger.Info("Updating zen card extensions CM")
+			updateErr := r.client.Update(ctx, currentConfigMap)
+			if updateErr == nil {
+				reqLogger.Info("Card extensions updated")
+			} else {
+				reqLogger.Info("Could not update card extensions", updateErr)
+				return updateErr
+			}
 		} else {
-			reqLogger.Info("Could not update card extensions", updateErr)
-			return updateErr
+			return err
 		}
-	} else {
-		return err
 	}
+
 	return nil
 }
 
@@ -1166,4 +1208,31 @@ func (r *ReconcileCommonWebUI) deleteClassicAdminHubRes(ctx context.Context, ins
 	}
 
 	return nil
+}
+
+func (r *ReconcileCommonWebUI) deleteZenAdminHubRes(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, useZen bool) {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("Getting ZEN admin hub resources")
+	//Get and delete classic admin hub left nav menu item
+	reqLogger.Info("Checking to see if ZEN admin hub config maps are present")
+
+	currentConfigMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      res.ZenCardExtensionsConfigMap,
+			Namespace: instance.Namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: res.ExtensionsConfigMap, Namespace: instance.Namespace}, currentConfigMap)
+
+	if getError == nil && !useZen {
+		reqLogger.Info("Got ZEN admin hub config maps")
+		err := r.client.Delete(ctx, currentConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete ZEN admin hub config maps")
+		} else {
+			reqLogger.Info("Deleted ZEN admin hub config maps")
+		}
+	} else if !errors.IsNotFound(getError) {
+		reqLogger.Error(getError, "Failed to get ZEN admin hub config maps")
+	}
 }

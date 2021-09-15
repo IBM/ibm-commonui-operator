@@ -206,16 +206,15 @@ var Extensions = `
 	}
 ]`
 
-var ZenNginxConfig = `
-	location /common-nav {
-		access_by_lua_file /nginx_data/checkjwt.lua;
-		set_by_lua $nsdomain 'return os.getenv("NS_DOMAIN")';
-		proxy_set_header Host $host;
-		proxy_set_header zen-namespace-domain $nsdomain;      
-		proxy_pass https://common-web-ui:3000;
-		proxy_read_timeout 10m;
-	}
-`
+var ZenNginxConfig = "location /common-nav {\n" +
+	"\taccess_by_lua_file /nginx_data/checkjwt.lua;\n" +
+	"\tset_by_lua $nsdomain 'return os.getenv('NS_DOMAIN')';\n" +
+	"\tproxy_set_header Host $host;\n" +
+	"\tproxy_set_header zen-namespace-domain $nsdomain;\n" +
+	"\tproxy_pass https://common-web-ui:3000;\n" +
+	"\tproxy_read_timeout 10m;\n" +
+	"}"
+
 var ZenCardExtensions = `
 [
 	  {
