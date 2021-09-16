@@ -194,13 +194,6 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		}
 	}
 
-	// Fetch unstructured zen instance and requeue accordingly
-	reqLogger.Info("Start reconciling unstructured resources")
-	err = r.reconcileUnstructuredResources(ctx, instance, &needToRequeue)
-	if err != nil {
-		return reconcile.Result{RequeueAfter: time.Minute * 1}, err
-	}
-
 	// Check if the config maps already exist. If not, create a new one.
 	err = r.reconcileConfigMaps(ctx, instance, res.Log4jsConfigMap, &needToRequeue)
 	if err != nil {
@@ -311,6 +304,13 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(ctx, instance)
 
+	// Fetch unstructured zen instance and requeue accordingly
+	// reqLogger.Info("Start reconciling unstructured resources")
+	// err = r.reconcileUnstructuredResources(ctx, instance, &needToRequeue)
+	// if err != nil {
+	// 	return reconcile.Result{RequeueAfter: time.Minute * 1}, err
+	// }
+
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
 		reqLogger.Info("Requeue the request")
@@ -344,25 +344,25 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	return reconcile.Result{}, nil
 }
 
-func (r *ReconcileCommonWebUI) reconcileUnstructuredResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
-	reqLogger := log.WithValues("func", "reconcileUnstructuredResources", "instance.Name", instance.Name)
+// func (r *ReconcileCommonWebUI) reconcileUnstructuredResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+// 	reqLogger := log.WithValues("func", "reconcileUnstructuredResources", "instance.Name", instance.Name)
 
-	reqLogger.Info("Reconciler function to requeue zen optional install process")
-	// Fetch unstructured zen instance and requeue accordingly
-	err := r.client.List(ctx, res.NewUnstructuredList("zen.cpd.ibm.com", "ZenService", "v1"))
-	//nolint
-	if err != nil {
-		if errors.IsNotFound(err) {
-			reqLogger.Error(err, "Not found")
-			// Return and don't requeue
-			return nil
-		}
-		// Error reading the object - requeue the request.
-		*needToRequeue = true
-		return err
-	}
-	return nil
-}
+// 	reqLogger.Info("Reconciler function to requeue zen optional install process")
+// 	// Fetch unstructured zen instance and requeue accordingly
+// 	err := r.client.List(ctx, res.NewUnstructuredList("zen.cpd.ibm.com", "ZenService", "v1"))
+// 	//nolint
+// 	if err != nil {
+// 		if errors.IsNotFound(err) {
+// 			reqLogger.Error(err, "Not found")
+// 			// Return and don't requeue
+// 			return nil
+// 		}
+// 		// Error reading the object - requeue the request.
+// 		*needToRequeue = true
+// 		return err
+// 	}
+// 	return nil
+// }
 
 func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
@@ -1072,7 +1072,7 @@ func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *oper
 
 	zenList := res.NewUnstructuredList("zen.cpd.ibm.com", "ZenService", "v1")
 
-	err := r.client.List(ctx, zenList)
+	err := r.client.List(ctx, zenList, &client.ListOptions{Namespace: instance.Namespace})
 	if err != nil {
 		reqLogger.Info("Could not find items for zen.cpd.ibm.com api group")
 		reqLogger.Error(err, "zen optional install CR is not present")
