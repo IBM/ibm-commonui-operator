@@ -101,7 +101,7 @@ spec:
       - "createResource"
       - "catalog"
   login:
-    logoAltText: "Cloud Pak | Administration Hub"
+    logoAltText: "Cloud Pak"
     logoUrl: "/common-nav/api/graphics/logincloudpak.svg"
     logoWidth: "190px"
     logoHeight: "47px"
