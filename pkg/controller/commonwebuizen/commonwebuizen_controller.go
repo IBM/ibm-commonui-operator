@@ -479,7 +479,7 @@ func (r *ReconcileCommonWebUIZen) deleteZenAdminHubRes(ctx context.Context, name
 			Namespace: namespace,
 		},
 	}
-	getError := r.client.Get(ctx, types.NamespacedName{Name: res.ExtensionsConfigMap, Namespace: namespace}, currentConfigMap)
+	getError := r.client.Get(ctx, types.NamespacedName{Name: res.ZenCardExtensionsConfigMap, Namespace: namespace}, currentConfigMap)
 
 	if getError == nil {
 		reqLogger.Info("Got ZEN admin hub config maps")
@@ -493,10 +493,10 @@ func (r *ReconcileCommonWebUIZen) deleteZenAdminHubRes(ctx context.Context, name
 		reqLogger.Error(getError, "Failed to get ZEN admin hub config maps")
 	}
 
-	reqLogger.Info("Checking to see if classic admin hub console link is present")
+	reqLogger.Info("Checking to see if zen admin hub console link is present")
 	var crTemplate map[string]interface{}
 	// Unmarshal or Decode the JSON to the interface.
-	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplate)
+	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates2), &crTemplate)
 	if crTemplatesErr != nil {
 		reqLogger.Info("Failed to unmarshall crTemplates")
 		return crTemplatesErr
