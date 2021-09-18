@@ -19,11 +19,8 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"strings"
-	"time"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
-	routesv1 "github.com/openshift/api/route/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
@@ -128,16 +125,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		reqLogger.Error(err, "Failed to watch Certificate")
 	}
 
-	//Watch on unstructured objects
-	// err = c.Watch(&source.Kind{Type: res.UnstructuredCR("zen.cpd.ibm.com", "ZenService", "v1")}, &handler.EnqueueRequestForOwner{
-	// 	IsController: true,
-	// 	OwnerType:    res.UnstructuredCR("zen.cpd.ibm.com", "ZenService", "v1"),
-	// })
-	// if err != nil {
-	// 	reqLogger.Error(err, "Failed to watch unstructured zen.cpd.ibm.com api group ZenService resource")
-	// 	return err
-	// }
-
 	return nil
 }
 
@@ -205,43 +192,8 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
-	// Create common-web-ui-config
-	err = r.reconcileConfigMaps(ctx, instance, res.CommonConfigMap, &needToRequeue)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// Create zen resources if zen is enabled
-	useZen := r.adminHubOnZen(ctx, instance)
-	if useZen {
-		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
-		if err != nil {
-			return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
-		}
-	} else {
-		err = r.reconcileConfigMaps(ctx, instance, res.ExtensionsConfigMap, &needToRequeue)
-		if err != nil {
-			return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
-		}
-	}
-
-	// Update/delete zen resources/classic admin hub resources if zen is enabled
-	if useZen {
-		updateErr := r.updateZenResources(ctx, instance, res.ZenCardExtensionsConfigMap)
-		if updateErr != nil {
-			reqLogger.Error(updateErr, "Failed updating zen card extensions")
-		}
-		deleteErr := r.deleteClassicAdminHubRes(ctx, instance)
-		if deleteErr != nil {
-			reqLogger.Error(deleteErr, "Failed deleting classic admin hub resources")
-		}
-	}
-
-	// Clean up zen admin hub resources (if any)
-	r.deleteZenAdminHubRes(ctx, instance, useZen)
-
 	// Check if the UI Deployment already exists, if not create a new one
-	newDeployment, err := r.deploymentForUI(instance, useZen)
+	newDeployment, err := r.deploymentForUI(instance)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -267,17 +219,10 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	}
 
 	//Check if console link CR already exists. If not, create a new one
-	if useZen {
-		err = r.reconcileCr(ctx, instance, "admin-hub-zen", res.CrTemplates2)
-		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr for zen")
-		}
-	} else {
-		err = r.reconcileCr(ctx, instance, "admin-hub", res.CrTemplates)
-		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr")
-		}
-	}
+	// err = r.reconcileCr(ctx, instance, "admin-hub", res.CrTemplates)
+	// if err != nil {
+	// 	reqLogger.Error(err, "Error creating console link cr")
+	// }
 
 	// Check if the Certificates already exist, if not create new ones
 	err = r.reconcileCertificates(ctx, instance, &needToRequeue)
@@ -303,13 +248,6 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
 	r.deleteDaemonSet(ctx, instance)
-
-	// Fetch unstructured zen instance and requeue accordingly
-	// reqLogger.Info("Start reconciling unstructured resources")
-	// err = r.reconcileUnstructuredResources(ctx, instance, &needToRequeue)
-	// if err != nil {
-	// 	return reconcile.Result{RequeueAfter: time.Minute * 1}, err
-	// }
 
 	if needToRequeue {
 		// one or more resources was created, so requeue the request
@@ -344,26 +282,6 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	return reconcile.Result{}, nil
 }
 
-// func (r *ReconcileCommonWebUI) reconcileUnstructuredResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
-// 	reqLogger := log.WithValues("func", "reconcileUnstructuredResources", "instance.Name", instance.Name)
-
-// 	reqLogger.Info("Reconciler function to requeue zen optional install process")
-// 	// Fetch unstructured zen instance and requeue accordingly
-// 	err := r.client.List(ctx, res.NewUnstructuredList("zen.cpd.ibm.com", "ZenService", "v1"))
-// 	//nolint
-// 	if err != nil {
-// 		if errors.IsNotFound(err) {
-// 			reqLogger.Error(err, "Not found")
-// 			// Return and don't requeue
-// 			return nil
-// 		}
-// 		// Error reading the object - requeue the request.
-// 		*needToRequeue = true
-// 		return err
-// 	}
-// 	return nil
-// }
-
 func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
@@ -376,37 +294,9 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 		newConfigMap := &corev1.ConfigMap{}
 		if nameOfCM == res.Log4jsConfigMap {
 			newConfigMap = res.Log4jsConfigMapUI(instance)
-		} else if nameOfCM == res.ExtensionsConfigMap {
-			currentRoute := &routesv1.Route{}
-			//Get the cp-console route and add it to the configmap below
-			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
-			if err2 != nil {
-				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
-				*needToRequeue = true
-				return err2
-			}
-			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-
-			var ExtensionsData = map[string]string{
-				"extensions": strings.Replace(res.Extensions, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
-			}
-
-			newConfigMap = res.ExtensionsConfigMapUI(instance, ExtensionsData)
-
 		} else if nameOfCM == res.RedisCertsConfigMap {
 			newConfigMap = res.RedisCertsConfigMapUI(instance)
-		} else if nameOfCM == res.ZenCardExtensionsConfigMap {
-			reqLogger.Info("Creating zen card extensions config map")
-			var ExtensionsData = map[string]string{
-				"nginx.conf": res.ZenNginxConfig,
-				"extensions": res.ZenCardExtensions,
-			}
-			newConfigMap = res.ZenCardExtensionsConfigMapUI(instance, ExtensionsData)
-		} else if nameOfCM == res.CommonConfigMap {
-			reqLogger.Info("Creating common-web-ui-config config map")
-			newConfigMap = res.CommonWebUIConfigMap(instance)
 		}
-
 		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set owner for log4js config map", "Namespace", newConfigMap.Namespace,
@@ -433,7 +323,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 
 }
 
-func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI, useZen bool) (*appsv1.Deployment, error) {
+func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.Deployment, error) {
 	// CommonMainVolumeMounts will be added by the controller
 	commonUIVolumeMounts := []corev1.VolumeMount{
 		{
@@ -539,12 +429,6 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
-	if useZen {
-		//nolint
-		commonwebuiContainer.Env[26].Value = "true"
-	} else {
-		commonwebuiContainer.Env[26].Value = "false"
-	}
 	commonwebuiContainer.Env[27].Value = instance.Spec.Version
 
 	deployment := &appsv1.Deployment{
@@ -746,88 +630,72 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(ctx context.Context, instance 
 	return nil
 }
 
-func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, crName, template string) error {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-	reqLogger.Info("RECONCILING CR")
+// func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, crName, template string) error {
+// 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+// 	reqLogger.Info("RECONCILING CR")
 
-	namespace := instance.Namespace
-	var crTemplate map[string]interface{}
-	// Unmarshal or Decode the JSON to the interface.
-	crTemplatesErr := json.Unmarshal([]byte(template), &crTemplate)
-	if crTemplatesErr != nil {
-		reqLogger.Info("Failed to unmarshall crTemplates")
-		return crTemplatesErr
-	}
-	var unstruct unstructured.Unstructured
-	unstruct.Object = crTemplate
-	name := crName
+// 	namespace := instance.Namespace
+// 	var crTemplate map[string]interface{}
+// 	// Unmarshal or Decode the JSON to the interface.
+// 	crTemplatesErr := json.Unmarshal([]byte(template), &crTemplate)
+// 	if crTemplatesErr != nil {
+// 		reqLogger.Info("Failed to unmarshall crTemplates")
+// 		return crTemplatesErr
+// 	}
+// 	var unstruct unstructured.Unstructured
+// 	unstruct.Object = crTemplate
+// 	name := crName
 
-	//Get CR and see if it exists
-	getError := r.client.Get(ctx, types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}, &unstruct)
+// 	//Get CR and see if it exists
+// 	getError := r.client.Get(ctx, types.NamespacedName{
+// 		Name:      name,
+// 		Namespace: namespace,
+// 	}, &unstruct)
 
-	err1 := r.client.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
-	if err1 == nil {
-		r.finalizerCr(ctx, instance, unstruct)
-	}
+// 	err1 := r.client.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
+// 	if err1 == nil {
+// 		r.finalizerCr(ctx, instance, unstruct)
+// 	}
 
-	if getError != nil && !errors.IsNotFound(getError) {
-		reqLogger.Error(getError, "Failed to get CR")
-	} else if errors.IsNotFound(getError) {
-		//If CR was not found, create it
-		//Get the cpd route is zen is true
-		currentRoute := &routesv1.Route{}
-		useZen := r.adminHubOnZen(ctx, instance)
-		if useZen {
-			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cpd", Namespace: instance.Namespace}, currentRoute)
-			if err2 != nil {
-				reqLogger.Error(err2, "Failed to get route for cpd, try again later")
-			}
-			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-			//Will hold href for admin hub console link
-			var href = "https://" + currentRoute.Spec.Host
+// 	if getError != nil && !errors.IsNotFound(getError) {
+// 		reqLogger.Error(getError, "Failed to get CR")
+// 	} else if errors.IsNotFound(getError) {
+// 		//If CR was not found, create it
+// 		//Get the cpd route is zen is true
+// 		currentRoute := &routesv1.Route{}
+// 		//Get the cp-console route
+// 		err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
+// 		if err2 != nil {
+// 			reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+// 		}
+// 		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+// 		//Will hold href for admin hub console link
+// 		var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
 
-			// Create Custom resource
-			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
-				reqLogger.Error(createErr, "Failed to create CR")
-				return createErr
-			}
-		} else { //Get the cp-console route
-			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
-			if err2 != nil {
-				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
-			}
-			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-			//Will hold href for admin hub console link
-			var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
+// 		// Create Custom resource
+// 		if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
+// 			reqLogger.Error(createErr, "Failed to create CR")
+// 			return createErr
+// 		}
+// 	} else {
+// 		reqLogger.Info("Skipping CR creation")
+// 	}
 
-			// Create Custom resource
-			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
-				reqLogger.Error(createErr, "Failed to create CR")
-				return createErr
-			}
-		}
-	} else {
-		reqLogger.Info("Skipping CR creation")
-	}
+// 	return nil
+// }
 
-	return nil
-}
+// func (r *ReconcileCommonWebUI) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string) error {
+// 	reqLogger := log.WithValues("CR name", name)
+// 	reqLogger.Info("creating a CR ", name)
 
-func (r *ReconcileCommonWebUI) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string) error {
-	reqLogger := log.WithValues("CR name", name)
-	reqLogger.Info("creating a CR ", name)
-
-	unstruct.Object["spec"].(map[string]interface{})["href"] = href
-	crCreateErr := r.client.Create(ctx, &unstruct)
-	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
-		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
-		return crCreateErr
-	}
-	return nil
-}
+// 	unstruct.Object["spec"].(map[string]interface{})["href"] = href
+// 	crCreateErr := r.client.Create(ctx, &unstruct)
+// 	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
+// 		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
+// 		return crCreateErr
+// 	}
+// 	return nil
+// }
 
 // func (r *ReconcileCommonWebUI) reconcileRedisSentinelCr(instance *operatorsv1alpha1.CommonWebUI) error {
 // 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
@@ -869,78 +737,59 @@ func (r *ReconcileCommonWebUI) createCustomResource(ctx context.Context, unstruc
 // 	return nil
 // }
 
-func (r *ReconcileCommonWebUI) finalizerCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, unstruct unstructured.Unstructured) {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+// func (r *ReconcileCommonWebUI) finalizerCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, unstruct unstructured.Unstructured) {
+// 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 
-	finalizerName := "commonui.operators.ibm.com"
-	finalizerName1 := "commonui1.operators.ibm.com"
+// 	finalizerName := "commonui.operators.ibm.com"
+// 	finalizerName1 := "commonui1.operators.ibm.com"
 
-	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
-		// Add the finalizer to the metadata of the instance and update the object.
-		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) && !containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
-			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName, finalizerName1)
-			if err := r.client.Update(ctx, instance); err != nil {
-				reqLogger.Error(err, "Failed to create finalizer")
-			} else {
-				reqLogger.Info("Created Finalizers")
-			}
-		}
-	} else {
-		// When the instance is being deleted. If finalizer is present
-		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-			// Finalizer is present, so lets handle any external dependency - remove console link CR
-			if err := r.client.Delete(ctx, &unstruct); err != nil {
-				// if fails to delete the external dependency here, return with error
-				reqLogger.Error(err, "Failed to delete Console Link CR")
-			} else {
-				reqLogger.Info("Deleted Console link CR")
-			}
+// 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
+// 		// Add the finalizer to the metadata of the instance and update the object.
+// 		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) && !containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
+// 			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName, finalizerName1)
+// 			if err := r.client.Update(ctx, instance); err != nil {
+// 				reqLogger.Error(err, "Failed to create finalizer")
+// 			} else {
+// 				reqLogger.Info("Created Finalizers")
+// 			}
+// 		}
+// 	} else {
+// 		// When the instance is being deleted. If finalizer is present
+// 		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
+// 			// Finalizer is present, so lets handle any external dependency - remove console link CR
+// 			if err := r.client.Delete(ctx, &unstruct); err != nil {
+// 				// if fails to delete the external dependency here, return with error
+// 				reqLogger.Error(err, "Failed to delete Console Link CR")
+// 			} else {
+// 				reqLogger.Info("Deleted Console link CR")
+// 			}
 
-			// Remove our finalizer from the metadata of the object and update it.
-			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
-			if err := r.client.Update(ctx, instance); err != nil {
-				reqLogger.Error(err, "Failed to delete  Console link finalizer")
-			} else {
-				reqLogger.Info("Deleted Console link Finalizer")
-			}
-		} else if containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
-			// Finalizer is present, so lets handle any external dependency - remove console link CR
-			if err := r.client.Delete(ctx, &unstruct); err != nil {
-				// if fails to delete the external dependency here, return with error
-				reqLogger.Error(err, "Failed to delete Redis CR")
-			} else {
-				reqLogger.Info("Deleted Redis CR")
-			}
+// 			// Remove our finalizer from the metadata of the object and update it.
+// 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
+// 			if err := r.client.Update(ctx, instance); err != nil {
+// 				reqLogger.Error(err, "Failed to delete  Console link finalizer")
+// 			} else {
+// 				reqLogger.Info("Deleted Console link Finalizer")
+// 			}
+// 		} else if containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
+// 			// Finalizer is present, so lets handle any external dependency - remove console link CR
+// 			if err := r.client.Delete(ctx, &unstruct); err != nil {
+// 				// if fails to delete the external dependency here, return with error
+// 				reqLogger.Error(err, "Failed to delete Redis CR")
+// 			} else {
+// 				reqLogger.Info("Deleted Redis CR")
+// 			}
 
-			// Remove our finalizer from the metadata of the object and update it.
-			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName1)
-			if err := r.client.Update(ctx, instance); err != nil {
-				reqLogger.Error(err, "Failed to delete Redis finalizer")
-			} else {
-				reqLogger.Info("Deleted Redis Finalizer")
-			}
-		}
-	}
-}
-
-func containsString(slice []string, s string) bool {
-	for _, item := range slice {
-		if item == s {
-			return true
-		}
-	}
-	return false
-}
-
-func removeString(slice []string, s string) (result []string) {
-	for _, item := range slice {
-		if item == s {
-			continue
-		}
-		result = append(result, item)
-	}
-	return
-}
+// 			// Remove our finalizer from the metadata of the object and update it.
+// 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName1)
+// 			if err := r.client.Update(ctx, instance); err != nil {
+// 				reqLogger.Error(err, "Failed to delete Redis finalizer")
+// 			} else {
+// 				reqLogger.Info("Deleted Redis Finalizer")
+// 			}
+// 		}
+// 	}
+// }
 
 func (r *ReconcileCommonWebUI) reconcileCertificates(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileCertificates", "instance.Name", instance.Name)
@@ -1064,175 +913,4 @@ func (r *ReconcileCommonWebUI) updateCustomResource(ctx context.Context, instanc
 		}
 	}
 	return nil
-}
-
-func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) bool {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-	reqLogger.Info("Checking zen optional install condition")
-
-	zenList := res.NewUnstructuredList("zen.cpd.ibm.com", "ZenService", "v1")
-
-	err := r.client.List(ctx, zenList, &client.ListOptions{Namespace: instance.Namespace})
-	if err != nil {
-		reqLogger.Info("Could not find items for zen.cpd.ibm.com api group")
-		reqLogger.Error(err, "zen optional install CR is not present")
-	} else if zenList.Items != nil {
-		reqLogger.Info("Found items for zen.cpd.ibm.com api group")
-		reqLogger.Info("Got zen optional install CR")
-		return true
-	}
-	return false
-}
-
-func (r *ReconcileCommonWebUI) shouldUpdateZenResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) bool {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-	reqLogger.Info("Checking zen upgrade condition")
-
-	currentConfigMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.ZenCardExtensionsConfigMap,
-			Namespace: instance.Namespace,
-		},
-	}
-	err := r.client.Get(ctx, types.NamespacedName{Name: res.ZenCardExtensionsConfigMap, Namespace: instance.Namespace}, currentConfigMap)
-
-	if err == nil {
-		reqLogger.Info("Comparing versions")
-		currentVersion := currentConfigMap.Labels["icpdata_addon_version"]
-		newVersion := instance.Spec.Version
-		reqLogger.Info("Old Version: " + currentVersion)
-		reqLogger.Info("New Version: " + newVersion)
-		if currentVersion != newVersion {
-			return true
-		}
-	}
-
-	return false
-}
-
-func (r *ReconcileCommonWebUI) updateZenResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string) error {
-	reqLogger := log.WithValues("func", "updateZenResources", "instance.Name", instance.Name)
-
-	reqLogger.Info("checking if zen card extensions config map exists")
-
-	if r.shouldUpdateZenResources(ctx, instance) {
-		currentConfigMap := &corev1.ConfigMap{
-			ObjectMeta: metav1.ObjectMeta{
-				Name:      nameOfCM,
-				Namespace: instance.Namespace,
-			},
-		}
-		err := r.client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, currentConfigMap)
-
-		if err == nil {
-			reqLogger.Info("zen card extensions config map exists")
-
-			var ExtensionsData = map[string]string{
-				"nginx.conf": res.ZenNginxConfig,
-				"extensions": res.ZenCardExtensions,
-			}
-			currentConfigMap.Labels["icpdata_addon_version"] = instance.Spec.Version
-			currentConfigMap.Data = ExtensionsData
-
-			reqLogger.Info("Updating zen card extensions CM")
-			updateErr := r.client.Update(ctx, currentConfigMap)
-			if updateErr == nil {
-				reqLogger.Info("Card extensions updated")
-			} else {
-				reqLogger.Info("Could not update card extensions", updateErr)
-				return updateErr
-			}
-		} else {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func (r *ReconcileCommonWebUI) deleteClassicAdminHubRes(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) error {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-	reqLogger.Info("Getting classic admin hub resources")
-
-	reqLogger.Info("Checking to see if classic admin hub console link is present")
-	namespace := instance.Namespace
-	var crTemplate map[string]interface{}
-	// Unmarshal or Decode the JSON to the interface.
-	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplate)
-	if crTemplatesErr != nil {
-		reqLogger.Info("Failed to unmarshall crTemplates")
-		return crTemplatesErr
-	}
-	var unstruct unstructured.Unstructured
-	unstruct.Object = crTemplate
-	name := "admin-hub"
-
-	//Get and delelte classic admin hub console link CR
-	getError := r.client.Get(ctx, types.NamespacedName{
-		Name:      name,
-		Namespace: namespace,
-	}, &unstruct)
-
-	if getError != nil && !errors.IsNotFound(getError) {
-		reqLogger.Error(getError, "Failed to get classic admin hub console link CR")
-	} else if getError == nil {
-		reqLogger.Info("Got classic admin hub console link")
-		err := r.client.Delete(ctx, &unstruct)
-		if err != nil {
-			reqLogger.Error(err, "Failed to delete classic admin hub console link")
-		} else {
-			reqLogger.Info("Deleted classic admin hub console link")
-		}
-	}
-
-	//Get and delete classic admin hub left nav menu item
-	reqLogger.Info("Checking to see if classic admin hub config map is present")
-	currentConfigMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.ExtensionsConfigMap,
-			Namespace: instance.Namespace,
-		},
-	}
-	getError2 := r.client.Get(ctx, types.NamespacedName{Name: res.ExtensionsConfigMap, Namespace: instance.Namespace}, currentConfigMap)
-
-	if getError2 == nil {
-		reqLogger.Info("Got classic admin hub config map")
-		err := r.client.Delete(ctx, currentConfigMap)
-		if err != nil {
-			reqLogger.Error(err, "Failed to delete classic admin hub config map")
-		} else {
-			reqLogger.Info("Deleted classic admin hub cofig map")
-		}
-	} else if !errors.IsNotFound(getError2) {
-		reqLogger.Error(getError2, "Failed to get classic admin hub config map")
-	}
-
-	return nil
-}
-
-func (r *ReconcileCommonWebUI) deleteZenAdminHubRes(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, useZen bool) {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-	reqLogger.Info("Getting ZEN admin hub resources")
-	//Get and delete classic admin hub left nav menu item
-	reqLogger.Info("Checking to see if ZEN admin hub config maps are present")
-
-	currentConfigMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.ZenCardExtensionsConfigMap,
-			Namespace: instance.Namespace,
-		},
-	}
-	getError := r.client.Get(ctx, types.NamespacedName{Name: res.ExtensionsConfigMap, Namespace: instance.Namespace}, currentConfigMap)
-
-	if getError == nil && !useZen {
-		reqLogger.Info("Got ZEN admin hub config maps")
-		err := r.client.Delete(ctx, currentConfigMap)
-		if err != nil {
-			reqLogger.Error(err, "Failed to delete ZEN admin hub config maps")
-		} else {
-			reqLogger.Info("Deleted ZEN admin hub config maps")
-		}
-	} else if !errors.IsNotFound(getError) {
-		reqLogger.Error(getError, "Failed to get ZEN admin hub config maps")
-	}
 }

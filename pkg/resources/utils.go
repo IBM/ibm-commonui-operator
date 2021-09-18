@@ -25,14 +25,11 @@ import (
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/runtime/schema"
 
 	"os"
 
 	apiextv1beta "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
-
-	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 )
 
 var log = logf.Log.WithName("resource_utils")
@@ -965,15 +962,15 @@ func LabelsForPodMetadata(deploymentName string, crType string, crName string) m
 	return podLabels
 }
 
-func ExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[string]string) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI", "Name", instance.Name)
+func ExtensionsConfigMapUI(namespace string, data map[string]string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI")
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
 	metaLabels["icpdata_addon"] = "true"
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ExtensionsConfigMap,
-			Namespace: instance.Namespace,
+			Namespace: namespace,
 			Labels:    metaLabels,
 		},
 		Data: data,
@@ -981,16 +978,16 @@ func ExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[str
 	return configmap
 }
 
-func ZenCardExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[string]string) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI", "Name", instance.Name)
+func ZenCardExtensionsConfigMapUI(namespace string, version string, data map[string]string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI")
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
 	metaLabels["icpdata_addon"] = "true"
-	metaLabels["icpdata_addon_version"] = "v" + instance.Spec.Version
+	metaLabels["icpdata_addon_version"] = "v" + version
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ZenCardExtensionsConfigMap,
-			Namespace: instance.Namespace,
+			Namespace: namespace,
 			Labels:    metaLabels,
 		},
 		Data: data,
@@ -998,39 +995,19 @@ func ZenCardExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data 
 	return configmap
 }
 
-func CommonWebUIConfigMap(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "CommonWebUIConfigMap", "Name", instance.Name)
+func CommonWebUIConfigMap(namespace string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "CommonWebUIConfigMap")
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(CommonConfigMap)
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      CommonConfigMap,
-			Namespace: instance.Namespace,
+			Namespace: namespace,
 			Labels:    metaLabels,
 		},
 	}
 
 	return configmap
-}
-
-// NewUnstructuredList returns UnstructuredList object
-func NewUnstructuredList(group, kind, version string) *unstructured.UnstructuredList {
-	ul := &unstructured.UnstructuredList{}
-	ul.SetGroupVersionKind(schema.GroupVersionKind{
-		Group:   group,
-		Kind:    kind,
-		Version: version})
-	return ul
-}
-
-func UnstructuredCR(group, kind, version string) *unstructured.Unstructured {
-	u := &unstructured.Unstructured{}
-	u.SetGroupVersionKind(schema.GroupVersionKind{
-		Kind:    kind,
-		Group:   group,
-		Version: version,
-	})
-	return u
 }
 
 func Log4jsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {

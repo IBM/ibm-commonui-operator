@@ -660,16 +660,6 @@ spec:
           - navconfigurations/status
           verbs:
           - update
-        - apiGroups:
-          - zen.cpd.ibm.com
-          resources:
-          - zenservices
-          - zenservices/finalizers
-          - zenservices/status
-          verbs:
-          - get
-          - list
-          - watch
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
