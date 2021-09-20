@@ -533,7 +533,7 @@ func (r *ReconcileCommonWebUIZen) deleteZenAdminHubRes(ctx context.Context, name
 
 	if getError3 == nil {
 		reqLogger.Info("Got common web ui config")
-		err := r.client.Delete(ctx, currentConfigMap)
+		err := r.client.Delete(ctx, currentConfigMap2)
 		if err != nil {
 			reqLogger.Error(err, "Failed to delete common web ui config")
 		} else {
