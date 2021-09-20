@@ -103,6 +103,28 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
+	commonuip := predicate.Funcs{
+		CreateFunc: func(e event.CreateEvent) bool {
+			if e.Object.GetName() == "common-web-ui" && e.Object.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+	}
+
+	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, handler.EnqueueRequestsFromMapFunc(func(a client.Object) []reconcile.Request {
+		return []reconcile.Request{
+			{NamespacedName: types.NamespacedName{
+				Name:      "COMMONUI-OPERAND-DEPLOYMENT-READY",
+				Namespace: a.GetNamespace(),
+			}},
+		}
+	}), commonuip)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -168,6 +190,13 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			reqLogger.Error(updateErr, "Failed updating zen card extensions")
 			return reconcile.Result{}, err
 		}
+		if request.Name == "COMMONUI-OPERAND-DEPLOYMENT-READY" {
+			updateErr := r.updateCommonUIDeployment(ctx, isZen, namespace)
+			if updateErr != nil {
+				reqLogger.Error(updateErr, "Failed updating common ui deployment")
+				return reconcile.Result{}, err
+			}
+		}
 	} else {
 		err := r.reconcileConfigMapsZen(ctx, namespace, res.ExtensionsConfigMap)
 		if err != nil {
@@ -182,6 +211,13 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			reqLogger.Error(err, "Error deleting zen admin hub resources")
 			return reconcile.Result{}, err
+		}
+		if request.Name == "COMMONUI-OPERAND-DEPLOYMENT-READY" {
+			updateErr := r.updateCommonUIDeployment(ctx, isZen, namespace)
+			if updateErr != nil {
+				reqLogger.Error(updateErr, "Failed updating common ui deployment")
+				return reconcile.Result{}, err
+			}
 		}
 	}
 
@@ -541,5 +577,45 @@ func (r *ReconcileCommonWebUIZen) deleteZenAdminHubRes(ctx context.Context, name
 		reqLogger.Error(getError3, "Failed to get common web ui config")
 	}
 
+	return nil
+}
+
+func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, isZen bool, namespace string) error {
+	reqLogger := log.WithValues("func", "updateCommonUIDeployment")
+	reqLogger.Info("Updating common ui deployment env variable")
+
+	commonDeployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "common-web-ui",
+			Namespace: namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "common-web-ui", Namespace: namespace}, commonDeployment)
+
+	if getError == nil {
+		reqLogger.Info("Got Common UI deployment")
+		env := commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value
+		if isZen && env == "false" {
+			reqLogger.Info("Setting use zen to true")
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value = "true"
+			updateErr := r.client.Update(ctx, commonDeployment)
+			if updateErr == nil {
+				reqLogger.Info("Updated common ui deployment env variable")
+			} else {
+				reqLogger.Error(updateErr, "Could not update common ui deployment env variable")
+				return updateErr
+			}
+		} else if !isZen && env == "true" {
+			reqLogger.Info("Setting use zen to false")
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value = "false"
+			updateErr := r.client.Update(ctx, commonDeployment)
+			if updateErr == nil {
+				reqLogger.Info("Updated common ui deployment env variable")
+			} else {
+				reqLogger.Error(updateErr, "Could not update common ui deployment env variable")
+				return updateErr
+			}
+		}
+	}
 	return nil
 }
