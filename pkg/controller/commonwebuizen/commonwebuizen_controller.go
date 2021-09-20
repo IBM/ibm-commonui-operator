@@ -19,7 +19,6 @@ package commonwebuizen
 import (
 	"context"
 	"encoding/json"
-	"os"
 	"strings"
 
 	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
@@ -132,7 +131,6 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 	namespace, namespaceErr := k8sutil.GetWatchNamespace()
 	if namespaceErr != nil {
 		log.Error(namespaceErr, "Failed to get watch namespace")
-		os.Exit(1)
 	}
 
 	reqLogger.Info("Namespace in Reconcile: " + namespace)
