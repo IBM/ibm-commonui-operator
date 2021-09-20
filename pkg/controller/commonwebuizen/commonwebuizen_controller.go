@@ -79,7 +79,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 	namespace, namespaceErr := k8sutil.GetWatchNamespace()
 	if namespaceErr != nil {
 		log.Error(namespaceErr, "Failed to get watch namespace")
-		os.Exit(1)
 	}
 
 	reqLogger.Info("Namespace in Watch: " + namespace)

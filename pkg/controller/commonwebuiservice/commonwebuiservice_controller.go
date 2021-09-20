@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
+	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
@@ -40,9 +41,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/reconcile"
 	"sigs.k8s.io/controller-runtime/pkg/source"
 )
@@ -125,6 +128,32 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		reqLogger.Error(err, "Failed to watch Certificate")
 	}
 
+	namespace, namespaceErr := k8sutil.GetWatchNamespace()
+	if namespaceErr != nil {
+		log.Error(namespaceErr, "Failed to get watch namespace")
+	}
+
+	zenp := predicate.Funcs{
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			if e.Object.GetName() == "zen-core" && e.Object.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+		CreateFunc: func(e event.CreateEvent) bool {
+			if e.Object.GetName() == "zen-core" && e.Object.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+	}
+
+	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForObject{}, zenp)
+
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -192,8 +221,11 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
+	//Reconcile to see if Zen is enabled
+	isZen := r.adminHubOnZen(ctx, instance.Namespace)
+
 	// Check if the UI Deployment already exists, if not create a new one
-	newDeployment, err := r.deploymentForUI(instance)
+	newDeployment, err := r.deploymentForUI(instance, isZen)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -282,6 +314,26 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	return reconcile.Result{}, nil
 }
 
+func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, namespace string) bool {
+	reqLogger := log.WithValues("func", "adminHubOnZen")
+	reqLogger.Info("Checking zen optional install condition")
+
+	zenDeployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "zen-core",
+			Namespace: namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "zen-core", Namespace: namespace}, zenDeployment)
+
+	if getError == nil {
+		reqLogger.Info("Got ZEN Deployment")
+		return true
+	}
+
+	return false
+}
+
 func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
@@ -323,7 +375,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 
 }
 
-func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.Deployment, error) {
+func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI, isZen bool) (*appsv1.Deployment, error) {
 	// CommonMainVolumeMounts will be added by the controller
 	commonUIVolumeMounts := []corev1.VolumeMount{
 		{
@@ -429,6 +481,13 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
+	if isZen {
+		reqLogger.Info("Setting USE_ZEN env variable in container to true")
+		commonwebuiContainer.Env[26].Value = "true"
+	} else {
+		reqLogger.Info("Setting USE_ZEN env variable in container to false")
+		commonwebuiContainer.Env[26].Value = "false"
+	}
 	commonwebuiContainer.Env[27].Value = instance.Spec.Version
 
 	deployment := &appsv1.Deployment{
