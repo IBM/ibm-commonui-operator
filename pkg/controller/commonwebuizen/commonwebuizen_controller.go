@@ -138,11 +138,6 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 	reqLogger.Info("Namespace in Reconcile: " + namespace)
 
 	reqLogger.Info("got CommonWebUIZen operator version=" + version.Version)
-	// Create common-web-ui-config
-	err := r.reconcileConfigMapsZen(ctx, namespace, res.CommonConfigMap)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
 
 	//Reconcile to see if Zen is enabled
 	isZen := r.adminHubOnZen(ctx, namespace)
@@ -154,6 +149,12 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		deleteErr := r.deleteClassicAdminHubRes(ctx, namespace)
 		if deleteErr != nil {
 			reqLogger.Error(deleteErr, "Failed deleting classic admin hub resources")
+		}
+
+		// Create common-web-ui-config
+		err := r.reconcileConfigMapsZen(ctx, namespace, res.CommonConfigMap)
+		if err != nil {
+			return reconcile.Result{}, err
 		}
 		err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenCardExtensionsConfigMap)
 		if err != nil {
@@ -170,7 +171,7 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			return reconcile.Result{}, err
 		}
 	} else {
-		err = r.reconcileConfigMapsZen(ctx, namespace, res.ExtensionsConfigMap)
+		err := r.reconcileConfigMapsZen(ctx, namespace, res.ExtensionsConfigMap)
 		if err != nil {
 			return reconcile.Result{}, err
 		}
@@ -520,6 +521,26 @@ func (r *ReconcileCommonWebUIZen) deleteZenAdminHubRes(ctx context.Context, name
 		} else {
 			reqLogger.Info("Deleted zen admin hub console link")
 		}
+	}
+
+	currentConfigMap2 := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      res.CommonConfigMap,
+			Namespace: namespace,
+		},
+	}
+	getError3 := r.client.Get(ctx, types.NamespacedName{Name: res.CommonConfigMap, Namespace: namespace}, currentConfigMap2)
+
+	if getError3 == nil {
+		reqLogger.Info("Got common web ui config")
+		err := r.client.Delete(ctx, currentConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete common web ui config")
+		} else {
+			reqLogger.Info("Deleted common web ui config")
+		}
+	} else if !errors.IsNotFound(getError3) {
+		reqLogger.Error(getError3, "Failed to get common web ui config")
 	}
 
 	return nil
