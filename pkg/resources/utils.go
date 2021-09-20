@@ -734,7 +734,7 @@ var NavConfigCR = `
 		  "enable": false,
 		  "headerText": "Header text here"
 		},
-		"logoAltText": "Cloud Pak | Administration Hub",
+		"logoAltText": "Cloud Pak",
 		"logoHeight": "47px",
 		"logoUrl": "/common-nav/api/graphics/logincloudpak.svg",
 		"logoWidth": "190px"
