@@ -181,6 +181,9 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		}
 	}
 
+	//Reconcile to see if Zen is enabled
+	isZen := r.adminHubOnZen(ctx, instance.Namespace)
+
 	// Check if the config maps already exist. If not, create a new one.
 	err = r.reconcileConfigMaps(ctx, instance, res.Log4jsConfigMap, &needToRequeue)
 	if err != nil {
@@ -193,7 +196,7 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	}
 
 	// Check if the UI Deployment already exists, if not create a new one
-	newDeployment, err := r.deploymentForUI(instance)
+	newDeployment, err := r.deploymentForUI(instance, isZen)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -218,11 +221,11 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
-	//Check if console link CR already exists. If not, create a new one
-	// err = r.reconcileCr(ctx, instance, "admin-hub", res.CrTemplates)
-	// if err != nil {
-	// 	reqLogger.Error(err, "Error creating console link cr")
-	// }
+	//Check if CR already exists. If not, create a new one
+	err = r.reconcileCr(ctx, instance)
+	if err != nil {
+		reqLogger.Error(err, "Error creating custom resource")
+	}
 
 	// Check if the Certificates already exist, if not create new ones
 	err = r.reconcileCertificates(ctx, instance, &needToRequeue)
@@ -282,6 +285,26 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	return reconcile.Result{}, nil
 }
 
+func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, namespace string) bool {
+	reqLogger := log.WithValues("func", "adminHubOnZen")
+	reqLogger.Info("Checking zen optional install condition")
+
+	zenDeployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "zen-core",
+			Namespace: namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "zen-core", Namespace: namespace}, zenDeployment)
+
+	if getError == nil {
+		reqLogger.Info("Got ZEN Deployment")
+		return true
+	}
+
+	return false
+}
+
 func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
@@ -323,7 +346,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 
 }
 
-func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI) (*appsv1.Deployment, error) {
+func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI, isZen bool) (*appsv1.Deployment, error) {
 	// CommonMainVolumeMounts will be added by the controller
 	commonUIVolumeMounts := []corev1.VolumeMount{
 		{
@@ -429,6 +452,13 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
+	if isZen {
+		reqLogger.Info("Setting use zen to true in container def")
+		commonwebuiContainer.Env[26].Value = "true"
+	} else {
+		reqLogger.Info("Setting use zen to false in container def")
+		commonwebuiContainer.Env[26].Value = "false"
+	}
 	commonwebuiContainer.Env[27].Value = instance.Spec.Version
 
 	deployment := &appsv1.Deployment{
@@ -630,59 +660,41 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(ctx context.Context, instance 
 	return nil
 }
 
-// func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, crName, template string) error {
-// 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-// 	reqLogger.Info("RECONCILING CR")
+func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) error {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("RECONCILING CR")
 
-// 	namespace := instance.Namespace
-// 	var crTemplate map[string]interface{}
-// 	// Unmarshal or Decode the JSON to the interface.
-// 	crTemplatesErr := json.Unmarshal([]byte(template), &crTemplate)
-// 	if crTemplatesErr != nil {
-// 		reqLogger.Info("Failed to unmarshall crTemplates")
-// 		return crTemplatesErr
-// 	}
-// 	var unstruct unstructured.Unstructured
-// 	unstruct.Object = crTemplate
-// 	name := crName
+	namespace := instance.Namespace
+	var crTemplate map[string]interface{}
+	// Unmarshal or Decode the JSON to the interface.
+	crTemplatesErr := json.Unmarshal([]byte(res.CrTemplates), &crTemplate)
+	if crTemplatesErr != nil {
+		reqLogger.Info("Failed to unmarshall crTemplates")
+		return crTemplatesErr
+	}
+	var unstruct unstructured.Unstructured
+	unstruct.Object = crTemplate
+	name := unstruct.Object["metadata"].(map[string]interface{})["name"].(string)
 
-// 	//Get CR and see if it exists
-// 	getError := r.client.Get(ctx, types.NamespacedName{
-// 		Name:      name,
-// 		Namespace: namespace,
-// 	}, &unstruct)
+	//Get CR and see if it exists
+	getError := r.client.Get(ctx, types.NamespacedName{
+		Name:      name,
+		Namespace: namespace,
+	}, &unstruct)
 
-// 	err1 := r.client.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
-// 	if err1 == nil {
-// 		r.finalizerCr(ctx, instance, unstruct)
-// 	}
+	err1 := r.client.Get(ctx, types.NamespacedName{Name: instance.Name, Namespace: instance.Namespace}, instance)
+	if err1 == nil {
+		r.finalizerCr(ctx, instance, unstruct)
+	}
 
-// 	if getError != nil && !errors.IsNotFound(getError) {
-// 		reqLogger.Error(getError, "Failed to get CR")
-// 	} else if errors.IsNotFound(getError) {
-// 		//If CR was not found, create it
-// 		//Get the cpd route is zen is true
-// 		currentRoute := &routesv1.Route{}
-// 		//Get the cp-console route
-// 		err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
-// 		if err2 != nil {
-// 			reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
-// 		}
-// 		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-// 		//Will hold href for admin hub console link
-// 		var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
+	if getError != nil && !errors.IsNotFound(getError) {
+		reqLogger.Error(getError, "Failed to get CR")
+	} else {
+		reqLogger.Info("Skipping CR creation")
+	}
 
-// 		// Create Custom resource
-// 		if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
-// 			reqLogger.Error(createErr, "Failed to create CR")
-// 			return createErr
-// 		}
-// 	} else {
-// 		reqLogger.Info("Skipping CR creation")
-// 	}
-
-// 	return nil
-// }
+	return nil
+}
 
 // func (r *ReconcileCommonWebUI) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string) error {
 // 	reqLogger := log.WithValues("CR name", name)
@@ -737,59 +749,78 @@ func (r *ReconcileCommonWebUI) reconcileIngresses(ctx context.Context, instance 
 // 	return nil
 // }
 
-// func (r *ReconcileCommonWebUI) finalizerCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, unstruct unstructured.Unstructured) {
-// 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+func (r *ReconcileCommonWebUI) finalizerCr(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, unstruct unstructured.Unstructured) {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
 
-// 	finalizerName := "commonui.operators.ibm.com"
-// 	finalizerName1 := "commonui1.operators.ibm.com"
+	finalizerName := "commonui.operators.ibm.com"
+	finalizerName1 := "commonui1.operators.ibm.com"
 
-// 	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
-// 		// Add the finalizer to the metadata of the instance and update the object.
-// 		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) && !containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
-// 			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName, finalizerName1)
-// 			if err := r.client.Update(ctx, instance); err != nil {
-// 				reqLogger.Error(err, "Failed to create finalizer")
-// 			} else {
-// 				reqLogger.Info("Created Finalizers")
-// 			}
-// 		}
-// 	} else {
-// 		// When the instance is being deleted. If finalizer is present
-// 		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
-// 			// Finalizer is present, so lets handle any external dependency - remove console link CR
-// 			if err := r.client.Delete(ctx, &unstruct); err != nil {
-// 				// if fails to delete the external dependency here, return with error
-// 				reqLogger.Error(err, "Failed to delete Console Link CR")
-// 			} else {
-// 				reqLogger.Info("Deleted Console link CR")
-// 			}
+	if instance.ObjectMeta.DeletionTimestamp.IsZero() {
+		// Add the finalizer to the metadata of the instance and update the object.
+		if !containsString(instance.ObjectMeta.Finalizers, finalizerName) && !containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
+			instance.ObjectMeta.Finalizers = append(instance.ObjectMeta.Finalizers, finalizerName, finalizerName1)
+			if err := r.client.Update(ctx, instance); err != nil {
+				reqLogger.Error(err, "Failed to create finalizer")
+			} else {
+				reqLogger.Info("Created Finalizers")
+			}
+		}
+	} else {
+		// When the instance is being deleted. If finalizer is present
+		if containsString(instance.ObjectMeta.Finalizers, finalizerName) {
+			// Finalizer is present, so lets handle any external dependency - remove console link CR
+			if err := r.client.Delete(ctx, &unstruct); err != nil {
+				// if fails to delete the external dependency here, return with error
+				reqLogger.Error(err, "Failed to delete Console Link CR")
+			} else {
+				reqLogger.Info("Deleted Console link CR")
+			}
 
-// 			// Remove our finalizer from the metadata of the object and update it.
-// 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
-// 			if err := r.client.Update(ctx, instance); err != nil {
-// 				reqLogger.Error(err, "Failed to delete  Console link finalizer")
-// 			} else {
-// 				reqLogger.Info("Deleted Console link Finalizer")
-// 			}
-// 		} else if containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
-// 			// Finalizer is present, so lets handle any external dependency - remove console link CR
-// 			if err := r.client.Delete(ctx, &unstruct); err != nil {
-// 				// if fails to delete the external dependency here, return with error
-// 				reqLogger.Error(err, "Failed to delete Redis CR")
-// 			} else {
-// 				reqLogger.Info("Deleted Redis CR")
-// 			}
+			// Remove our finalizer from the metadata of the object and update it.
+			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName)
+			if err := r.client.Update(ctx, instance); err != nil {
+				reqLogger.Error(err, "Failed to delete  Console link finalizer")
+			} else {
+				reqLogger.Info("Deleted Console link Finalizer")
+			}
+		} else if containsString(instance.ObjectMeta.Finalizers, finalizerName1) {
+			// Finalizer is present, so lets handle any external dependency - remove console link CR
+			if err := r.client.Delete(ctx, &unstruct); err != nil {
+				// if fails to delete the external dependency here, return with error
+				reqLogger.Error(err, "Failed to delete Redis CR")
+			} else {
+				reqLogger.Info("Deleted Redis CR")
+			}
 
-// 			// Remove our finalizer from the metadata of the object and update it.
-// 			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName1)
-// 			if err := r.client.Update(ctx, instance); err != nil {
-// 				reqLogger.Error(err, "Failed to delete Redis finalizer")
-// 			} else {
-// 				reqLogger.Info("Deleted Redis Finalizer")
-// 			}
-// 		}
-// 	}
-// }
+			// Remove our finalizer from the metadata of the object and update it.
+			instance.ObjectMeta.Finalizers = removeString(instance.ObjectMeta.Finalizers, finalizerName1)
+			if err := r.client.Update(ctx, instance); err != nil {
+				reqLogger.Error(err, "Failed to delete Redis finalizer")
+			} else {
+				reqLogger.Info("Deleted Redis Finalizer")
+			}
+		}
+	}
+}
+
+func containsString(slice []string, s string) bool {
+	for _, item := range slice {
+		if item == s {
+			return true
+		}
+	}
+	return false
+}
+
+func removeString(slice []string, s string) (result []string) {
+	for _, item := range slice {
+		if item == s {
+			continue
+		}
+		result = append(result, item)
+	}
+	return
+}
 
 func (r *ReconcileCommonWebUI) reconcileCertificates(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileCertificates", "instance.Name", instance.Name)

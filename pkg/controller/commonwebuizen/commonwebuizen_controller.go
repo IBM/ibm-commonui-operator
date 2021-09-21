@@ -103,28 +103,6 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	commonuip := predicate.Funcs{
-		CreateFunc: func(e event.CreateEvent) bool {
-			if e.Object.GetName() == "common-web-ui" && e.Object.GetNamespace() == namespace {
-				return true
-			}
-			return false
-		},
-	}
-
-	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, handler.EnqueueRequestsFromMapFunc(func(a client.Object) []reconcile.Request {
-		return []reconcile.Request{
-			{NamespacedName: types.NamespacedName{
-				Name:      "COMMONUI-OPERAND-DEPLOYMENT-READY",
-				Namespace: a.GetNamespace(),
-			}},
-		}
-	}), commonuip)
-
-	if err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -170,7 +148,6 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if deleteErr != nil {
 			reqLogger.Error(deleteErr, "Failed deleting classic admin hub resources")
 		}
-
 		// Create common-web-ui-config
 		err := r.reconcileConfigMapsZen(ctx, namespace, res.CommonConfigMap)
 		if err != nil {
@@ -190,12 +167,10 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			reqLogger.Error(updateErr, "Failed updating zen card extensions")
 			return reconcile.Result{}, err
 		}
-		if request.Name == "COMMONUI-OPERAND-DEPLOYMENT-READY" {
-			updateErr := r.updateCommonUIDeployment(ctx, isZen, namespace)
-			if updateErr != nil {
-				reqLogger.Error(updateErr, "Failed updating common ui deployment")
-				return reconcile.Result{}, err
-			}
+		updateErr = r.updateCommonUIDeployment(ctx, isZen, namespace)
+		if updateErr != nil {
+			reqLogger.Error(updateErr, "Failed updating common ui deployment")
+			return reconcile.Result{}, err
 		}
 	} else {
 		err := r.reconcileConfigMapsZen(ctx, namespace, res.ExtensionsConfigMap)
@@ -212,12 +187,10 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			reqLogger.Error(err, "Error deleting zen admin hub resources")
 			return reconcile.Result{}, err
 		}
-		if request.Name == "COMMONUI-OPERAND-DEPLOYMENT-READY" {
-			updateErr := r.updateCommonUIDeployment(ctx, isZen, namespace)
-			if updateErr != nil {
-				reqLogger.Error(updateErr, "Failed updating common ui deployment")
-				return reconcile.Result{}, err
-			}
+		updateErr := r.updateCommonUIDeployment(ctx, isZen, namespace)
+		if updateErr != nil {
+			reqLogger.Error(updateErr, "Failed updating common ui deployment")
+			return reconcile.Result{}, err
 		}
 	}
 
