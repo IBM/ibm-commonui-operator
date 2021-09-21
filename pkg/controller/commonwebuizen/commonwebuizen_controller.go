@@ -19,9 +19,8 @@ package commonwebuizen
 import (
 	"context"
 	"encoding/json"
+	"os"
 	"strings"
-
-	"github.com/operator-framework/operator-sdk/pkg/k8sutil"
 
 	// "k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -75,12 +74,8 @@ func add(mgr manager.Manager, r reconcile.Reconciler) error {
 		return err
 	}
 
-	namespace, namespaceErr := k8sutil.GetWatchNamespace()
-	if namespaceErr != nil {
-		log.Error(namespaceErr, "Failed to get watch namespace")
-	}
-
-	reqLogger.Info("Namespace in Watch: " + namespace)
+	namespace := os.Getenv("WATCH_NAMESPACE")
+	reqLogger.Info("Namespace in ZEN Watch: " + namespace)
 
 	zenp := predicate.Funcs{
 		DeleteFunc: func(e event.DeleteEvent) bool {
@@ -128,12 +123,8 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling CommonWebUIZen")
 
-	namespace, namespaceErr := k8sutil.GetWatchNamespace()
-	if namespaceErr != nil {
-		log.Error(namespaceErr, "Failed to get watch namespace")
-	}
-
-	reqLogger.Info("Namespace in Reconcile: " + namespace)
+	namespace := os.Getenv("WATCH_NAMESPACE")
+	reqLogger.Info("Namespace in ZEN Reconcile: " + namespace)
 
 	reqLogger.Info("got CommonWebUIZen operator version=" + version.Version)
 
