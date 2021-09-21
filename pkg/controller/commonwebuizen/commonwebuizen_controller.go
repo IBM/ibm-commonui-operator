@@ -583,6 +583,9 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 				return updateErr
 			}
 		}
+	} else {
+		reqLogger.Info("Failed to get Common UI deployment")
+		return getError
 	}
 	return nil
 }
