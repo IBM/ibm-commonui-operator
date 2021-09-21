@@ -63,6 +63,15 @@ const ChartVersion = "1.0.2"
 
 var DefaultStatusForCR = []string{"none"}
 
+//Config map values for the zen product-configmap to define meta api and endpoints
+const ZenProductConfigMapName = "product-configmap"
+
+var ZenPcmMap = map[string]string{
+	"CLOUD_PAK_TYPE":     "admin",
+	"CLOUD_PAK_URL":      "https://common-web-ui:3000/common-nav/zen/meta",
+	"CLOUD_PAK_AUTH_URL": "https://common-web-ui:3000/common-nav/zen/meta",
+}
+
 //GetImageID constructs image IDs for operands: either <IMAGE_NAME>:<IMAGE_TAG> or <IMAGE_NAME>@<IMAGE_SHA>
 func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, envVarName string) string {
 	reqLogger := log.WithValues("Func", "GetImageID")
@@ -208,7 +217,7 @@ var ZenNginxConfig = `
 				access_by_lua_file /nginx_data/checkjwt.lua;
 				set_by_lua $nsdomain 'return os.getenv("NS_DOMAIN")';
 				proxy_set_header Host $host;
-				proxy_set_header zen-namespace-domain $nsdomain;      
+				proxy_set_header zen-namespace-domain $nsdomain;
 				proxy_pass https://common-web-ui:3000;
 				proxy_read_timeout 10m;
 		}

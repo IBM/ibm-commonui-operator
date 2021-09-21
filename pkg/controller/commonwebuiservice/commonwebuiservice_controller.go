@@ -301,8 +301,11 @@ func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, namespace stri
 		reqLogger.Info("Got ZEN Deployment in commonui controller")
 		return true
 	}
-
-	reqLogger.Error(getError, "ZEN deployment not found in commonui controller")
+	if errors.IsNotFound(getError) {
+		reqLogger.Info("ZEN deployment not found in commonui controller")
+	} else {
+		reqLogger.Error(getError, "Error getting ZEN deployment  in commonui controller")
+	}
 	return false
 }
 
