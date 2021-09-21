@@ -371,6 +371,13 @@ func isPodTemplateEqual(oldPodTemplate, newPodTemplate corev1.PodTemplateSpec) b
 		return false
 	}
 
+	// check containers
+	oldContainers := oldPodTemplate.Spec.Containers
+	newContainers := newPodTemplate.Spec.Containers
+	if !isContainerEqual(oldContainers, newContainers, false) {
+		return false
+	}
+
 	oldVolumes := oldPodTemplate.Spec.Volumes
 	newVolumes := newPodTemplate.Spec.Volumes
 	if len(oldVolumes) == len(newVolumes) {
@@ -392,13 +399,6 @@ func isPodTemplateEqual(oldPodTemplate, newPodTemplate corev1.PodTemplateSpec) b
 		}
 	} else {
 		logger.Info("Volume lengths not equal")
-		return false
-	}
-
-	// check containers
-	oldContainers := oldPodTemplate.Spec.Containers
-	newContainers := newPodTemplate.Spec.Containers
-	if !isContainerEqual(oldContainers, newContainers, false) {
 		return false
 	}
 

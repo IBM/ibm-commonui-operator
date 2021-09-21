@@ -19,11 +19,8 @@ import (
 	"context"
 	"encoding/json"
 	"strconv"
-	"strings"
-	"time"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
-	routesv1 "github.com/openshift/api/route/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
@@ -183,6 +180,10 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 			return reconcile.Result{}, err
 		}
 	}
+
+	//Reconcile to see if Zen is enabled
+	isZen := r.adminHubOnZen(ctx, instance.Namespace)
+
 	// Check if the config maps already exist. If not, create a new one.
 	err = r.reconcileConfigMaps(ctx, instance, res.Log4jsConfigMap, &needToRequeue)
 	if err != nil {
@@ -194,28 +195,8 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 		return reconcile.Result{}, err
 	}
 
-	// Create common-web-ui-config config map
-	err = r.reconcileConfigMaps(ctx, instance, res.CommonConfigMap, &needToRequeue)
-	if err != nil {
-		return reconcile.Result{}, err
-	}
-
-	// Create zen extensions config map
-	useZen := r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
-	if useZen {
-		err = r.reconcileConfigMaps(ctx, instance, res.ZenCardExtensionsConfigMap, &needToRequeue)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-	} else {
-		err = r.reconcileConfigMaps(ctx, instance, res.ExtensionsConfigMap, &needToRequeue)
-		if err != nil {
-			return reconcile.Result{RequeueAfter: time.Duration(3) * time.Minute}, err
-		}
-	}
-
 	// Check if the UI Deployment already exists, if not create a new one
-	newDeployment, err := r.deploymentForUI(instance, useZen)
+	newDeployment, err := r.deploymentForUI(instance, isZen)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -304,6 +285,27 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	return reconcile.Result{}, nil
 }
 
+func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, namespace string) bool {
+	reqLogger := log.WithValues("func", "adminHubOnZen")
+	reqLogger.Info("Checking zen optional install condition in commonui controller")
+
+	zenDeployment := &appsv1.Deployment{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "zen-core",
+			Namespace: namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "zen-core", Namespace: namespace}, zenDeployment)
+
+	if getError == nil {
+		reqLogger.Info("Got ZEN Deployment in commonui controller")
+		return true
+	}
+
+	reqLogger.Error(getError, "ZEN deployment not found in commonui controller")
+	return false
+}
+
 func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
@@ -316,37 +318,9 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 		newConfigMap := &corev1.ConfigMap{}
 		if nameOfCM == res.Log4jsConfigMap {
 			newConfigMap = res.Log4jsConfigMapUI(instance)
-		} else if nameOfCM == res.ExtensionsConfigMap {
-			currentRoute := &routesv1.Route{}
-			//Get the cp-console route and add it to the configmap below
-			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
-			if err2 != nil {
-				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
-				*needToRequeue = true
-				return err2
-			}
-			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-
-			var ExtensionsData = map[string]string{
-				"extensions": strings.Replace(res.Extensions, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
-			}
-
-			newConfigMap = res.ExtensionsConfigMapUI(instance, ExtensionsData)
-
 		} else if nameOfCM == res.RedisCertsConfigMap {
 			newConfigMap = res.RedisCertsConfigMapUI(instance)
-		} else if nameOfCM == res.ZenCardExtensionsConfigMap {
-			reqLogger.Info("Creating zen card extensions config map")
-			var ExtensionsData = map[string]string{
-				"nginx.conf": res.ZenNginxConfig,
-				"extensions": res.ZenCardExtensions,
-			}
-			newConfigMap = res.ZenCardExtensionsConfigMapUI(instance, ExtensionsData)
-		} else if nameOfCM == res.CommonConfigMap {
-			reqLogger.Info("Creating common-web-ui-config config map")
-			newConfigMap = res.CommonWebUIConfigMap(instance)
 		}
-
 		err = controllerutil.SetControllerReference(instance, newConfigMap, r.scheme)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set owner for log4js config map", "Namespace", newConfigMap.Namespace,
@@ -373,7 +347,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 
 }
 
-func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI, useZen bool) (*appsv1.Deployment, error) {
+func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI, isZen bool) (*appsv1.Deployment, error) {
 	// CommonMainVolumeMounts will be added by the controller
 	commonUIVolumeMounts := []corev1.VolumeMount{
 		{
@@ -479,9 +453,12 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.VolumeMounts = commonUIVolumeMounts
 
-	if useZen {
-		//nolint
+	if isZen {
+		reqLogger.Info("Setting use zen to true in container def")
 		commonwebuiContainer.Env[26].Value = "true"
+	} else {
+		reqLogger.Info("Setting use zen to false in container def")
+		commonwebuiContainer.Env[26].Value = "false"
 	}
 	commonwebuiContainer.Env[27].Value = instance.Spec.Version
 
@@ -713,40 +690,6 @@ func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operat
 
 	if getError != nil && !errors.IsNotFound(getError) {
 		reqLogger.Error(getError, "Failed to get CR")
-	} else if errors.IsNotFound(getError) {
-		//If CR was not found, create it
-		//Get the cpd route is zen is true
-		currentRoute := &routesv1.Route{}
-		useZen := r.adminHubOnZen(ctx, instance, "adminhub-on-zen-cm")
-		if useZen {
-			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cpd", Namespace: instance.Namespace}, currentRoute)
-			if err2 != nil {
-				reqLogger.Error(err2, "Failed to get route for cpd, try again later")
-			}
-			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-			//Will hold href for admin hub console link
-			var href = "https://" + currentRoute.Spec.Host
-
-			// Create Custom resource
-			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
-				reqLogger.Error(createErr, "Failed to create CR")
-				return createErr
-			}
-		} else { //Get the cp-console route
-			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
-			if err2 != nil {
-				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
-			}
-			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-			//Will hold href for admin hub console link
-			var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
-
-			// Create Custom resource
-			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
-				reqLogger.Error(createErr, "Failed to create CR")
-				return createErr
-			}
-		}
 	} else {
 		reqLogger.Info("Skipping CR creation")
 	}
@@ -754,37 +697,18 @@ func (r *ReconcileCommonWebUI) reconcileCr(ctx context.Context, instance *operat
 	return nil
 }
 
-func (r *ReconcileCommonWebUI) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string) error {
-	reqLogger := log.WithValues("CR name", name)
-	reqLogger.Info("creating a CR ", name)
+// func (r *ReconcileCommonWebUI) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string) error {
+// 	reqLogger := log.WithValues("CR name", name)
+// 	reqLogger.Info("creating a CR ", name)
 
-	unstruct.Object["spec"].(map[string]interface{})["href"] = href
-	crCreateErr := r.client.Create(ctx, &unstruct)
-	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
-		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
-		return crCreateErr
-	}
-	return nil
-}
-
-func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string) bool {
-	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
-	reqLogger.Info("Checking zen optional install condition")
-	adminHubOnZenCM := &corev1.ConfigMap{}
-	err := r.client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: instance.Namespace}, adminHubOnZenCM)
-	if err != nil {
-		reqLogger.Info("zen optional install config map not present")
-	} else {
-		reqLogger.Info("Got zen optional install config map, name: " + adminHubOnZenCM.Name)
-		reqLogger.Info("Admin hub on zen optional install flag is set to: " + adminHubOnZenCM.Data["adminHubOnZen"])
-		if adminHubOnZenCM.Data["adminHubOnZen"] == "true" {
-			reqLogger.Info("Verified zen optional install flag is set to true, returning")
-			return true
-		}
-		reqLogger.Info("Verified zen optional install flag is set to false, returning")
-	}
-	return false
-}
+// 	unstruct.Object["spec"].(map[string]interface{})["href"] = href
+// 	crCreateErr := r.client.Create(ctx, &unstruct)
+// 	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
+// 		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
+// 		return crCreateErr
+// 	}
+// 	return nil
+// }
 
 // func (r *ReconcileCommonWebUI) reconcileRedisSentinelCr(instance *operatorsv1alpha1.CommonWebUI) error {
 // 	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)

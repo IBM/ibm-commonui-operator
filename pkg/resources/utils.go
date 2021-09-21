@@ -204,14 +204,14 @@ var Extensions = `
 ]`
 
 var ZenNginxConfig = `
-	location /common-nav {
-		access_by_lua_file /nginx_data/checkjwt.lua;
-		set_by_lua $nsdomain 'return os.getenv("NS_DOMAIN")';
-		proxy_set_header Host $host;
-		proxy_set_header zen-namespace-domain $nsdomain;      
-		proxy_pass https://common-web-ui:3000;
-		proxy_read_timeout 10m;
-	}
+		location /common-nav {
+				access_by_lua_file /nginx_data/checkjwt.lua;
+				set_by_lua $nsdomain 'return os.getenv("NS_DOMAIN")';
+				proxy_set_header Host $host;
+				proxy_set_header zen-namespace-domain $nsdomain;      
+				proxy_pass https://common-web-ui:3000;
+				proxy_read_timeout 10m;
+		}
 `
 var ZenCardExtensions = `
 [
@@ -224,7 +224,7 @@ var ZenCardExtensions = `
         "meta": {},
         "details": {
 			"parent_folder": "dap-header-administer",
-			"href": "/common-nav/zen/id/providers"
+			"href": "/common-nav/zen/idproviders"
         }
       },
       {
@@ -621,6 +621,19 @@ var CrTemplates = `{
 	}
 }`
 
+var CrTemplates2 = `{
+	"apiVersion": "console.openshift.io/v1",
+	"kind": "ConsoleLink",
+	"metadata": {
+		"name": "admin-hub-zen"
+	},
+	"spec": {
+		"href": "https://<cp-console-route>/common-nav/dashboard",
+		"location": "ApplicationMenu",
+		"text": "Cloud Pak Administration Hub"
+	}
+}`
+
 //nolint
 var NavConfigCR = `
 {
@@ -950,15 +963,15 @@ func LabelsForPodMetadata(deploymentName string, crType string, crName string) m
 	return podLabels
 }
 
-func ExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[string]string) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI", "Name", instance.Name)
+func ExtensionsConfigMapUI(namespace string, data map[string]string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI")
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
 	metaLabels["icpdata_addon"] = "true"
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ExtensionsConfigMap,
-			Namespace: instance.Namespace,
+			Namespace: namespace,
 			Labels:    metaLabels,
 		},
 		Data: data,
@@ -966,16 +979,16 @@ func ExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[str
 	return configmap
 }
 
-func ZenCardExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data map[string]string) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI", "Name", instance.Name)
+func ZenCardExtensionsConfigMapUI(namespace string, version string, data map[string]string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI")
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
 	metaLabels["icpdata_addon"] = "true"
-	metaLabels["icpdata_addon_version"] = "v" + instance.Spec.Version
+	metaLabels["icpdata_addon_version"] = "v" + version
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ZenCardExtensionsConfigMap,
-			Namespace: instance.Namespace,
+			Namespace: namespace,
 			Labels:    metaLabels,
 		},
 		Data: data,
@@ -983,14 +996,14 @@ func ZenCardExtensionsConfigMapUI(instance *operatorsv1alpha1.CommonWebUI, data 
 	return configmap
 }
 
-func CommonWebUIConfigMap(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "CommonWebUIConfigMap", "Name", instance.Name)
+func CommonWebUIConfigMap(namespace string) *corev1.ConfigMap {
+	reqLogger := log.WithValues("func", "CommonWebUIConfigMap")
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(CommonConfigMap)
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      CommonConfigMap,
-			Namespace: instance.Namespace,
+			Namespace: namespace,
 			Labels:    metaLabels,
 		},
 	}
