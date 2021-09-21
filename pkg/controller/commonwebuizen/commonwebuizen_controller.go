@@ -200,7 +200,7 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 
 func (r *ReconcileCommonWebUIZen) adminHubOnZen(ctx context.Context, namespace string) bool {
 	reqLogger := log.WithValues("func", "adminHubOnZen")
-	reqLogger.Info("Checking zen optional install condition")
+	reqLogger.Info("Checking zen optional install condition in commonui-zen controller")
 
 	zenDeployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -211,10 +211,11 @@ func (r *ReconcileCommonWebUIZen) adminHubOnZen(ctx context.Context, namespace s
 	getError := r.client.Get(ctx, types.NamespacedName{Name: "zen-core", Namespace: namespace}, zenDeployment)
 
 	if getError == nil {
-		reqLogger.Info("Got ZEN Deployment")
+		reqLogger.Info("Got ZEN Deployment in commonui-zen controller")
 		return true
 	}
 
+	reqLogger.Error(getError, "ZEN deployment not found in commonui-zen controller")
 	return false
 }
 
