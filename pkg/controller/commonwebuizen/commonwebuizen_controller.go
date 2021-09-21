@@ -194,6 +194,7 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		}
 	}
 
+	reqLogger.Info("ZEN CONTROLLER??? all done")
 	return reconcile.Result{}, nil
 }
 
@@ -303,6 +304,7 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cpd", Namespace: namespace}, currentRoute)
 			if err2 != nil {
 				reqLogger.Error(err2, "Failed to get route for cpd, try again later")
+				return err2
 			}
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 			//Will hold href for admin hub console link
