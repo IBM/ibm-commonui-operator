@@ -224,7 +224,7 @@ var ZenCardExtensions = `
         "meta": {},
         "details": {
 			"parent_folder": "dap-header-administer",
-			"href": "/common-nav/zen/id/providers"
+			"href": "/common-nav/zen/idproviders"
         }
       },
       {
