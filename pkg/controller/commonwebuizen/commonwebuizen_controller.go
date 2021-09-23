@@ -207,19 +207,22 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		updateErr := r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMap)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating zen card extensions")
-			return reconcile.Result{}, err
+			return reconcile.Result{}, updateErr
 		}
 		updateErr = r.updateCommonUIDeployment(ctx, isZen, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
-			return reconcile.Result{}, err
+			return reconcile.Result{}, updateErr
 		}
+
+		deleteErr = r.deleteBindInfo(ctx, namespace)
+		if deleteErr != nil {
+			reqLogger.Error(deleteErr, "Failed deleting Common UI bind Info")
+			return reconcile.Result{}, deleteErr
+		}
+
 	} else {
-		err := r.reconcileConfigMapsZen(ctx, namespace, res.ExtensionsConfigMap)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-		err = r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
+		err := r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
 		if err != nil {
 			reqLogger.Error(err, "Error creating console link cr")
 			return reconcile.Result{}, err
@@ -232,7 +235,7 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		updateErr := r.updateCommonUIDeployment(ctx, isZen, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
-			return reconcile.Result{}, err
+			return reconcile.Result{}, updateErr
 		}
 	}
 
@@ -453,6 +456,36 @@ func (r *ReconcileCommonWebUIZen) deleteClassicAdminHubRes(ctx context.Context, 
 		}
 	} else if !errors.IsNotFound(getError2) {
 		reqLogger.Error(getError2, "Failed to get classic admin hub config map")
+	}
+
+	return nil
+}
+
+func (r *ReconcileCommonWebUIZen) deleteBindInfo(ctx context.Context, namespace string) error {
+	reqLogger := log.WithValues("func", "deleteBindInfo")
+	//Get and delete classic admin hub left nav menu item
+	reqLogger.Info("Checking to see if Common UI bind info exists")
+	currentConfigMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ibm-commonui-bindinfo-common-webui-ui-extensions",
+			Namespace: namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "ibm-commonui-bindinfo-common-webui-ui-extensions", Namespace: namespace}, currentConfigMap)
+
+	if getError == nil {
+		reqLogger.Info("Got Common UI bind info")
+		err := r.client.Delete(ctx, currentConfigMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete Common UI bind info")
+		} else {
+			reqLogger.Info("Deleted Common UI bind info")
+		}
+	} else if !errors.IsNotFound(getError) {
+		reqLogger.Error(getError, "Not found Common UI bind info")
+		return getError
+	} else {
+		reqLogger.Error(getError, "Failed to get Common UI bind info")
 	}
 
 	return nil
