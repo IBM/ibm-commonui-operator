@@ -222,11 +222,7 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		}
 
 	} else {
-		err := r.reconcileConfigMapsZen(ctx, namespace, res.ExtensionsConfigMap)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
-		err = r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
+		err := r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
 		if err != nil {
 			reqLogger.Error(err, "Error creating console link cr")
 			return reconcile.Result{}, err
