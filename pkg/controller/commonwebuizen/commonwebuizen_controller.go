@@ -483,6 +483,7 @@ func (r *ReconcileCommonWebUIZen) deleteBindInfo(ctx context.Context, namespace 
 		}
 	} else if !errors.IsNotFound(getError) {
 		reqLogger.Error(getError, "Not found Common UI bind info")
+		return getError
 	} else {
 		reqLogger.Error(getError, "Failed to get Common UI bind info")
 	}
