@@ -44,9 +44,11 @@ const DefaultNamespace = "ibm-common-services"
 const DefaultImageRegistry = "quay.io/opencloudio"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.2.1"
+
 var DefaultStatusForCR = []string{"none"}
 
 const Log4jsConfigMapName = "common-web-ui-log4js"
+
 var Log4jsConfigMapData = map[string]string{
 	"log4js.json": `   {
 		"appenders": {
@@ -82,8 +84,8 @@ var Log4jsConfigMapData = map[string]string{
 	  }`,
 }
 
-
 const RedisConfigMapName = "redis-client-certs"
+
 var RedisConfigMapAnnotations = map[string]string{
 	"service.beta.openshift.io/inject-cabundle": "true",
 }
@@ -91,6 +93,7 @@ var RedisConfigMapAnnotations = map[string]string{
 const AdminHubOnZenConfigMapName = "adminhub-on-zen-cm"
 
 const ZenCardsConfigMapName = "common-web-ui-zen-card-extensions"
+
 var ZenNginxConfig = `
 	location /common-nav {
 		access_by_lua_file /nginx_data/checkjwt.lua;
@@ -395,6 +398,7 @@ var ZenCardExtensions = `
 `
 
 const ExtensionsConfigMapName = "common-webui-ui-extensions"
+
 var ExtensionsConfigMapData = `
 [
 	{
@@ -417,6 +421,7 @@ const ClusterCaVolumeName = "cluster-ca"
 const InternalTLSVolumeName = "internal-tls"
 const UICertVolumeName = "common-web-ui-certs"
 const UICertSecretName = "common-web-ui-cert" + ""
+
 var Log4jsVolume = corev1.Volume{
 	Name: Log4jsVolumeName,
 	VolumeSource: corev1.VolumeSource{
@@ -760,6 +765,7 @@ var CommonContainer = corev1.Container{
 }
 
 const APIIngressName = "common-web-ui-api"
+
 var APIIngressAnnotations = map[string]string{
 	"kubernetes.io/ingress.class":            "ibm-icp-management",
 	"icp.management.ibm.com/secure-backends": "true",
@@ -771,6 +777,7 @@ var APIIngressAnnotations = map[string]string{
 }
 
 const CallbackIngressName = "common-web-ui-callback"
+
 var CallbackIngressAnnotations = map[string]string{
 	"kubernetes.io/ingress.class":            "ibm-icp-management",
 	"icp.management.ibm.com/upstream-uri":    "/auth/liberty/callback",
@@ -778,6 +785,7 @@ var CallbackIngressAnnotations = map[string]string{
 }
 
 const NavIngressName = "common-web-ui"
+
 var NavIngressAnnotations = map[string]string{
 	"kubernetes.io/ingress.class":            "ibm-icp-management",
 	"icp.management.ibm.com/auth-type":       "access-token",
@@ -808,6 +816,7 @@ const finalizerName1 = "commonui1.operators.ibm.com"
 const DefaultClusterIssuer = "cs-ca-issuer"
 const UICertName = "common-web-ui-ca-cert"
 const UICertCommonName = "common-web-ui"
+
 var UICertificateData = CertificateData{
 	Name:      UICertName,
 	Secret:    UICertSecretName,
@@ -818,6 +827,7 @@ var UICertificateData = CertificateData{
 
 const AdminHubNavConfigName = "common-web-ui-config"
 const CP4INavConfigName = "icp4i"
+
 var AdminHubNavConfig = `
 {
 	"apiVersion": "foundation.ibm.com/v1",

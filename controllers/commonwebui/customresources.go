@@ -20,14 +20,14 @@ import (
 	"context"
 	"encoding/json"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	routesv1 "github.com/openshift/api/route/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 )
 
-func (r *CommonWebUIReconciler) reconcileConsoleLink(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, adminHubOnZen bool, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileConsoleLink(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, adminHubOnZen bool, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConsoleLink", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling ConsoleLink CR")
 
@@ -66,7 +66,7 @@ func (r *CommonWebUIReconciler) reconcileConsoleLink(ctx context.Context, instan
 
 		// Remove our finalizer from the metadata of the object and update it.
 		instance.ObjectMeta.Finalizers = RemoveString(instance.ObjectMeta.Finalizers, finalizerName)
-		
+
 		if err := r.Client.Update(ctx, instance); err != nil {
 			reqLogger.Error(err, "Failed to delete  Console link finalizer")
 		} else {
@@ -117,7 +117,7 @@ func (r *CommonWebUIReconciler) reconcileConsoleLink(ctx context.Context, instan
 				reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 				//Will hold href for admin hub console link
 				var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
-	
+
 				// Create Custom resource
 				if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
 					reqLogger.Error(createErr, "Failed to create CR")

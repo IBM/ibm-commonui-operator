@@ -32,8 +32,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	"github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
+	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
+	routesv1 "github.com/openshift/api/route/v1"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -43,9 +45,17 @@ var (
 )
 
 func init() {
+	// add default kubernetes schemes to controller
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(operatorv1alpha1.AddToScheme(scheme))
+	// add cert manager scheme to controller
+	utilruntime.Must(certmgr.AddToScheme(scheme))
+
+	// add openshift routes scheme to controller
+	utilruntime.Must(routesv1.AddToScheme(scheme))
+
+	// add common web ui scheme to controller
+	utilruntime.Must(operatorsv1alpha1.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 
@@ -68,8 +78,8 @@ func main() {
 
 	watchNamespace, err := getWatchNamespace()
 	if err != nil {
-			setupLog.Error(err, "unable to get WatchNamespace, " +
-				"the manager will watch and manage resources in all namespaces")
+		setupLog.Error(err, "unable to get WatchNamespace, "+
+			"the manager will watch and manage resources in all namespaces")
 	}
 
 	mgr, err := ctrl.NewManager(ctrl.GetConfigOrDie(), ctrl.Options{
@@ -79,7 +89,7 @@ func main() {
 		HealthProbeBindAddress: probeAddr,
 		LeaderElection:         enableLeaderElection,
 		LeaderElectionID:       "cf857902.ibm.com",
-		Namespace: watchNamespace, // namespaced-scope when the value is not empty
+		Namespace:              watchNamespace, // namespaced-scope when the value is not empty
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
@@ -120,7 +130,7 @@ func getWatchNamespace() (string, error) {
 
 	ns, found := os.LookupEnv(watchNamespaceEnvVar)
 	if !found {
-			return "", fmt.Errorf("%s must be set", watchNamespaceEnvVar)
+		return "", fmt.Errorf("%s must be set", watchNamespaceEnvVar)
 	}
 	return ns, nil
 }

@@ -19,7 +19,7 @@ package commonwebui
 import (
 	"context"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -35,7 +35,7 @@ type CertificateData struct {
 	Component string
 }
 
-func (r *CommonWebUIReconciler) getDesiredCertificate(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, data CertificateData) (*certmgr.Certificate, error) {
+func (r *CommonWebUIReconciler) getDesiredCertificate(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, data CertificateData) (*certmgr.Certificate, error) {
 	reqLogger := log.WithValues("func", "getDesiredCertificate", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	metaLabels := map[string]string{
@@ -79,7 +79,7 @@ func (r *CommonWebUIReconciler) getDesiredCertificate(ctx context.Context, insta
 	return certificate, nil
 }
 
-func (r *CommonWebUIReconciler) reconcileCertificates(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileCertificates(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileCertificates", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling certificates")
 
@@ -99,9 +99,9 @@ func (r *CommonWebUIReconciler) reconcileCertificates(ctx context.Context, insta
 		}
 
 		desiredCertificate, err := r.getDesiredCertificate(ctx, instance, certData)
-			if err != nil {
-				return err
-			}
+		if err != nil {
+			return err
+		}
 
 		if err != nil && errors.IsNotFound(err) {
 			reqLogger.Info("Creating a new certificate", "Certificate.Namespace", desiredCertificate.Namespace, "Certificate.Name", desiredCertificate.Name)
@@ -127,7 +127,7 @@ func (r *CommonWebUIReconciler) reconcileCertificates(ctx context.Context, insta
 
 			if !IsCertificateEqual(certificate, desiredCertificate) {
 				reqLogger.Info("Updating certificate", "Certificate.Namespace", certificate.Namespace, "Certificate.Name", certificate.Name)
-				
+
 				certificate.ObjectMeta.Name = desiredCertificate.ObjectMeta.Name
 				certificate.ObjectMeta.Labels = desiredCertificate.ObjectMeta.Labels
 				certificate.Spec = desiredCertificate.Spec
@@ -140,6 +140,6 @@ func (r *CommonWebUIReconciler) reconcileCertificates(ctx context.Context, insta
 			}
 		}
 	}
-	
+
 	return nil
 }

@@ -5,7 +5,7 @@ metadata:
   name: commonwebui-editor-role
 rules:
 - apiGroups:
-  - operator.ibm.com
+  - operators.ibm.com
   resources:
   - commonwebuis
   verbs:
@@ -17,7 +17,7 @@ rules:
   - update
   - watch
 - apiGroups:
-  - operator.ibm.com
+  - operators.ibm.com
   resources:
   - commonwebuis/status
   verbs:

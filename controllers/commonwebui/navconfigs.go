@@ -21,28 +21,29 @@ import (
 	"encoding/json"
 	errorf "errors"
 	"fmt"
+	"reflect"
 
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
-func (r *CommonWebUIReconciler) reconcileAdminHubNavConfig(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileAdminHubNavConfig(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileAdminHubNavConfig", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling admin hub nav config")
 
 	return r.reconcileNavConfig(ctx, instance, needToRequeue, AdminHubNavConfigName, AdminHubNavConfig)
 }
 
-func (r *CommonWebUIReconciler) reconcileCP4INavConfig(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileCP4INavConfig(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileCP4INavConfig", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling cp4i nav config")
 
 	return r.reconcileNavConfig(ctx, instance, needToRequeue, CP4INavConfigName, CP4INavConfig)
 }
 
-func (r *CommonWebUIReconciler) reconcileNavConfig(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool, name, config string) error {
+func (r *CommonWebUIReconciler) reconcileNavConfig(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool, name, config string) error {
 	reqLogger := log.WithValues("func", "reconcileNavConfig", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	var template map[string]interface{}
@@ -63,13 +64,36 @@ func (r *CommonWebUIReconciler) reconcileNavConfig(ctx context.Context, instance
 	err = r.Client.Get(ctx, types.NamespacedName{Name: name, Namespace: instance.Namespace}, navConfig)
 	if err == nil {
 		reqLogger.Info(fmt.Sprintf("Updating nav config: %s", name))
-	
-		// Cast navItems interface to array of json objects
-		navItems, ok := desiredNavConfig.Object["spec"].(map[string]interface{})["navItems"].([]map[string]interface{})
+
+		// cast navItems interface to array of json objects
+		navItemsValue, ok := desiredNavConfig.Object["spec"].(map[string]interface{})["navItems"]
 		if !ok {
 			msg := fmt.Sprintf("Failed to unmarshal navItems array for nav config: %s", name)
 			reqLogger.Info(msg)
 			return errorf.New(msg)
+		}
+
+		// get reflected value of navItems interface
+		s := reflect.ValueOf(navItemsValue)
+
+		// return error if navItems interface is not a slice
+		if s.IsNil() || s.Kind() != reflect.Slice {
+			msg := fmt.Sprintf("Invalid navItems array in nav config: %s", name)
+			reqLogger.Info(msg)
+			return errorf.New(msg)
+		}
+
+		// initialize navItems array based on length of value
+		navItems := make([]map[string]interface{}, s.Len())
+
+		// cast each navItem to a map of strings to interfaces
+		for i := 0; i < s.Len(); i++ {
+			navItems[i], ok = s.Index(i).Interface().(map[string]interface{})
+			if !ok {
+				msg := fmt.Sprintf("Failed to unmarshal navItem %d for nav config: %s", i, name)
+				reqLogger.Info(msg)
+				return errorf.New(msg)
+			}
 		}
 
 		// Update namespace for all nav items
@@ -78,10 +102,10 @@ func (r *CommonWebUIReconciler) reconcileNavConfig(ctx context.Context, instance
 				item["namespace"] = instance.Namespace
 			}
 		}
-		
+
 		// Set nav items to array with updated namespaces
 		navConfig.Object["spec"].(map[string]interface{})["navItems"] = navItems
-	
+
 		// Update nav config
 		err = r.Client.Update(ctx, navConfig)
 		if err != nil {

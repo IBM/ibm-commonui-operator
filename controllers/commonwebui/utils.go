@@ -73,7 +73,7 @@ func GetResourceValueWithDefault(valueStr string, defaultValue int64) int64 {
 			value = quantity.Value()
 		}
 	}
-	
+
 	return value
 }
 
@@ -115,15 +115,15 @@ func RemoveString(strs []string, search string) []string {
 }
 
 func CopyMap(m map[string]interface{}) map[string]interface{} {
-    cp := make(map[string]interface{})
-    for k, v := range m {
-        vm, ok := v.(map[string]interface{})
-        if ok {
-            cp[k] = CopyMap(vm)
-        } else {
-            cp[k] = v
-        }
-    }
+	cp := make(map[string]interface{})
+	for k, v := range m {
+		vm, ok := v.(map[string]interface{})
+		if ok {
+			cp[k] = CopyMap(vm)
+		} else {
+			cp[k] = v
+		}
+	}
 
-    return cp
+	return cp
 }

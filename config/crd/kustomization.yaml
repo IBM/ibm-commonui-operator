@@ -2,8 +2,8 @@
 # since it depends on service name and namespace that are out of this kustomize package.
 # It should be run by config/default
 resources:
-- bases/operator.ibm.com_commonwebuis.yaml
-- bases/operator.ibm.com_switcheritems.yaml
+- bases/operators.ibm.com_commonwebuis.yaml
+- bases/operators.ibm.com_switcheritems.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

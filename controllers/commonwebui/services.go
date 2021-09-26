@@ -26,10 +26,10 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
-func (r *CommonWebUIReconciler) getDesiredService(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) (*corev1.Service, error) {
+func (r *CommonWebUIReconciler) getDesiredService(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*corev1.Service, error) {
 	reqLogger := log.WithValues("func", "getDesiredService", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	metaLabels := LabelsForMetadata(ServiceName)
@@ -69,7 +69,7 @@ func (r *CommonWebUIReconciler) getDesiredService(ctx context.Context, instance 
 	return service, nil
 }
 
-func (r *CommonWebUIReconciler) reconcileService(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileService(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileService", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling service")
 
@@ -110,7 +110,7 @@ func (r *CommonWebUIReconciler) reconcileService(ctx context.Context, instance *
 
 		if !IsServiceEqual(service, desiredService) {
 			reqLogger.Info("Updating service", "Service.Namespace", service.Namespace, "Service.Name", service.Name)
-			
+
 			service.ObjectMeta.Name = desiredService.ObjectMeta.Name
 			service.ObjectMeta.Labels = desiredService.ObjectMeta.Labels
 			service.Spec.Ports = desiredService.Spec.Ports

@@ -28,10 +28,10 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
-func (r *CommonWebUIReconciler) getDesiredDeployment(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, adminHubOnZen bool, needToRequeue *bool) (*appsv1.Deployment, error) {
+func (r *CommonWebUIReconciler) getDesiredDeployment(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, adminHubOnZen bool, needToRequeue *bool) (*appsv1.Deployment, error) {
 	reqLogger := log.WithValues("func", "getDesiredDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	volumes := []corev1.Volume{}
@@ -189,7 +189,7 @@ func (r *CommonWebUIReconciler) getDesiredDeployment(ctx context.Context, instan
 	return deployment, nil
 }
 
-func (r *CommonWebUIReconciler) reconcileDeployment(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, adminHubOnZen bool, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileDeployment(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, adminHubOnZen bool, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling deployment")
 
@@ -197,7 +197,7 @@ func (r *CommonWebUIReconciler) reconcileDeployment(ctx context.Context, instanc
 
 	err := r.Client.Get(ctx, types.NamespacedName{Name: DeploymentName, Namespace: instance.Namespace}, deployment)
 	if err != nil && !errors.IsNotFound(err) {
-		reqLogger.Error(err, "Failed to get deployment", "Deployment.Namespace", instance.Namespace,"Deployment.Name", DeploymentName)
+		reqLogger.Error(err, "Failed to get deployment", "Deployment.Namespace", instance.Namespace, "Deployment.Name", DeploymentName)
 		return err
 	}
 
@@ -255,6 +255,6 @@ func (r *CommonWebUIReconciler) reconcileDeployment(ctx context.Context, instanc
 			}
 		}
 	}
-	
+
 	return nil
 }

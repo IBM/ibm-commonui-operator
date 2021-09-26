@@ -20,7 +20,7 @@ import (
 	"context"
 	"fmt"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 
 	routesv1 "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -30,9 +30,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-func (r *CommonWebUIReconciler) createConfigMap(ctx context.Context, cm *corev1.ConfigMap, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) createConfigMap(ctx context.Context, cm *corev1.ConfigMap, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "createConfigMap", "instance.Name", instance.Name, "configmap.Name", cm.Name)
-	
+
 	err := controllerutil.SetControllerReference(instance, cm, r.Scheme)
 	if err != nil {
 		reqLogger.Error(err, fmt.Sprintf("Failed to set owner for configmap: %s", cm.Name))
@@ -52,7 +52,7 @@ func (r *CommonWebUIReconciler) createConfigMap(ctx context.Context, cm *corev1.
 	return nil
 }
 
-func (r *CommonWebUIReconciler) reconcileLog4jsConfigMap(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileLog4jsConfigMap(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileLog4jsConfigMap", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling log4js configmap")
 
@@ -65,13 +65,13 @@ func (r *CommonWebUIReconciler) reconcileLog4jsConfigMap(ctx context.Context, in
 			metaLabels := LabelsForMetadata(Log4jsConfigMapName)
 			cm = &corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: Log4jsConfigMapName,
+					Name:      Log4jsConfigMapName,
 					Namespace: instance.Namespace,
-					Labels: metaLabels,
+					Labels:    metaLabels,
 				},
 				Data: Log4jsConfigMapData,
 			}
-			
+
 			err = r.createConfigMap(ctx, cm, instance, needToRequeue)
 			if err != nil {
 				return err
@@ -85,7 +85,7 @@ func (r *CommonWebUIReconciler) reconcileLog4jsConfigMap(ctx context.Context, in
 	return nil
 }
 
-func (r *CommonWebUIReconciler) reconcileRedisConfigMap(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileRedisConfigMap(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileRedisConfigMap", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling redis certs configmap")
 
@@ -98,10 +98,10 @@ func (r *CommonWebUIReconciler) reconcileRedisConfigMap(ctx context.Context, ins
 			metaLabels := LabelsForMetadata(RedisConfigMapName)
 			cm = &corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: RedisConfigMapName,
+					Name:        RedisConfigMapName,
 					Annotations: RedisConfigMapAnnotations,
-					Namespace: instance.Namespace,
-					Labels: metaLabels,
+					Namespace:   instance.Namespace,
+					Labels:      metaLabels,
 				},
 			}
 
@@ -114,11 +114,11 @@ func (r *CommonWebUIReconciler) reconcileRedisConfigMap(ctx context.Context, ins
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
-func (r *CommonWebUIReconciler) reconcileZenCardsConfigMap(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileZenCardsConfigMap(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileZenCardsConfigMap", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling zen card extensions configmap")
 
@@ -134,9 +134,9 @@ func (r *CommonWebUIReconciler) reconcileZenCardsConfigMap(ctx context.Context, 
 
 			cm = &corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: ZenCardsConfigMapName,
+					Name:      ZenCardsConfigMapName,
 					Namespace: instance.Namespace,
-					Labels: metaLabels,
+					Labels:    metaLabels,
 				},
 				Data: map[string]string{
 					"nginx.conf": ZenNginxConfig,
@@ -153,11 +153,11 @@ func (r *CommonWebUIReconciler) reconcileZenCardsConfigMap(ctx context.Context, 
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
-func (r *CommonWebUIReconciler) reconcileExtensionsConfigMap(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileExtensionsConfigMap(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileExtensionsConfigMap", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling extensions configmap")
 
@@ -184,9 +184,9 @@ func (r *CommonWebUIReconciler) reconcileExtensionsConfigMap(ctx context.Context
 
 			cm = &corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{
-					Name: ExtensionsConfigMapName,
+					Name:      ExtensionsConfigMapName,
 					Namespace: instance.Namespace,
-					Labels: metaLabels,
+					Labels:    metaLabels,
 				},
 				Data: map[string]string{
 					"extensions": fmt.Sprintf(ExtensionsConfigMapData, route.Spec.Host),
@@ -202,6 +202,6 @@ func (r *CommonWebUIReconciler) reconcileExtensionsConfigMap(ctx context.Context
 			return err
 		}
 	}
-	
+
 	return nil
 }

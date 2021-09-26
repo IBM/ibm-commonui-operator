@@ -19,7 +19,7 @@ package commonwebui
 import (
 	"context"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -27,9 +27,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-type DesiredStateGetter func(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error)
+type DesiredStateGetter func(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error)
 
-func (r *CommonWebUIReconciler) getDesiredAPIIngress(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error) {
+func (r *CommonWebUIReconciler) getDesiredAPIIngress(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error) {
 	reqLogger := log.WithValues("func", "getDesiredAPIIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	metaLabels := LabelsForMetadata(APIIngressName)
@@ -94,14 +94,14 @@ func (r *CommonWebUIReconciler) getDesiredAPIIngress(ctx context.Context, instan
 	return ingress, nil
 }
 
-func (r *CommonWebUIReconciler) reconcileAPIIngress(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileAPIIngress(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileAPIIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling API ingress")
 
 	return r.reconcileIngress(ctx, instance, APIIngressName, r.getDesiredAPIIngress, needToRequeue)
 }
 
-func (r *CommonWebUIReconciler) getDesiredCallbackIngress(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error) {
+func (r *CommonWebUIReconciler) getDesiredCallbackIngress(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error) {
 	reqLogger := log.WithValues("func", "getDesiredCallbackIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	metaLabels := LabelsForMetadata(CallbackIngressName)
@@ -149,14 +149,14 @@ func (r *CommonWebUIReconciler) getDesiredCallbackIngress(ctx context.Context, i
 	return ingress, nil
 }
 
-func (r *CommonWebUIReconciler) reconcileCallbackIngress(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileCallbackIngress(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileCallbackIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling callback ingress")
 
 	return r.reconcileIngress(ctx, instance, CallbackIngressName, r.getDesiredCallbackIngress, needToRequeue)
 }
 
-func (r *CommonWebUIReconciler) getDesiredNavIngress(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error) {
+func (r *CommonWebUIReconciler) getDesiredNavIngress(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error) {
 	reqLogger := log.WithValues("func", "getDesiredNavIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	metaLabels := LabelsForMetadata(NavIngressName)
@@ -204,14 +204,14 @@ func (r *CommonWebUIReconciler) getDesiredNavIngress(ctx context.Context, instan
 	return ingress, nil
 }
 
-func (r *CommonWebUIReconciler) reconcileNavIngress(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileNavIngress(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileNavIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling common-nav ingress")
 
 	return r.reconcileIngress(ctx, instance, NavIngressName, r.getDesiredNavIngress, needToRequeue)
 }
 
-func (r *CommonWebUIReconciler) reconcileIngress(ctx context.Context, instance *operatorv1alpha1.CommonWebUI, ingressName string, desiredStateGetter DesiredStateGetter, needToRequeue *bool) error {
+func (r *CommonWebUIReconciler) reconcileIngress(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, ingressName string, desiredStateGetter DesiredStateGetter, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	ingress := &netv1.Ingress{}
@@ -251,7 +251,7 @@ func (r *CommonWebUIReconciler) reconcileIngress(ctx context.Context, instance *
 
 		if !IsIngressEqual(ingress, desiredIngress) {
 			reqLogger.Info("Updating ingress", "Ingress.Namespace", ingress.Namespace, "Ingress.Name", ingress.Name)
-			
+
 			ingress.ObjectMeta.Name = desiredIngress.ObjectMeta.Name
 			ingress.ObjectMeta.Labels = desiredIngress.ObjectMeta.Labels
 			ingress.ObjectMeta.Annotations = desiredIngress.ObjectMeta.Annotations

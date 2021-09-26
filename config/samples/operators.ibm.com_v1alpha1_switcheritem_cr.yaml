@@ -1,0 +1,10 @@
+apiVersion: operators.ibm.com/v1alpha1
+kind: SwitcherItem
+metadata:
+  name: example-switcheritem
+spec:
+  cloudPakInfo:
+    display: "Cloud Pak Administration Hub"
+    label: "administration-hub"
+    landingPage: "/common-nav/dashboard"
+    logoURL: ""

@@ -33,7 +33,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 
-	operatorv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
 )
 
@@ -57,7 +57,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Set a flag to requeue only once in the instance that multiple resources are created
 	needToRequeue := false
 
-	instance := &operatorv1alpha1.CommonWebUI{}
+	instance := &operatorsv1alpha1.CommonWebUI{}
 
 	// Fetch the CommonWebUIService CR instance
 	err := r.Client.Get(ctx, request.NamespacedName, instance)
@@ -185,12 +185,12 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	return ctrl.Result{}, nil
 }
 
-func (r *CommonWebUIReconciler) deleteDaemonSet(ctx context.Context, instance *operatorv1alpha1.CommonWebUI) {
+func (r *CommonWebUIReconciler) deleteDaemonSet(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
 	reqLogger := log.WithValues("func", "deleteDaemonSet", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	daemonSet := &appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
-			Name: DaemonSetName,
+			Name:      DaemonSetName,
 			Namespace: DefaultNamespace,
 		},
 	}
@@ -209,10 +209,10 @@ func (r *CommonWebUIReconciler) deleteDaemonSet(ctx context.Context, instance *o
 	}
 }
 
-func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *operatorv1alpha1.CommonWebUI) error {
+func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) error {
 	reqLogger := log.WithValues("func", "updateStatus", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Updating CommonWebUI status")
-	
+
 	podList := &corev1.PodList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
@@ -239,11 +239,11 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 			return err
 		}
 	}
-	
+
 	return nil
 }
 
-func (r *CommonWebUIReconciler) hasAdminHubOnZen(ctx context.Context, instance *operatorv1alpha1.CommonWebUI) bool {
+func (r *CommonWebUIReconciler) hasAdminHubOnZen(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) bool {
 	reqLogger := log.WithValues("func", "hasAdminHubOnZen", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Checking zen optional install condition")
 
@@ -263,7 +263,7 @@ func (r *CommonWebUIReconciler) hasAdminHubOnZen(ctx context.Context, instance *
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		For(&operatorv1alpha1.CommonWebUI{}).
+		For(&operatorsv1alpha1.CommonWebUI{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
