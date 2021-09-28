@@ -98,7 +98,7 @@ Prerequisite:
 
 ### Debugging guide
 
-Use the following commands to debug the operator installation:
+Use the following commands to debug the operator installation
 
 - Check the CSV installation status:
 
