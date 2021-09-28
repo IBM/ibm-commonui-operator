@@ -41,7 +41,7 @@ spec:
       containers:
         - name: ibm-commonui-operator
           # Replace this with the built image name
-          image: quay.io/opencloudio/ibm-commonui-operator:1.10.0
+          image: quay.io/opencloudio/ibm-commonui-operator:4.0.0-k
           command:
           - ibm-commonui-operator
           imagePullPolicy: Always
