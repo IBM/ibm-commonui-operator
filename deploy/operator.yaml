@@ -41,7 +41,7 @@ spec:
       containers:
         - name: ibm-commonui-operator
           # Replace this with the built image name
-          image: quay.io/opencloudio/ibm-commonui-operator:1.10.0
+          image: quay.io/opencloudio/ibm-commonui-operator:4.0.0-k
           command:
           - ibm-commonui-operator
           imagePullPolicy: Always
@@ -57,7 +57,7 @@ spec:
             - name: OPERATOR_NAME
               value: "ibm-commonui-operator"
             - name: COMMON_WEB_UI_IMAGE
-              value: "quay.io/opencloudio/common-web-ui:1.10.0"
+              value: "quay.io/opencloudio/common-web-ui:4.0.0-k"
             - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
               value: "sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46"
           resources:
