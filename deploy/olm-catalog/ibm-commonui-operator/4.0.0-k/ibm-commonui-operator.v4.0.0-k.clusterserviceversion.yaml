@@ -48,7 +48,7 @@ metadata:
               "cpuLimits": "300",
               "cpuMemory": "256",
               "imageRegistry": "quay.io/opencloudio",
-              "imageTag": "1.10.0",
+              "imageTag": "4.0.0-k",
               "ingressPath": "/common-nav",
               "landingPage": "",
               "requestLimits": "300",
@@ -692,7 +692,7 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE
-                  value: quay.io/opencloudio/common-web-ui:1.10.0
+                  value: quay.io/opencloudio/common-web-ui:4.0.0-k
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
                 image: quay.io/opencloudio/ibm-commonui-operator:4.0.0-k
@@ -875,7 +875,7 @@ spec:
   relatedImages:
   - image: quay.io/opencloudio/ibm-commonui-operator:4.0.0-k
     name: COMMON_WEB_UI_OPERATOR_IMAGE
-  - image: quay.io/opencloudio/common-web-ui:1.10.0
+  - image: quay.io/opencloudio/common-web-ui:4.0.0-k
     name: COMMON_WEB_UI_IMAGE
-  replaces: ibm-commonui-operator.v1.10.0
+  replaces: ibm-commonui-operator.v1.9.0
   version: 4.0.0-k
