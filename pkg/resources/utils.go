@@ -66,9 +66,12 @@ var DefaultStatusForCR = []string{"none"}
 const ZenProductConfigMapName = "product-configmap"
 
 var ZenPcmMap = map[string]string{
-	"CLOUD_PAK_TYPE":     "admin",
-	"CLOUD_PAK_URL":      "https://common-web-ui:3000/common-nav/zen/meta",
-	"CLOUD_PAK_AUTH_URL": "https://common-web-ui:3000/common-nav/zen/meta",
+	"CLOUD_PAK_TYPE":           "admin",
+	"CLOUD_PAK_URL":            "https://common-web-ui:3000/common-nav/zen/meta",
+	"CLOUD_PAK_AUTH_URL":       "https://common-web-ui:3000/common-nav/zen/meta",
+	"IBM_PRODUCT_NAME":         "IBM Cloud Pak | Administration",
+	"IBM_DEFAULT_PRODUCT_NAME": "IBM Cloud Pak | Administration",
+	"IBM_GLOBAL_PRODUCT_NAME":  "IBM Cloud Pak | Administration",
 }
 
 //GetImageID constructs image IDs for operands: either <IMAGE_NAME>:<IMAGE_TAG> or <IMAGE_NAME>@<IMAGE_SHA>
@@ -236,10 +239,9 @@ var ZenCardExtensions = `
         "extension_name": "homepage_quick_navigation_id_providers",
         "display_name": "{{ .global_zen_homepage_nav_id_providers }}",
         "order_hint": 100,
-        "match_permissions": "",
+        "match_permissions": "administrator",
         "match_instance_id": "",
         "match_instance_role": "",
-        "meta": {},
         "details": {
           "label": "{{ .global_adminhub_id_providers }}",
           "nav_link": "/common-nav/zen/idproviders"
@@ -256,7 +258,7 @@ var ZenCardExtensions = `
         "meta": {},
         "details": {
           "label": "{{ .global_adminhub_documentation }}",
-          "nav_link": "http://ibm.biz/cpcs_adminui",
+          "nav_link": "https://ibm.biz/cpcs_adminui",
           "carbon_icon": "Document16"
         }
       },
@@ -326,8 +328,8 @@ var ZenCardExtensions = `
           "template_type": "number_list",
           "data_url": "/common-nav/zen/api/v1/deployments",
           "empty_state": {
-            "main_text": "No Cloud Paks found.",
-            "sub_text": "When data is available, all Cloud Paks in this cluster will appear here."
+            "main_text": "{{ .global_adminhub_deployments_empty_main_text }}",
+            "sub_text": "{{ .global_adminhub_deployments_empty_sub_text }}"
           }
         }
       },
@@ -378,8 +380,8 @@ var ZenCardExtensions = `
           "template_type": "condensed_list",
           "data_url": "/common-nav/zen/api/v1/system_utility_status",
           "empty_state": {
-            "main_text": "No services found",
-            "sub_text": "When data is available, services in this cluster will appear here.",
+            "main_text": "{{ .global_adminhub_system_utility_status_empty_main_text }}",
+            "sub_text": "{{ .global_adminhub_system_utility_status_empty_sub_text }}",
             "button_text": "",
             "button_url": ""
           }
@@ -428,8 +430,8 @@ var ZenCardExtensions = `
          "template_type": "text_list",
          "data_url": "/common-nav/zen/api/v1/events",
          "empty_state": {
-           "main_text": "No events found",
-           "sub_text": "When data is available, all events in this cluster will appear here."
+			"main_text": "{{ .global_adminhub_system_events_empty_main_text }}",
+			"sub_text": "{{ .global_adminhub_system_events_empty_sub_text }}"
          }
        }
       },
