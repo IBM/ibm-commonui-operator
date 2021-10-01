@@ -199,6 +199,10 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			return reconcile.Result{}, err
 		}
+		err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenQuickNavExtensionsConfigMap)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 		err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
 		if err != nil {
 			reqLogger.Error(err, "Error creating console link cr for zen")
@@ -285,7 +289,13 @@ func (r *ReconcileCommonWebUIZen) reconcileConfigMapsZen(ctx context.Context, na
 				"nginx.conf": res.ZenNginxConfig,
 				"extensions": res.ZenCardExtensions,
 			}
-			newConfigMap = res.ZenCardExtensionsConfigMapUI(namespace, version.Version, ExtensionsData)
+			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenCardExtensionsConfigMap, namespace, version.Version, ExtensionsData)
+		} else if nameOfCM == res.ZenQuickNavExtensionsConfigMap {
+			reqLogger.Info("Creating zen quick nav extensions config map")
+			var ExtensionsData = map[string]string{
+				"extensions": res.ZenQuickNavExtensions,
+			}
+			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenQuickNavExtensionsConfigMap, namespace, version.Version, ExtensionsData)
 		} else if nameOfCM == res.CommonConfigMap {
 			reqLogger.Info("Creating common-web-ui-config config map")
 			newConfigMap = res.CommonWebUIConfigMap(namespace)

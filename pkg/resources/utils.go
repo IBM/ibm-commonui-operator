@@ -46,6 +46,7 @@ const ReleaseName = "common-web-ui"
 const Log4jsConfigMap = "common-web-ui-log4js"
 const ExtensionsConfigMap = "common-webui-ui-extensions"
 const ZenCardExtensionsConfigMap = "common-web-ui-zen-card-extensions"
+const ZenQuickNavExtensionsConfigMap = "common-web-ui-zen-quicknav-extensions"
 const CommonConfigMap = "common-web-ui-config"
 const DaemonSetName = "common-web-ui"
 const DeploymentName = "common-web-ui"
@@ -220,6 +221,31 @@ var ZenNginxConfig = `
 				proxy_read_timeout 10m;
 		}
 `
+
+var ZenQuickNavExtensions = `
+[
+      {
+        "extension_point_id": "homepage_quick_navigation",
+        "extension_name": "homepage_quick_navigation_id_providers",
+        "display_name": "{{ .global_zen_homepage_nav_id_providers }}",
+        "order_hint": 100,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "extension_type": "ootb",
+          "reference": {
+            "nav_item": "nav-id-providers"
+          }
+        },
+        "details": {
+          "label": "{{ .global_adminhub_id_providers }}",
+          "nav_link": "/common-nav/zen/idproviders"
+        }
+      }
+]
+`
+
 var ZenCardExtensions = `
 [
 	  {
@@ -232,19 +258,6 @@ var ZenCardExtensions = `
         "details": {
 			"parent_folder": "dap-header-administer",
 			"href": "/common-nav/zen/idproviders"
-        }
-      },
-      {
-        "extension_point_id": "homepage_quick_navigation",
-        "extension_name": "homepage_quick_navigation_id_providers",
-        "display_name": "{{ .global_zen_homepage_nav_id_providers }}",
-        "order_hint": 100,
-        "match_permissions": "administrator",
-        "match_instance_id": "",
-        "match_instance_role": "",
-        "details": {
-          "label": "{{ .global_adminhub_id_providers }}",
-          "nav_link": "/common-nav/zen/idproviders"
         }
       },
       {
@@ -883,7 +896,7 @@ func ExtensionsConfigMapUI(namespace string, data map[string]string) *corev1.Con
 	return configmap
 }
 
-func ZenCardExtensionsConfigMapUI(namespace string, version string, data map[string]string) *corev1.ConfigMap {
+func ZenCardExtensionsConfigMapUI(name string, namespace string, version string, data map[string]string) *corev1.ConfigMap {
 	reqLogger := log.WithValues("func", "ExtensionsConfigMapUI")
 	reqLogger.Info("CS??? Entry")
 	metaLabels := LabelsForMetadata(ExtensionsConfigMap)
@@ -891,7 +904,7 @@ func ZenCardExtensionsConfigMapUI(namespace string, version string, data map[str
 	metaLabels["icpdata_addon_version"] = "v" + version
 	configmap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      ZenCardExtensionsConfigMap,
+			Name:      name,
 			Namespace: namespace,
 			Labels:    metaLabels,
 		},
