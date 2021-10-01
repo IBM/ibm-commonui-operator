@@ -72,7 +72,6 @@ var ZenPcmMap = map[string]string{
 	"CLOUD_PAK_AUTH_URL":       "https://common-web-ui:3000/common-nav/zen/meta",
 	"IBM_PRODUCT_NAME":         "IBM Cloud Pak | Administration",
 	"IBM_DEFAULT_PRODUCT_NAME": "IBM Cloud Pak | Administration",
-	"IBM_GLOBAL_PRODUCT_NAME":  "IBM Cloud Pak | Administration",
 }
 
 //GetImageID constructs image IDs for operands: either <IMAGE_NAME>:<IMAGE_TAG> or <IMAGE_NAME>@<IMAGE_SHA>
@@ -534,7 +533,7 @@ var CrTemplates = `{
 	"spec": {
 		"href": "https://<cp-console-route>/common-nav/dashboard",
 		"location": "ApplicationMenu",
-		"text": "Cloud Pak Administration Hub"
+		"text": "IBM Cloud Pak for Administration"
 	}
 }`
 
@@ -547,7 +546,7 @@ var CrTemplates2 = `{
 	"spec": {
 		"href": "https://<cp-console-route>/common-nav/dashboard",
 		"location": "ApplicationMenu",
-		"text": "Cloud Pak Administration Hub"
+		"text": "IBM Cloud Pak for Administration"
 	}
 }`
 

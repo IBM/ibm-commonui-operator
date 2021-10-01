@@ -387,7 +387,7 @@ metadata:
           },
           "spec": {
             "cloudPakInfo": {
-              "display": "Cloud Pak Administration Hub",
+              "display": "IBM Cloud Pak | Administration",
               "label": "administration-hub",
               "landingPage": "/common-nav/dashboard",
               "logoURL": ""
