@@ -222,12 +222,7 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		}
 
 	} else {
-		err := r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
-		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr")
-			return reconcile.Result{}, err
-		}
-		err = r.deleteZenAdminHubRes(ctx, namespace)
+		err := r.deleteZenAdminHubRes(ctx, namespace)
 		if err != nil {
 			reqLogger.Error(err, "Error deleting zen admin hub resources")
 			return reconcile.Result{}, err
