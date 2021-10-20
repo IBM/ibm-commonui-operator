@@ -402,6 +402,7 @@ metadata:
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
     olm.skipRange: '<1.11.0'
+    operators.operatorframework.io/operator-type: 'non-standalone'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
   name: ibm-commonui-operator.v1.11.0
