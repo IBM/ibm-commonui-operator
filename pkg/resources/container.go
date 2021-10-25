@@ -290,6 +290,10 @@ var CommonContainer = corev1.Container{
 			},
 		},
 		{
+			Name: "USE_CNCF",
+			Value: "true",
+		},
+		{
 			Name: "WLP_CLIENT_ID",
 			ValueFrom: &corev1.EnvVarSource{
 				SecretKeyRef: &corev1.SecretKeySelector{
