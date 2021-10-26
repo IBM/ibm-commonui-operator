@@ -47,6 +47,7 @@ const Log4jsConfigMap = "common-web-ui-log4js"
 const ExtensionsConfigMap = "common-webui-ui-extensions"
 const ZenCardExtensionsConfigMap = "common-web-ui-zen-card-extensions"
 const ZenQuickNavExtensionsConfigMap = "common-web-ui-zen-quicknav-extensions"
+const ZenWalkmeExtensionsConfigMap = "common-web-ui-zen-walkme-extensions"
 const CommonConfigMap = "common-web-ui-config"
 const DaemonSetName = "common-web-ui"
 const DeploymentName = "common-web-ui"
@@ -549,6 +550,35 @@ var CrTemplates2 = `{
 		"text": "IBM Cloud Pak for Administration"
 	}
 }`
+
+var ZenWalkmeExtensions = `
+[
+	{
+		"extension_point_id":"generic_preferences",
+		"extension_name":"guided_tours",
+		"display_name":"Guided tours",
+		"description":"",
+		"match_permissions":"",
+		"meta":null,
+		"details":{
+		  "lite_tours_src": "/common-nav/walkme/walkme_760e1a0cad93453f8cc129ce436f336e_https.js"
+		},
+		"status":"enabled"
+	},
+	{
+	  "extension_point_id": "zen_platform_customization",
+	  "extension_name": "mypak_customization_tours",
+	  "order_hint": 300,
+	  "details": {
+		"title": "{{.global_zen_platform_customization_tours_title}}",
+		"description": "{{.global_zen_platform_customization_tours_description}}",
+		"icon": "Crossroads20",
+		"icon_alt": "{{.global_zen_platform_customization_tours_title}}",
+		"nav_url": "/zen/#/guidedToursCustomization"
+	  }
+	}
+]
+`
 
 //nolint
 var NavConfigCR = `
