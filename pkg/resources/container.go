@@ -359,8 +359,15 @@ var CommonContainer = corev1.Container{
 			Value: "",
 		},
 		{
-			Name:  "USE_CNCF",
-			Value: "true",
+			Name: "USE_CNCF",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "ibm-project-k",
+					},
+					Key: "kubernetes_cluster_type",
+				},
+			},
 		},
 	},
 }
