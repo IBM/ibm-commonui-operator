@@ -203,11 +203,6 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
-		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr for zen")
-			return reconcile.Result{}, err
-		}
 		updateErr := r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMap)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating zen card extensions")
@@ -225,13 +220,14 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			return reconcile.Result{}, deleteErr
 		}
 
-	} else {
-		err := r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
+		err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
 		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr")
+			reqLogger.Error(err, "Error creating console link cr for zen")
 			return reconcile.Result{}, err
 		}
-		err = r.deleteZenAdminHubRes(ctx, namespace)
+
+	} else {
+		err := r.deleteZenAdminHubRes(ctx, namespace)
 		if err != nil {
 			reqLogger.Error(err, "Error deleting zen admin hub resources")
 			return reconcile.Result{}, err
@@ -240,6 +236,11 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
 			return reconcile.Result{}, updateErr
+		}
+		err = r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
+		if err != nil {
+			reqLogger.Error(err, "Error creating console link cr")
+			return reconcile.Result{}, err
 		}
 	}
 
@@ -380,6 +381,7 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: namespace}, currentRoute)
 			if err2 != nil {
 				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+				return err2
 			}
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 			//Will hold href for admin hub console link
