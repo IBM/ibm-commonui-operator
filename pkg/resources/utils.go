@@ -290,6 +290,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "card_id": "homepage_card_memory_usage",
           "title": "{{ .global_adminhub_memory_usage }}",
           "description": "{{ .global_zen_homepage_memory_usage_description }}",
           "drilldown_url": "",
@@ -312,7 +313,8 @@ var ZenCardExtensions = `
           }
         },
         "details": {
-          "title": "{{ .global_adminhub_cluster_inventory }}",
+		  "card_id": "homepage_card_cluster_inventory",
+		  "title": "{{ .global_adminhub_cluster_inventory }}",
           "description": "{{ .global_zen_homepage_card_inventory_description }}",
           "drilldown_url": "",
           "window_open_target": "ah_cluster_inventory",
@@ -335,7 +337,8 @@ var ZenCardExtensions = `
           }
         },
         "details": {
-          "title": "{{ .global_adminhub_deployments }}",
+		  "card_id": "homepage_card_deployments",
+		  "title": "{{ .global_adminhub_deployments }}",
           "description": "{{ .global_zen_homepage_card_deployments_description }}",
           "drilldown_url": "",
           "template_type": "number_list",
@@ -361,6 +364,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "card_id": "homepage_card_monitoring_trends",
           "title": "{{ .global_adminhub_monitoring_trends }}",
           "description": "{{ .global_zen_homepage_vulnerabilities_description }}",
           "drilldown_url": "",
@@ -387,6 +391,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "card_id": "homepage_card_system_utility_status",
           "title": "{{ .global_adminhub_system_utility_status }}",
           "description": "{{ .global_common_core_homepage_card_recent_projects_description }}",
           "drilldown_url": "",
@@ -415,6 +420,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "card_id": "homepage_card_workload_summary",
           "title": "{{ .global_adminhub_workload_summary }}",
           "description": "{{ .global_zen_homepage_memory_workload_summary }}",
           "drilldown_url": "",
@@ -437,6 +443,7 @@ var ZenCardExtensions = `
           }
        },
        "details": {
+         "card_id": "homepage_card_events",
          "title": "{{ .global_adminhub_system_events }}",
          "description": "{{ .global_zen_homepage_card_events_description }}",
          "drilldown_url": "",
@@ -463,6 +470,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "card_id": "homepage_card_identity_and_users_access",
           "title": "{{ .global_adminhub_identity_and_users_access }}",
           "description": "{{ .global_zen_homepage_card_requests_description }}",
           "drilldown_url": "",
@@ -489,6 +497,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "card_id": "homepage_card_license_products",
           "title": "{{ .global_adminhub_license_products }}",
           "description": "{{ .global_zen_homepage_card_requests_description }}",
           "drilldown_url": "",
@@ -515,6 +524,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "card_id": "homepage_card_diagnostics",
           "title": "Diagnostics",
           "description": "{{ .global_common_core_homepage_card_diagnostics_description }}",
           "template_type": "iframe",
