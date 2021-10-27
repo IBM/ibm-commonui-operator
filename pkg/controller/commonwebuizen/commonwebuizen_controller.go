@@ -203,6 +203,10 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			return reconcile.Result{}, err
 		}
+		err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenWalkmeExtensionsConfigMap)
+		if err != nil {
+			return reconcile.Result{}, err
+		}
 		updateErr := r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMap)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating zen card extensions")
@@ -297,6 +301,12 @@ func (r *ReconcileCommonWebUIZen) reconcileConfigMapsZen(ctx context.Context, na
 				"extensions": res.ZenQuickNavExtensions,
 			}
 			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenQuickNavExtensionsConfigMap, namespace, version.Version, ExtensionsData)
+		} else if nameOfCM == res.ZenWalkmeExtensionsConfigMap {
+			reqLogger.Info("Creating zen walkme extensions config map")
+			var ExtensionsData = map[string]string{
+				"extensions": res.ZenWalkmeExtensions,
+			}
+			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenWalkmeExtensionsConfigMap, namespace, version.Version, ExtensionsData)
 		} else if nameOfCM == res.CommonConfigMap {
 			reqLogger.Info("Creating common-web-ui-config config map")
 			newConfigMap = res.CommonWebUIConfigMap(namespace)
