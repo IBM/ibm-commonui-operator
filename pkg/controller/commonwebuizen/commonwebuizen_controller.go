@@ -203,10 +203,10 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenWalkmeExtensionsConfigMap)
-		if err != nil {
-			return reconcile.Result{}, err
-		}
+		//err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenWalkmeExtensionsConfigMap)
+		//if err != nil {
+		//	return reconcile.Result{}, err
+		//}
 		updateErr := r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMap)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating zen card extensions")
