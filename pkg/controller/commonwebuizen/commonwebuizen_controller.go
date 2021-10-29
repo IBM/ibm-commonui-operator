@@ -203,7 +203,7 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		//err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenWalkmeExtensionsConfigMap)
+		//uncomment for walkme support err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenWalkmeExtensionsConfigMap)
 		//if err != nil {
 		//	return reconcile.Result{}, err
 		//}
