@@ -179,6 +179,9 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		return reconcile.Result{Requeue: true}, nil
 	}
 
+	//Check to see kubernetes cluster type
+	isCncf := r.getKubernetesClusterType(ctx, namespace)
+
 	//Reconcile to see if Zen is enabled
 	isZen := r.adminHubOnZen(ctx, namespace)
 
@@ -199,10 +202,12 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
-		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr for zen")
-			return reconcile.Result{}, err
+		if !isCncf {
+			err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
+			if err != nil {
+				reqLogger.Error(err, "Error creating console link cr for zen")
+				return reconcile.Result{}, err
+			}
 		}
 		updateErr := r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMap)
 		if updateErr != nil {
@@ -222,12 +227,14 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		}
 
 	} else {
-		err := r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
-		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr")
-			return reconcile.Result{}, err
+		if !isCncf {
+			err := r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
+			if err != nil {
+				reqLogger.Error(err, "Error creating console link cr")
+				return reconcile.Result{}, err
+			}
 		}
-		err = r.deleteZenAdminHubRes(ctx, namespace)
+		err := r.deleteZenAdminHubRes(ctx, namespace)
 		if err != nil {
 			reqLogger.Error(err, "Error deleting zen admin hub resources")
 			return reconcile.Result{}, err
@@ -729,4 +736,34 @@ func (r *ReconcileCommonWebUIZen) reconcileZenProductConfigMap(ctx context.Conte
 
 	return nil
 
+}
+
+func (r *ReconcileCommonWebUIZen) getKubernetesClusterType(ctx context.Context, namespace string) bool {
+	reqLogger := log.WithValues("func", "isCncf")
+	reqLogger.Info("Checking kubernetes cluster type")
+
+	ibmProjectK := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ibm-project-k",
+			Namespace: namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "ibm-project-k", Namespace: namespace}, ibmProjectK)
+
+	if getError == nil {
+		reqLogger.Info("Got ibm project k config map")
+		clusterType := ibmProjectK.Data["kubernetes_cluster_type"]
+		if clusterType == "cncf" {
+			reqLogger.Info("Kubernetes cluster type is " + clusterType)
+			return true
+		}
+	}
+
+	if errors.IsNotFound(getError) {
+		reqLogger.Info("ibm project k config map not found in cs namepace")
+	} else {
+		reqLogger.Error(getError, "error getting ibm project k config map in cs namepace")
+	}
+
+	return false
 }
