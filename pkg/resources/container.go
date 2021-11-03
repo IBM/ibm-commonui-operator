@@ -358,5 +358,16 @@ var CommonContainer = corev1.Container{
 			Name:  "APP_VERSION",
 			Value: "",
 		},
+		{
+			Name: "CLUSTER_TYPE",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "ibm-project-k",
+					},
+					Key: "kubernetes_cluster_type",
+				},
+			},
+		},
 	},
 }
