@@ -187,6 +187,9 @@ var NavConfigCR = `
 	"kind": "NavConfiguration",
 	"metadata": {
 	  "labels": {
+		"app.kubernetes.io/instance": "common-web-ui-config",
+		"app.kubernetes.io/managed-by": "ibm-commonui-operator",
+		"app.kubernetes.io/name": "ibm-commonui-operator",
 		"default": "true",
 		"name": "common-web-ui-config"
 	  },
