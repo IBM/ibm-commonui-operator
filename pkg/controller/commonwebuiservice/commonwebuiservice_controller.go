@@ -17,6 +17,7 @@ package commonwebuiservice
 
 import (
 	"context"
+	"encoding/json"
 	"strconv"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
@@ -34,6 +35,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -215,6 +217,11 @@ func (r *ReconcileCommonWebUI) Reconcile(request reconcile.Request) (reconcile.R
 	err = r.reconcileCertificates(instance, &needToRequeue)
 	if err != nil {
 		return reconcile.Result{}, err
+	}
+
+	err = r.updateCustomResource(instance, res.CommonWebUICr)
+	if err != nil {
+		reqLogger.Error(err, "Failed updating navconfig CR")
 	}
 
 	// For 1.3.0 operator version check if daemonSet and navconfig crd exits on upgrade and delete if so
@@ -707,4 +714,64 @@ func (r *ReconcileCommonWebUI) deleteDaemonSet(instance *operatorsv1alpha1.Commo
 	} else if !errors.IsNotFound(err) {
 		reqLogger.Error(err, "Failed to get old DaemonSet")
 	}
+}
+
+func (r *ReconcileCommonWebUI) updateCustomResource(instance *operatorsv1alpha1.CommonWebUI, nameOfCR string) error {
+	reqLogger := log.WithValues("Instance.Namespace", instance.Namespace, "Instance.Name", instance.Name)
+	reqLogger.Info("UPDATE CUSTOM RESOURCE")
+	namespace := instance.Namespace
+	var crTemplate map[string]interface{}
+	var jsonStringCr string
+	// Unmarshal or Decode the JSON to the interface.
+	if nameOfCR == res.CommonWebUICr {
+		jsonStringCr = res.NavConfigCR
+	}
+	crTemplateErr := json.Unmarshal([]byte(jsonStringCr), &crTemplate)
+	if crTemplateErr != nil {
+		reqLogger.Info("Failed to unmarshall nav config cr")
+		return crTemplateErr
+	}
+	var unstruct unstructured.Unstructured
+	unstruct.Object = crTemplate
+	getError := r.client.Get(context.TODO(), types.NamespacedName{
+		Name:      nameOfCR,
+		Namespace: namespace,
+	}, &unstruct)
+
+	if getError == nil {
+		reqLogger.Info("FOUND NAV CONFIG CR TRYING TO UPDATE")
+		var currentTemplate map[string]interface{}
+		crTemplateErr2 := json.Unmarshal([]byte(jsonStringCr), &currentTemplate)
+		if crTemplateErr2 != nil {
+			reqLogger.Info("Failed to unmarshall current nav config cr")
+			return crTemplateErr2
+		}
+		var unstruct2 unstructured.Unstructured
+		unstruct2.Object = currentTemplate
+		navItems := unstruct2.Object["spec"].(map[string]interface{})["navItems"]
+		var jsonData []byte
+		jsonData, err := json.Marshal(navItems)
+		if err != nil {
+			reqLogger.Info("Failed to marshall navitems")
+			return err
+		}
+		var updatedNavItems []map[string]interface{}
+		//nolint
+		navItemsErr := json.Unmarshal([]byte(jsonData), &updatedNavItems)
+		if navItemsErr != nil {
+			reqLogger.Info("Failed to unmarshall nav items array")
+			return navItemsErr
+		}
+		for _, item := range updatedNavItems {
+			if item["namespace"] != "" {
+				item["namespace"] = namespace
+			}
+		}
+		unstruct.Object["spec"].(map[string]interface{})["navItems"] = updatedNavItems
+		updateErr := r.client.Update(context.TODO(), &unstruct)
+		if updateErr == nil {
+			reqLogger.Info("CLIENT UPDATED NAV CONFIG CR ")
+		}
+	}
+	return nil
 }
