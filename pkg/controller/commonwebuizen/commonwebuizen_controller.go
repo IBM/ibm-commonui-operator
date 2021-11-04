@@ -744,11 +744,11 @@ func (r *ReconcileCommonWebUIZen) getKubernetesClusterType(ctx context.Context, 
 
 	ibmProjectK := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      "ibm-project-k",
+			Name:      "ibm-cpp-config",
 			Namespace: namespace,
 		},
 	}
-	getError := r.client.Get(ctx, types.NamespacedName{Name: "ibm-project-k", Namespace: namespace}, ibmProjectK)
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "ibm-cpp-config", Namespace: namespace}, ibmProjectK)
 
 	if getError == nil {
 		reqLogger.Info("Got ibm project k config map")
