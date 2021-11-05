@@ -24,7 +24,7 @@ REGISTRY_DEV ?= quay.io/ericabr
 CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
 LEGACY_TAG ?= 3.2.5
-COMMON_TAG ?= 1.11.0
+COMMON_TAG ?= $(VERSION)
 DASHBOARD_TAG ?= 1.1.1
 
 # Set the registry and tag for the operand/operator images
