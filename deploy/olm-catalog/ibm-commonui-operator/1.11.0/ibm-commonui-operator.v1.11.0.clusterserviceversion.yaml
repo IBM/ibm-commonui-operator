@@ -48,7 +48,7 @@ metadata:
               "cpuLimits": "300",
               "cpuMemory": "256",
               "imageRegistry": "quay.io/opencloudio",
-              "imageTag": "1.12.0",
+              "imageTag": "1.11.0",
               "ingressPath": "/common-nav",
               "landingPage": "",
               "requestLimits": "300",
@@ -64,7 +64,7 @@ metadata:
               "osAuth": "",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "1.12.0",
+            "operatorVersion": "1.11.0",
             "replicas": 1,
             "resources": {
               "limits": {
@@ -76,7 +76,7 @@ metadata:
                 "memory": "256Mi"
               }
             },
-            "version": "1.12.0"
+            "version": "1.11.0"
           }
         },
         {
@@ -398,14 +398,14 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.12.0
+    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.11.0
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
-    olm.skipRange: '<1.12.0'
+    olm.skipRange: '<1.11.0'
     operators.operatorframework.io/operator-type: 'non-standalone'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
-  name: ibm-commonui-operator.v1.12.0
+  name: ibm-commonui-operator.v1.11.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -715,10 +715,10 @@ spec:
                 - name: OPERATOR_NAME
                   value: ibm-commonui-operator
                 - name: COMMON_WEB_UI_IMAGE
-                  value: quay.io/opencloudio/common-web-ui:1.12.0
+                  value: quay.io/opencloudio/common-web-ui:1.11.0
                 - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
                   value: sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46
-                image: quay.io/opencloudio/ibm-commonui-operator:1.12.0
+                image: quay.io/opencloudio/ibm-commonui-operator:1.11.0
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
                 resources:
@@ -896,9 +896,9 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: quay.io/opencloudio/ibm-commonui-operator:1.12.0
+  - image: quay.io/opencloudio/ibm-commonui-operator:1.11.0
     name: COMMON_WEB_UI_OPERATOR_IMAGE
-  - image: quay.io/opencloudio/common-web-ui:1.12.0
+  - image: quay.io/opencloudio/common-web-ui:1.11.0
     name: COMMON_WEB_UI_IMAGE
-  replaces: ibm-commonui-operator.v1.11.0
-  version: 1.12.0
+  replaces: ibm-commonui-operator.v1.10.0
+  version: 1.11.0
