@@ -358,5 +358,9 @@ var CommonContainer = corev1.Container{
 			Name:  "APP_VERSION",
 			Value: "",
 		},
+		{
+			Name:  "CLUSTER_TYPE",
+			Value: "unknown",
+		},
 	},
 }

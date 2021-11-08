@@ -184,6 +184,9 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	//Reconcile to see if Zen is enabled
 	isZen := r.adminHubOnZen(ctx, instance.Namespace)
 
+	//Check to see kubernetes cluster type
+	isCncf := r.getKubernetesClusterType(ctx, instance.Namespace)
+
 	// Check if the config maps already exist. If not, create a new one.
 	err = r.reconcileConfigMaps(ctx, instance, res.Log4jsConfigMap, &needToRequeue)
 	if err != nil {
@@ -191,7 +194,7 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	}
 
 	// Check if the UI Deployment already exists, if not create a new one
-	newDeployment, err := r.deploymentForUI(instance, isZen)
+	newDeployment, err := r.deploymentForUI(instance, isZen, isCncf)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -298,6 +301,36 @@ func (r *ReconcileCommonWebUI) adminHubOnZen(ctx context.Context, namespace stri
 	return false
 }
 
+func (r *ReconcileCommonWebUI) getKubernetesClusterType(ctx context.Context, namespace string) bool {
+	reqLogger := log.WithValues("func", "isCncf")
+	reqLogger.Info("Checking kubernetes cluster type")
+
+	ibmProjectK := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ibm-cpp-config",
+			Namespace: namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "ibm-cpp-config", Namespace: namespace}, ibmProjectK)
+
+	if getError == nil {
+		reqLogger.Info("Got ibm project k config map")
+		clusterType := ibmProjectK.Data["kubernetes_cluster_type"]
+		if clusterType == "cncf" {
+			reqLogger.Info("Kubernetes cluster type is " + clusterType)
+			return true
+		}
+	}
+
+	if errors.IsNotFound(getError) {
+		reqLogger.Info("ibm project k config map not found in cs namepace")
+	} else {
+		reqLogger.Error(getError, "error getting ibm project k config map in cs namepace")
+	}
+
+	return false
+}
+
 func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, nameOfCM string, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileConfiMaps", "instance.Name", instance.Name)
 
@@ -337,7 +370,7 @@ func (r *ReconcileCommonWebUI) reconcileConfigMaps(ctx context.Context, instance
 
 }
 
-func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI, isZen bool) (*appsv1.Deployment, error) {
+func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool) (*appsv1.Deployment, error) {
 	// CommonMainVolumeMounts will be added by the controller
 	commonUIVolumeMounts := []corev1.VolumeMount{
 		{
@@ -451,6 +484,11 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 		commonwebuiContainer.Env[26].Value = "false"
 	}
 	commonwebuiContainer.Env[27].Value = instance.Spec.Version
+
+	if isCncf {
+		reqLogger.Info("Setting cluster type env var to cncf")
+		commonwebuiContainer.Env[28].Value = "cncf"
+	}
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{

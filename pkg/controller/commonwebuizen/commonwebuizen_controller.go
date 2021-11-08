@@ -179,6 +179,9 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		return reconcile.Result{Requeue: true}, nil
 	}
 
+	//Check to see kubernetes cluster type
+	isCncf := r.getKubernetesClusterType(ctx, namespace)
+
 	//Reconcile to see if Zen is enabled
 	isZen := r.adminHubOnZen(ctx, namespace)
 
@@ -212,7 +215,7 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			reqLogger.Error(updateErr, "Failed updating zen card extensions")
 			return reconcile.Result{}, updateErr
 		}
-		updateErr = r.updateCommonUIDeployment(ctx, isZen, namespace)
+		updateErr = r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
 			return reconcile.Result{}, updateErr
@@ -224,10 +227,12 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			return reconcile.Result{}, deleteErr
 		}
 
-		err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
-		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr for zen")
-			return reconcile.Result{}, err
+		if !isCncf {
+			err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
+			if err != nil {
+				reqLogger.Error(err, "Error creating console link cr for zen")
+				return reconcile.Result{}, err
+			}
 		}
 
 	} else {
@@ -236,15 +241,17 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			reqLogger.Error(err, "Error deleting zen admin hub resources")
 			return reconcile.Result{}, err
 		}
-		updateErr := r.updateCommonUIDeployment(ctx, isZen, namespace)
+		updateErr := r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
 			return reconcile.Result{}, updateErr
 		}
-		err = r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
-		if err != nil {
-			reqLogger.Error(err, "Error creating console link cr")
-			return reconcile.Result{}, err
+		if !isCncf {
+			err = r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
+			if err != nil {
+				reqLogger.Error(err, "Error creating console link cr")
+				return reconcile.Result{}, err
+			}
 		}
 	}
 
@@ -658,7 +665,7 @@ func (r *ReconcileCommonWebUIZen) deleteZenAdminHubRes(ctx context.Context, name
 	return nil
 }
 
-func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, isZen bool, namespace string) error {
+func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, isZen bool, isCncf bool, namespace string) error {
 	reqLogger := log.WithValues("func", "updateCommonUIDeployment")
 	reqLogger.Info("Updating common ui deployment env variable")
 
@@ -673,9 +680,15 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 	if getError == nil {
 		reqLogger.Info("Got Common UI deployment")
 		env := commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value
+		clusterTypeEnvVar := commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value
+		clusterType := "cncf"
 		if isZen && env == "false" {
 			reqLogger.Info("Setting use zen to true")
 			commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value = "true"
+			if isCncf && clusterTypeEnvVar != clusterType {
+				reqLogger.Info("Setting cluster type env var to cncf for zen case")
+				commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+			}
 			updateErr := r.client.Update(ctx, commonDeployment)
 			if updateErr == nil {
 				reqLogger.Info("Updated common ui deployment env variable")
@@ -691,6 +704,16 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 				reqLogger.Info("Updated common ui deployment env variable")
 			} else {
 				reqLogger.Error(updateErr, "Could not update common ui deployment env variable")
+				return updateErr
+			}
+		} else if !isZen && isCncf {
+			reqLogger.Info("Setting cluster type env var to cncf for non zen case")
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+			updateErr := r.client.Update(ctx, commonDeployment)
+			if updateErr == nil {
+				reqLogger.Info("Updated common ui deployment with cluster type")
+			} else {
+				reqLogger.Error(updateErr, "Could not update common ui with cluster type")
 				return updateErr
 			}
 		}
@@ -751,4 +774,34 @@ func (r *ReconcileCommonWebUIZen) reconcileZenProductConfigMap(ctx context.Conte
 
 	return nil
 
+}
+
+func (r *ReconcileCommonWebUIZen) getKubernetesClusterType(ctx context.Context, namespace string) bool {
+	reqLogger := log.WithValues("func", "isCncf")
+	reqLogger.Info("Checking kubernetes cluster type")
+
+	ibmProjectK := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ibm-cpp-config",
+			Namespace: namespace,
+		},
+	}
+	getError := r.client.Get(ctx, types.NamespacedName{Name: "ibm-cpp-config", Namespace: namespace}, ibmProjectK)
+
+	if getError == nil {
+		reqLogger.Info("Got ibm project k config map")
+		clusterType := ibmProjectK.Data["kubernetes_cluster_type"]
+		if clusterType == "cncf" {
+			reqLogger.Info("Kubernetes cluster type is " + clusterType)
+			return true
+		}
+	}
+
+	if errors.IsNotFound(getError) {
+		reqLogger.Info("ibm project k config map not found in cs namepace")
+	} else {
+		reqLogger.Error(getError, "error getting ibm project k config map in cs namepace")
+	}
+
+	return false
 }
