@@ -202,19 +202,20 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		if !isCncf {
-			err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
-			if err != nil {
-				reqLogger.Error(err, "Error creating console link cr for zen")
-				return reconcile.Result{}, err
-			}
+		err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenQuickNavExtensionsConfigMap)
+		if err != nil {
+			return reconcile.Result{}, err
 		}
+		//uncomment for walkme support err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenWalkmeExtensionsConfigMap)
+		//if err != nil {
+		//	return reconcile.Result{}, err
+		//}
 		updateErr := r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMap)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating zen card extensions")
 			return reconcile.Result{}, updateErr
 		}
-		updateErr = r.updateCommonUIDeployment(ctx, isZen, namespace)
+		updateErr = r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
 			return reconcile.Result{}, updateErr
@@ -226,23 +227,31 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 			return reconcile.Result{}, deleteErr
 		}
 
-	} else {
 		if !isCncf {
-			err := r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
+			err = r.reconcileCrZen(ctx, namespace, "admin-hub-zen", res.CrTemplates2, isZen)
 			if err != nil {
-				reqLogger.Error(err, "Error creating console link cr")
+				reqLogger.Error(err, "Error creating console link cr for zen")
 				return reconcile.Result{}, err
 			}
 		}
+
+	} else {
 		err := r.deleteZenAdminHubRes(ctx, namespace)
 		if err != nil {
 			reqLogger.Error(err, "Error deleting zen admin hub resources")
 			return reconcile.Result{}, err
 		}
-		updateErr := r.updateCommonUIDeployment(ctx, isZen, namespace)
+		updateErr := r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
 			return reconcile.Result{}, updateErr
+		}
+		if !isCncf {
+			err = r.reconcileCrZen(ctx, namespace, "admin-hub", res.CrTemplates, isZen)
+			if err != nil {
+				reqLogger.Error(err, "Error creating console link cr")
+				return reconcile.Result{}, err
+			}
 		}
 	}
 
@@ -292,7 +301,19 @@ func (r *ReconcileCommonWebUIZen) reconcileConfigMapsZen(ctx context.Context, na
 				"nginx.conf": res.ZenNginxConfig,
 				"extensions": res.ZenCardExtensions,
 			}
-			newConfigMap = res.ZenCardExtensionsConfigMapUI(namespace, version.Version, ExtensionsData)
+			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenCardExtensionsConfigMap, namespace, version.Version, ExtensionsData)
+		} else if nameOfCM == res.ZenQuickNavExtensionsConfigMap {
+			reqLogger.Info("Creating zen quick nav extensions config map")
+			var ExtensionsData = map[string]string{
+				"extensions": res.ZenQuickNavExtensions,
+			}
+			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenQuickNavExtensionsConfigMap, namespace, version.Version, ExtensionsData)
+		} else if nameOfCM == res.ZenWalkmeExtensionsConfigMap {
+			reqLogger.Info("Creating zen walkme extensions config map")
+			var ExtensionsData = map[string]string{
+				"extensions": res.ZenWalkmeExtensions,
+			}
+			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenWalkmeExtensionsConfigMap, namespace, version.Version, ExtensionsData)
 		} else if nameOfCM == res.CommonConfigMap {
 			reqLogger.Info("Creating common-web-ui-config config map")
 			newConfigMap = res.CommonWebUIConfigMap(namespace)
@@ -377,6 +398,7 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 			err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: namespace}, currentRoute)
 			if err2 != nil {
 				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+				return err2
 			}
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 			//Will hold href for admin hub console link
@@ -643,7 +665,7 @@ func (r *ReconcileCommonWebUIZen) deleteZenAdminHubRes(ctx context.Context, name
 	return nil
 }
 
-func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, isZen bool, namespace string) error {
+func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, isZen bool, isCncf bool, namespace string) error {
 	reqLogger := log.WithValues("func", "updateCommonUIDeployment")
 	reqLogger.Info("Updating common ui deployment env variable")
 
@@ -658,9 +680,15 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 	if getError == nil {
 		reqLogger.Info("Got Common UI deployment")
 		env := commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value
+		clusterTypeEnvVar := commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value
+		clusterType := "cncf"
 		if isZen && env == "false" {
 			reqLogger.Info("Setting use zen to true")
 			commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value = "true"
+			if isCncf && clusterTypeEnvVar != clusterType {
+				reqLogger.Info("Setting cluster type env var to cncf for zen case")
+				commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+			}
 			updateErr := r.client.Update(ctx, commonDeployment)
 			if updateErr == nil {
 				reqLogger.Info("Updated common ui deployment env variable")
@@ -676,6 +704,16 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 				reqLogger.Info("Updated common ui deployment env variable")
 			} else {
 				reqLogger.Error(updateErr, "Could not update common ui deployment env variable")
+				return updateErr
+			}
+		} else if !isZen && isCncf {
+			reqLogger.Info("Setting cluster type env var to cncf for non zen case")
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+			updateErr := r.client.Update(ctx, commonDeployment)
+			if updateErr == nil {
+				reqLogger.Info("Updated common ui deployment with cluster type")
+			} else {
+				reqLogger.Error(updateErr, "Could not update common ui with cluster type")
 				return updateErr
 			}
 		}

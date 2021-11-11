@@ -359,15 +359,8 @@ var CommonContainer = corev1.Container{
 			Value: "",
 		},
 		{
-			Name: "CLUSTER_TYPE",
-			ValueFrom: &corev1.EnvVarSource{
-				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "ibm-cpp-config",
-					},
-					Key: "kubernetes_cluster_type",
-				},
-			},
+			Name:  "CLUSTER_TYPE",
+			Value: "unknown",
 		},
 	},
 }
