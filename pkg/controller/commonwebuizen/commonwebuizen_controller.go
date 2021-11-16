@@ -198,9 +198,16 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		if err != nil {
 			return reconcile.Result{}, err
 		}
-		err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenCardExtensionsConfigMap)
-		if err != nil {
-			return reconcile.Result{}, err
+		if isCncf {
+			err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenCardExtensionsConfigMapCncf)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
+		} else {
+			err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenCardExtensionsConfigMap)
+			if err != nil {
+				return reconcile.Result{}, err
+			}
 		}
 		err = r.reconcileConfigMapsZen(ctx, namespace, res.ZenQuickNavExtensionsConfigMap)
 		if err != nil {
@@ -210,10 +217,23 @@ func (r *ReconcileCommonWebUIZen) Reconcile(ctx context.Context, request reconci
 		//if err != nil {
 		//	return reconcile.Result{}, err
 		//}
-		updateErr := r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMap)
+		updateErr := r.updateZenResources(ctx, namespace, res.ZenQuickNavExtensionsConfigMap)
 		if updateErr != nil {
-			reqLogger.Error(updateErr, "Failed updating zen card extensions")
+			reqLogger.Error(updateErr, "Failed updating zen card quick nav extensions")
 			return reconcile.Result{}, updateErr
+		}
+		if isCncf {
+			updateErr = r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMapCncf)
+			if updateErr != nil {
+				reqLogger.Error(updateErr, "Failed updating zen card extensions CNCF")
+				return reconcile.Result{}, updateErr
+			}
+		} else {
+			updateErr = r.updateZenResources(ctx, namespace, res.ZenCardExtensionsConfigMap)
+			if updateErr != nil {
+				reqLogger.Error(updateErr, "Failed updating zen card extensions")
+				return reconcile.Result{}, updateErr
+			}
 		}
 		updateErr = r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
 		if updateErr != nil {
@@ -302,6 +322,13 @@ func (r *ReconcileCommonWebUIZen) reconcileConfigMapsZen(ctx context.Context, na
 				"extensions": res.ZenCardExtensions,
 			}
 			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenCardExtensionsConfigMap, namespace, version.Version, ExtensionsData)
+		} else if nameOfCM == res.ZenCardExtensionsConfigMapCncf {
+			reqLogger.Info("Creating zen card extensions config map for CNCF")
+			var ExtensionsData = map[string]string{
+				"nginx.conf": res.ZenNginxConfig,
+				"extensions": res.ZenCardExtensionsCncf,
+			}
+			newConfigMap = res.ZenCardExtensionsConfigMapUI(res.ZenCardExtensionsConfigMapCncf, namespace, version.Version, ExtensionsData)
 		} else if nameOfCM == res.ZenQuickNavExtensionsConfigMap {
 			reqLogger.Info("Creating zen quick nav extensions config map")
 			var ExtensionsData = map[string]string{
@@ -520,17 +547,17 @@ func (r *ReconcileCommonWebUIZen) deleteBindInfo(ctx context.Context, namespace 
 	return nil
 }
 
-func (r *ReconcileCommonWebUIZen) shouldUpdateZenResources(ctx context.Context, namespace string) bool {
+func (r *ReconcileCommonWebUIZen) shouldUpdateZenResources(ctx context.Context, nameOfCM string, namespace string) bool {
 	reqLogger := log.WithValues("func", "shouldUpdateZenResources")
 	reqLogger.Info("Checking zen upgrade condition")
 
 	currentConfigMap := &corev1.ConfigMap{
 		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.ZenCardExtensionsConfigMap,
+			Name:      nameOfCM,
 			Namespace: namespace,
 		},
 	}
-	err := r.client.Get(ctx, types.NamespacedName{Name: res.ZenCardExtensionsConfigMap, Namespace: namespace}, currentConfigMap)
+	err := r.client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: namespace}, currentConfigMap)
 
 	if err == nil {
 		reqLogger.Info("Comparing versions")
@@ -551,7 +578,7 @@ func (r *ReconcileCommonWebUIZen) updateZenResources(ctx context.Context, namesp
 
 	reqLogger.Info("checking if zen card extensions config map exists")
 
-	if r.shouldUpdateZenResources(ctx, namespace) {
+	if r.shouldUpdateZenResources(ctx, nameOfCM, namespace) {
 		currentConfigMap := &corev1.ConfigMap{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      nameOfCM,
@@ -563,9 +590,22 @@ func (r *ReconcileCommonWebUIZen) updateZenResources(ctx context.Context, namesp
 		if err == nil {
 			reqLogger.Info("zen card extensions config map exists")
 
-			var ExtensionsData = map[string]string{
-				"nginx.conf": res.ZenNginxConfig,
-				"extensions": res.ZenCardExtensions,
+			var ExtensionsData map[string]string
+
+			if nameOfCM == res.ZenQuickNavExtensionsConfigMap {
+				ExtensionsData = map[string]string{
+					"extensions": res.ZenQuickNavExtensions,
+				}
+			} else if nameOfCM == res.ZenCardExtensionsConfigMapCncf {
+				ExtensionsData = map[string]string{
+					"nginx.conf": res.ZenNginxConfig,
+					"extensions": res.ZenCardExtensionsCncf,
+				}
+			} else {
+				ExtensionsData = map[string]string{
+					"nginx.conf": res.ZenNginxConfig,
+					"extensions": res.ZenCardExtensions,
+				}
 			}
 			currentConfigMap.Labels["icpdata_addon_version"] = version.Version
 			currentConfigMap.Data = ExtensionsData
