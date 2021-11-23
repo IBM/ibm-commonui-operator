@@ -225,23 +225,8 @@ var CommonContainer = corev1.Container{
 			Value: "8443",
 		},
 		{
-			Name: "OAUTH2_CLIENT_REGISTRATION_SECRET",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "platform-oidc-credentials",
-					},
-					Key: "OAUTH2_CLIENT_REGISTRATION_SECRET",
-				},
-			},
-		},
-		{
 			Name:  "CLOUDPAK_VERSION",
 			Value: "1.0.0",
-		},
-		{
-			Name:  "default_admin_user",
-			Value: "admin",
 		},
 		{
 			Name:  "CLUSTER_NAME",
@@ -286,28 +271,6 @@ var CommonContainer = corev1.Container{
 						Name: "platform-auth-idp",
 					},
 					Key: "ROKS_ENABLED",
-				},
-			},
-		},
-		{
-			Name: "WLP_CLIENT_ID",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "platform-oidc-credentials",
-					},
-					Key: "WLP_CLIENT_ID",
-				},
-			},
-		},
-		{
-			Name: "WLP_CLIENT_SECRET",
-			ValueFrom: &corev1.EnvVarSource{
-				SecretKeyRef: &corev1.SecretKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "platform-oidc-credentials",
-					},
-					Key: "WLP_CLIENT_SECRET",
 				},
 			},
 		},
