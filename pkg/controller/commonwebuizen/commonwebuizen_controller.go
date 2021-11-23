@@ -720,14 +720,17 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 	if getError == nil {
 		reqLogger.Info("Got Common UI deployment")
 		env := commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value
-		clusterTypeEnvVar := commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value
 		clusterType := "cncf"
 		if isZen && env == "false" {
 			reqLogger.Info("Setting use zen to true")
 			commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value = "true"
-			if isCncf && clusterTypeEnvVar != clusterType {
+			envLength := len(commonDeployment.Spec.Template.Spec.Containers[0].Env)
+			if isCncf && envLength > 28 {
 				reqLogger.Info("Setting cluster type env var to cncf for zen case")
-				commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+				clusterTypeEnvVar := commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value
+				if clusterTypeEnvVar != clusterType {
+					commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+				}
 			}
 			updateErr := r.client.Update(ctx, commonDeployment)
 			if updateErr == nil {
@@ -748,7 +751,10 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 			}
 		} else if !isZen && isCncf {
 			reqLogger.Info("Setting cluster type env var to cncf for non zen case")
-			commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+			envLength := len(commonDeployment.Spec.Template.Spec.Containers[0].Env)
+			if envLength > 28 {
+				commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+			}
 			updateErr := r.client.Update(ctx, commonDeployment)
 			if updateErr == nil {
 				reqLogger.Info("Updated common ui deployment with cluster type")
