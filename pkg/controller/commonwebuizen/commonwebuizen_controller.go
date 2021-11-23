@@ -719,15 +719,15 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 
 	if getError == nil {
 		reqLogger.Info("Got Common UI deployment")
-		env := commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value
-		clusterTypeEnvVar := commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value
+		env := commonDeployment.Spec.Template.Spec.Containers[0].Env[22].Value
+		clusterTypeEnvVar := commonDeployment.Spec.Template.Spec.Containers[0].Env[24].Value
 		clusterType := "cncf"
 		if isZen && env == "false" {
 			reqLogger.Info("Setting use zen to true")
-			commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value = "true"
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[22].Value = "true"
 			if isCncf && clusterTypeEnvVar != clusterType {
 				reqLogger.Info("Setting cluster type env var to cncf for zen case")
-				commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+				commonDeployment.Spec.Template.Spec.Containers[0].Env[24].Value = clusterType
 			}
 			updateErr := r.client.Update(ctx, commonDeployment)
 			if updateErr == nil {
@@ -738,7 +738,7 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 			}
 		} else if !isZen && env == "true" {
 			reqLogger.Info("Setting use zen to false")
-			commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value = "false"
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[22].Value = "false"
 			updateErr := r.client.Update(ctx, commonDeployment)
 			if updateErr == nil {
 				reqLogger.Info("Updated common ui deployment env variable")
@@ -748,7 +748,7 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 			}
 		} else if !isZen && isCncf {
 			reqLogger.Info("Setting cluster type env var to cncf for non zen case")
-			commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[24].Value = clusterType
 			updateErr := r.client.Update(ctx, commonDeployment)
 			if updateErr == nil {
 				reqLogger.Info("Updated common ui deployment with cluster type")

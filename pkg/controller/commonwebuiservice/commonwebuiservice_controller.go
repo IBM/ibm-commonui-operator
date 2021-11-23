@@ -463,13 +463,12 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	commonwebuiContainer := res.CommonContainer
 	commonwebuiContainer.Image = image
 	commonwebuiContainer.Name = res.DaemonSetName
-	commonwebuiContainer.Env[7].Value = instance.Spec.GlobalUIConfig.CloudPakVersion
-	commonwebuiContainer.Env[8].Value = instance.Spec.GlobalUIConfig.DefaultAdminUser
-	commonwebuiContainer.Env[10].Value = instance.Spec.GlobalUIConfig.DefaultAuth
-	commonwebuiContainer.Env[11].Value = instance.Spec.GlobalUIConfig.EnterpriseLDAP
-	commonwebuiContainer.Env[12].Value = instance.Spec.GlobalUIConfig.EnterpriseSAML
-	commonwebuiContainer.Env[13].Value = instance.Spec.GlobalUIConfig.OSAuth
-	commonwebuiContainer.Env[23].Value = instance.Spec.CommonWebUIConfig.LandingPage
+	commonwebuiContainer.Env[6].Value = instance.Spec.GlobalUIConfig.CloudPakVersion
+	commonwebuiContainer.Env[8].Value = instance.Spec.GlobalUIConfig.DefaultAuth
+	commonwebuiContainer.Env[9].Value = instance.Spec.GlobalUIConfig.EnterpriseLDAP
+	commonwebuiContainer.Env[10].Value = instance.Spec.GlobalUIConfig.EnterpriseSAML
+	commonwebuiContainer.Env[11].Value = instance.Spec.GlobalUIConfig.OSAuth
+	commonwebuiContainer.Env[19].Value = instance.Spec.CommonWebUIConfig.LandingPage
 	commonwebuiContainer.Resources.Limits["cpu"] = *resource.NewMilliQuantity(cpuLimits, resource.DecimalSI)
 	commonwebuiContainer.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
 	commonwebuiContainer.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
@@ -478,16 +477,16 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 
 	if isZen {
 		reqLogger.Info("Setting use zen to true in container def")
-		commonwebuiContainer.Env[26].Value = "true"
+		commonwebuiContainer.Env[22].Value = "true"
 	} else {
 		reqLogger.Info("Setting use zen to false in container def")
-		commonwebuiContainer.Env[26].Value = "false"
+		commonwebuiContainer.Env[22].Value = "false"
 	}
-	commonwebuiContainer.Env[27].Value = instance.Spec.Version
+	commonwebuiContainer.Env[23].Value = instance.Spec.Version
 
 	if isCncf {
 		reqLogger.Info("Setting cluster type env var to cncf")
-		commonwebuiContainer.Env[28].Value = "cncf"
+		commonwebuiContainer.Env[24].Value = "cncf"
 	}
 
 	deployment := &appsv1.Deployment{
