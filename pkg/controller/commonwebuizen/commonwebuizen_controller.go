@@ -724,12 +724,14 @@ func (r *ReconcileCommonWebUIZen) updateCommonUIDeployment(ctx context.Context, 
 		if isZen && env == "false" {
 			reqLogger.Info("Setting use zen to true")
 			commonDeployment.Spec.Template.Spec.Containers[0].Env[26].Value = "true"
-			envLength := len(commonDeployment.Spec.Template.Spec.Containers[0].Env)
-			if isCncf && envLength > 28 {
+			if isCncf {
 				reqLogger.Info("Setting cluster type env var to cncf for zen case")
-				clusterTypeEnvVar := commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value
-				if clusterTypeEnvVar != clusterType {
-					commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+				envLength := len(commonDeployment.Spec.Template.Spec.Containers[0].Env)
+				if envLength > 28 {
+					clusterTypeEnvVar := commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value
+					if clusterTypeEnvVar != clusterType {
+						commonDeployment.Spec.Template.Spec.Containers[0].Env[28].Value = clusterType
+					}
 				}
 			}
 			updateErr := r.client.Update(ctx, commonDeployment)
