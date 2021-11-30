@@ -901,6 +901,13 @@ func (r *ReconcileCommonWebUI) updateCustomResource(ctx context.Context, instanc
 			}
 		}
 		unstruct.Object["spec"].(map[string]interface{})["navItems"] = updatedNavItems
+
+		if nameOfCR == res.CommonWebUICr {
+			licenses := unstruct2.Object["spec"].(map[string]interface{})["about"].(map[string]interface{})["licenses"]
+			unstruct.Object["spec"].(map[string]interface{})["about"].(map[string]interface{})["licenses"] = licenses
+		}
+
+		//Update the CR
 		updateErr := r.client.Update(ctx, &unstruct)
 		if updateErr == nil {
 			reqLogger.Info("CLIENT UPDATED NAV CONFIG CR ")
