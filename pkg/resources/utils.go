@@ -843,7 +843,7 @@ var NavConfigCR = `
 		  "inotify-tools, v3.14, GPL v2",
 		  "logrotate, v3.8.6, GPL v2",
 		  "checker-qual, version 2.0.0, GPLv2",
-		  "ocrad-bower v1.0.0 GPL v3"
+		  "ocrad-bower, v1.0.0, GPL v3"
 		],
 		"logoUrl": "IBM Cloud Pak | Administration Hub",
 		"logoAltText": "IBM Cloud Pak | Administration Hub"
