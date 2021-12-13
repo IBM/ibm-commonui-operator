@@ -399,6 +399,24 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 		Namespace: namespace,
 	}, &unstruct)
 
+	if getError == nil {
+		reqLogger.Info("CR already present, checking for updates")
+		if unstruct.Object["spec"].(map[string]interface{})["applicationMenu"] == nil {
+			reqLogger.Info("Console link CR missing attributes, trying to update")
+			var currentTemplate map[string]interface{}
+			crTemplateErr2 := json.Unmarshal([]byte(template), &currentTemplate)
+			if crTemplateErr2 != nil {
+				reqLogger.Info("Failed to console link cr")
+				return crTemplateErr2
+			}
+			var unstruct2 unstructured.Unstructured
+			unstruct2.Object = currentTemplate
+			if updateErr := r.updateCustomResource(ctx, unstruct, unstruct2, isZen, namespace); updateErr != nil {
+				reqLogger.Error(updateErr, "Failed to update console link CR")
+				return updateErr
+			}
+		}
+	}
 	if getError != nil && !errors.IsNotFound(getError) {
 		reqLogger.Error(getError, "Failed to get CR")
 	} else if errors.IsNotFound(getError) {
@@ -437,22 +455,6 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 			}
 		}
 
-	} else {
-		reqLogger.Info("CR already present, checking for updates")
-		if unstruct.Object["spec"].(map[string]interface{})["applicationMenu"] == nil {
-			var currentTemplate map[string]interface{}
-			crTemplateErr2 := json.Unmarshal([]byte(template), &currentTemplate)
-			if crTemplateErr2 != nil {
-				reqLogger.Info("Failed to console link cr")
-				return crTemplateErr2
-			}
-			var unstruct2 unstructured.Unstructured
-			unstruct2.Object = currentTemplate
-			if updateErr := r.updateCustomResource(ctx, unstruct, unstruct2, isZen, namespace); updateErr != nil {
-				reqLogger.Error(updateErr, "Failed to update console link CR")
-				return updateErr
-			}
-		}
 	}
 
 	return nil
