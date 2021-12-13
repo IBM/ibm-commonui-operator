@@ -488,6 +488,7 @@ func (r *ReconcileCommonWebUIZen) updateCustomResource(ctx context.Context, unst
 		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 		var href = "https://" + currentRoute.Spec.Host
 		unstruct2.Object["spec"].(map[string]interface{})["href"] = href
+		unstruct2.Object["spec"].(map[string]interface{})["applicationMenu"].(map[string]interface{})["imageURL"] = href + "/common-nav/graphics/systems.svg"
 	} else {
 		err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: namespace}, currentRoute)
 		if err2 != nil {
@@ -495,8 +496,9 @@ func (r *ReconcileCommonWebUIZen) updateCustomResource(ctx context.Context, unst
 			return err2
 		}
 		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-		var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
-		unstruct2.Object["spec"].(map[string]interface{})["href"] = href
+		var href = "https://" + currentRoute.Spec.Host
+		unstruct2.Object["spec"].(map[string]interface{})["href"] = href + "/common-nav/dashboard"
+		unstruct2.Object["spec"].(map[string]interface{})["applicationMenu"].(map[string]interface{})["imageURL"] = href + "/common-nav/graphics/systems.svg"
 	}
 
 	unstruct.Object["spec"] = unstruct2.Object["spec"]
