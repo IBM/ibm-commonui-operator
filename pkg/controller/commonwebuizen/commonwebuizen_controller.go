@@ -432,9 +432,9 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 			//Will hold href for admin hub console link
 			var href = "https://" + currentRoute.Spec.Host
-
+			var href2 = href + "/common-nav/graphics/settings.svg"
 			// Create Custom resource
-			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
+			if createErr := r.createCustomResource(ctx, unstruct, name, href, href2); createErr != nil {
 				reqLogger.Error(createErr, "Failed to create CR")
 				return createErr
 			}
@@ -447,9 +447,9 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 			//Will hold href for admin hub console link
 			var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
-
+			var href2 = "https://" + currentRoute.Spec.Host + "/common-nav/graphics/settings.svg"
 			// Create Custom resource
-			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
+			if createErr := r.createCustomResource(ctx, unstruct, name, href, href2); createErr != nil {
 				reqLogger.Error(createErr, "Failed to create CR")
 				return createErr
 			}
@@ -460,11 +460,13 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 	return nil
 }
 
-func (r *ReconcileCommonWebUIZen) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string) error {
+func (r *ReconcileCommonWebUIZen) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string, href2 string) error {
 	reqLogger := log.WithValues("CR name", name)
 	reqLogger.Info("creating a CR ", name)
 
 	unstruct.Object["spec"].(map[string]interface{})["href"] = href
+	unstruct.Object["spec"].(map[string]interface{})["applicationMenu"].(map[string]interface{})["imageURL"] = href2
+
 	crCreateErr := r.client.Create(ctx, &unstruct)
 	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
 		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
