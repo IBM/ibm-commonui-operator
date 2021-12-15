@@ -399,6 +399,24 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 		Namespace: namespace,
 	}, &unstruct)
 
+	if getError == nil {
+		reqLogger.Info("CR already present, checking for updates")
+		if unstruct.Object["spec"].(map[string]interface{})["applicationMenu"] == nil {
+			reqLogger.Info("Console link CR missing attributes, trying to update")
+			var currentTemplate map[string]interface{}
+			crTemplateErr2 := json.Unmarshal([]byte(template), &currentTemplate)
+			if crTemplateErr2 != nil {
+				reqLogger.Info("Failed to console link cr")
+				return crTemplateErr2
+			}
+			var unstruct2 unstructured.Unstructured
+			unstruct2.Object = currentTemplate
+			if updateErr := r.updateCustomResource(ctx, unstruct, unstruct2, isZen, namespace); updateErr != nil {
+				reqLogger.Error(updateErr, "Failed to update console link CR")
+				return updateErr
+			}
+		}
+	}
 	if getError != nil && !errors.IsNotFound(getError) {
 		reqLogger.Error(getError, "Failed to get CR")
 	} else if errors.IsNotFound(getError) {
@@ -414,9 +432,9 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 			//Will hold href for admin hub console link
 			var href = "https://" + currentRoute.Spec.Host
-
+			var href2 = href + "/common-nav/graphics/settings.svg"
 			// Create Custom resource
-			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
+			if createErr := r.createCustomResource(ctx, unstruct, name, href, href2); createErr != nil {
 				reqLogger.Error(createErr, "Failed to create CR")
 				return createErr
 			}
@@ -429,30 +447,67 @@ func (r *ReconcileCommonWebUIZen) reconcileCrZen(ctx context.Context, namespace 
 			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 			//Will hold href for admin hub console link
 			var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
-
+			var href2 = "https://" + currentRoute.Spec.Host + "/common-nav/graphics/settings.svg"
 			// Create Custom resource
-			if createErr := r.createCustomResource(ctx, unstruct, name, href); createErr != nil {
+			if createErr := r.createCustomResource(ctx, unstruct, name, href, href2); createErr != nil {
 				reqLogger.Error(createErr, "Failed to create CR")
 				return createErr
 			}
 		}
 
-	} else {
-		reqLogger.Info("Skipping CR creation")
 	}
 
 	return nil
 }
 
-func (r *ReconcileCommonWebUIZen) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string) error {
+func (r *ReconcileCommonWebUIZen) createCustomResource(ctx context.Context, unstruct unstructured.Unstructured, name, href string, href2 string) error {
 	reqLogger := log.WithValues("CR name", name)
 	reqLogger.Info("creating a CR ", name)
 
 	unstruct.Object["spec"].(map[string]interface{})["href"] = href
+	unstruct.Object["spec"].(map[string]interface{})["applicationMenu"].(map[string]interface{})["imageURL"] = href2
+
 	crCreateErr := r.client.Create(ctx, &unstruct)
 	if crCreateErr != nil && !errors.IsAlreadyExists(crCreateErr) {
 		reqLogger.Error(crCreateErr, "Failed to Create the Custom Resource")
 		return crCreateErr
+	}
+	return nil
+}
+
+//nolint
+func (r *ReconcileCommonWebUIZen) updateCustomResource(ctx context.Context, unstruct unstructured.Unstructured, unstruct2 unstructured.Unstructured, isZen bool, namespace string) error {
+	reqLogger := log.WithValues("func", "updateCustomResource")
+	reqLogger.Info("Updating console link cr")
+
+	currentRoute := &routesv1.Route{}
+	if isZen {
+		err2 := r.client.Get(ctx, types.NamespacedName{Name: "cpd", Namespace: namespace}, currentRoute)
+		if err2 != nil {
+			reqLogger.Error(err2, "Failed to get route for cpd, try again later")
+			return err2
+		}
+		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+		var href = "https://" + currentRoute.Spec.Host
+		unstruct2.Object["spec"].(map[string]interface{})["href"] = href
+		unstruct2.Object["spec"].(map[string]interface{})["applicationMenu"].(map[string]interface{})["imageURL"] = href + "/common-nav/graphics/settings.svg"
+	} else {
+		err2 := r.client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: namespace}, currentRoute)
+		if err2 != nil {
+			reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+			return err2
+		}
+		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+		var href = "https://" + currentRoute.Spec.Host
+		unstruct2.Object["spec"].(map[string]interface{})["href"] = href + "/common-nav/dashboard"
+		unstruct2.Object["spec"].(map[string]interface{})["applicationMenu"].(map[string]interface{})["imageURL"] = href + "/common-nav/graphics/settings.svg"
+	}
+
+	unstruct.Object["spec"] = unstruct2.Object["spec"]
+	crUpdateErr := r.client.Update(ctx, &unstruct)
+	if crUpdateErr != nil && !errors.IsAlreadyExists(crUpdateErr) {
+		reqLogger.Error(crUpdateErr, "Failed to Create the Custom Resource")
+		return crUpdateErr
 	}
 	return nil
 }

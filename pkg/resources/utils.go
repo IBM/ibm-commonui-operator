@@ -704,9 +704,13 @@ var CrTemplates = `{
 		"name": "admin-hub"
 	},
 	"spec": {
+		"applicationMenu": {
+			"imageURL": "https://raw.githubusercontent.com/carbon-design-system/carbon/main/packages/icons/src/svg/32/cloud.svg",
+			"section": "IBM Cloud Paks"
+		},
 		"href": "https://<cp-console-route>/common-nav/dashboard",
 		"location": "ApplicationMenu",
-		"text": "IBM Cloud Pak for Administration"
+		"text": "Administration"
 	}
 }`
 
@@ -717,9 +721,13 @@ var CrTemplates2 = `{
 		"name": "admin-hub-zen"
 	},
 	"spec": {
+		"applicationMenu": {
+			"imageURL": "https://raw.githubusercontent.com/carbon-design-system/carbon/main/packages/icons/src/svg/32/cloud.svg",
+			"section": "IBM Cloud Paks"
+		},
 		"href": "https://<cp-console-route>/common-nav/dashboard",
 		"location": "ApplicationMenu",
-		"text": "IBM Cloud Pak for Administration"
+		"text": "Administration"
 	}
 }`
 
