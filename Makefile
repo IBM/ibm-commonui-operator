@@ -24,7 +24,7 @@ REGISTRY_DEV ?= quay.io/ericabr
 CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
 LEGACY_TAG ?= 3.2.5
-COMMON_TAG ?= 1.4.3
+COMMON_TAG ?= 1.4.4
 DASHBOARD_TAG ?= 1.1.2
 
 # Set the registry and tag for the operand/operator images
@@ -203,7 +203,7 @@ coverage:
 # install operator sdk section
 ############################################################
 
-install-operator-sdk: 
+install-operator-sdk:
 	@operator-sdk version 2> /dev/null ; if [ $$? -ne 0 ]; then ./common/scripts/install-operator-sdk.sh; fi
 
 ############################################################
