@@ -21,6 +21,7 @@ require (
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.5.1
 	github.com/prometheus-operator/prometheus-operator => github.com/prometheus-operator/prometheus-operator v0.38.0 // indirect
+	golang.org/x/crypto v0.0.0-20201002170205-7f63de1d35b0 => golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f
 	k8s.io/api => k8s.io/api v0.19.10
 	k8s.io/apiextensions-apiserver => k8s.io/apiextensions-apiserver v0.19.10
 	k8s.io/apimachinery => k8s.io/apimachinery v0.19.10
