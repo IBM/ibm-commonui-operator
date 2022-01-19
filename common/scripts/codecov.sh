@@ -18,7 +18,7 @@ set -e
 set -u
 set -o pipefail
 
-# turn off GOSUMDB check
+# turn off GOSUMDB chec
 export GOSUMDB=off
 
 # add $GOPATH/bin to $PATH
