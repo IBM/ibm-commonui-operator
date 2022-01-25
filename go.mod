@@ -17,6 +17,8 @@ require (
 	sigs.k8s.io/controller-runtime v0.7.2
 )
 
+require golang.org/x/crypto v0.0.0-20201216223049-8b5274cf687f // indirect
+
 // Pinned to kubernetes-1.16.2
 replace (
 	github.com/googleapis/gnostic => github.com/googleapis/gnostic v0.5.1
