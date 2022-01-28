@@ -238,3 +238,8 @@ rules:
     - get
     - list
     - create
+- nonResourceURLs:
+    - /products
+    - /health
+  verbs:
+    - get

@@ -667,6 +667,11 @@ spec:
           - get
           - list
           - create
+        - nonResourceURLs:
+          - /products
+          - /health
+          verbs:
+          - get
         serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
