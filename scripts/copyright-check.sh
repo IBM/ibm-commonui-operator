@@ -14,7 +14,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 ############################################################################
-
 # Scan source files and check that the copyright header has the correct information.
 # Run this script from the repository root dir as "scripts/copyright-check.sh".
 # Input: list of files to scan (optional)
