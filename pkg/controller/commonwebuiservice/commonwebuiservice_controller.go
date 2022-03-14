@@ -214,7 +214,7 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	}
 
 	// Check if the common web ui Ingresses already exist. If not, create a new one.
-	err = r.reconcileIngresses(ctx, instance, &needToRequeue)
+	err = r.reconcileIngresses(ctx, instance, &needToRequeue, isCncf)
 	if err != nil {
 		return reconcile.Result{}, err
 	}
@@ -639,12 +639,15 @@ func (r *ReconcileCommonWebUI) serviceForUI(instance *operatorsv1alpha1.CommonWe
 
 // Check if the common web ui Ingresses already exist. If not, create a new one.
 // This function was created to reduce the cyclomatic complexity :)
-func (r *ReconcileCommonWebUI) reconcileIngresses(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func (r *ReconcileCommonWebUI) reconcileIngresses(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool, isCncf bool) error {
 	reqLogger := log.WithValues("func", "reconcileIngresses", "instance.Name", instance.Name)
 
 	reqLogger.Info("checking  common web ui api ingress")
 	// Define a new Ingress
 	newAPIIngress := res.APIIngressForCommonWebUI(instance)
+	if isCncf {
+		newAPIIngress = res.APIIngressForCommonWebUICncf(instance)
+	}
 	// Set instance as the owner and controller of the ingress
 	err := controllerutil.SetControllerReference(instance, newAPIIngress, r.scheme)
 	if err != nil {
