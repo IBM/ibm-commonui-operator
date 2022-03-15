@@ -1211,6 +1211,50 @@ func APIIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.In
 
 }
 
+func APIIngressForCommonWebUICncf(instance *operatorsv1alpha1.CommonWebUI) *netv1.Ingress {
+	reqLogger := log.WithValues("func", "apiIngressForCommonWebUI", "Ingress.Name", instance.Name)
+	reqLogger.Info("CS??? Entry")
+	metaLabels := LabelsForMetadata(APIIngress)
+	Annotations := APIIngressAnnotations
+	IngressPath := instance.Spec.CommonWebUIConfig.IngressPath
+	APIIngressPath := IngressPath + "/api/"
+	pathType := netv1.PathType("ImplementationSpecific")
+	ingress := &netv1.Ingress{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:        APIIngress,
+			Annotations: Annotations,
+			Labels:      metaLabels,
+			Namespace:   instance.Namespace,
+		},
+		Spec: netv1.IngressSpec{
+			Rules: []netv1.IngressRule{
+				{
+					IngressRuleValue: netv1.IngressRuleValue{
+						HTTP: &netv1.HTTPIngressRuleValue{
+							Paths: []netv1.HTTPIngressPath{
+								{
+									Path:     APIIngressPath,
+									PathType: &pathType,
+									Backend: netv1.IngressBackend{
+										Service: &netv1.IngressServiceBackend{
+											Name: instance.Spec.CommonWebUIConfig.ServiceName,
+											Port: netv1.ServiceBackendPort{
+												Number: 3000,
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+	}
+	return ingress
+
+}
+
 func CallbackIngressForCommonWebUI(instance *operatorsv1alpha1.CommonWebUI) *netv1.Ingress {
 	reqLogger := log.WithValues("func", "callbackIngressForCommonWebUI", "Ingress.Name", instance.Name)
 	reqLogger.Info("CS??? Entry")
