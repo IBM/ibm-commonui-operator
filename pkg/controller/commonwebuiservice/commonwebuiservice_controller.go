@@ -21,6 +21,7 @@ import (
 	"strconv"
 
 	res "github.com/ibm/ibm-commonui-operator/pkg/resources"
+	ver "github.com/ibm/ibm-commonui-operator/version"
 	"k8s.io/apimachinery/pkg/util/intstr"
 
 	operatorsv1alpha1 "github.com/ibm/ibm-commonui-operator/pkg/apis/operators/v1alpha1"
@@ -174,6 +175,7 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	// set a default Status value
 	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR
+		instance.Status.Versions = operatorsv1alpha1.Versions{Reconciled: ver.Version}
 		err = r.client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set CommonWebUI default status")
@@ -266,6 +268,7 @@ func (r *ReconcileCommonWebUI) Reconcile(ctx context.Context, request reconcile.
 	//update status.Nodes if needed
 	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
 		instance.Status.Nodes = podNames
+		instance.Status.Versions = operatorsv1alpha1.Versions{Reconciled: ver.Version}
 		err := r.client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to update CommonWebUI status")
