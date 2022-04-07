@@ -1,0 +1,6 @@
+apiVersion: operators.ibm.com/v1alpha1
+kind: CommonWebUI
+metadata:
+  name: commonwebui-sample
+spec:
+  # TODO(user): Add fields here
