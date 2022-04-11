@@ -32,7 +32,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
-	controllers "github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
+	commonwebuicontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -78,7 +78,7 @@ func main() {
 		os.Exit(1)
 	}
 
-	if err = (&controllers.CommonWebUIReconciler{
+	if err = (&commonwebuicontrollers.CommonWebUIReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
