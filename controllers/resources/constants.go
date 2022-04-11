@@ -567,13 +567,13 @@ const DefaultClusterIssuer = "cs-ca-issuer"
 const UICertName = "common-web-ui-ca-cert"
 const UICertCommonName = "common-web-ui"
 
-type CertificateData struct {
-	Name      string
-	Secret    string
-	Common    string
-	App       string
-	Component string
-}
+// type CertificateData struct {
+// 	Name      string
+// 	Secret    string
+// 	Common    string
+// 	App       string
+// 	Component string
+// }
 
 var UICertificateData = CertificateData{
 	Name:      UICertName,

@@ -75,6 +75,7 @@ require (
 
 require (
 	github.com/cert-manager/cert-manager v1.8.0
+	// github.com/jetstack/cert-manager v0.10.1
 	github.com/openshift/api v3.9.0+incompatible
 	k8s.io/api v0.23.5
 	k8s.io/apiextensions-apiserver v0.23.5 // indirect

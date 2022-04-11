@@ -20,7 +20,9 @@ import (
 	"context"
 
 	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
@@ -68,60 +70,60 @@ func getDesiredService(ctx context.Context, client client.Client, instance *oper
 	return service, nil
 }
 
-// func (r *CommonWebUIReconciler) reconcileService(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
-// 	reqLogger := log.WithValues("func", "reconcileService", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
-// 	reqLogger.Info("Reconciling service")
+func ReconcileService(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+	reqLogger := log.WithValues("func", "reconcileService", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+	reqLogger.Info("Reconciling service")
 
-// 	service := &corev1.Service{}
+	service := &corev1.Service{}
 
-// 	err := r.Client.Get(ctx, types.NamespacedName{Name: ServiceName, Namespace: instance.Namespace}, service)
-// 	if err != nil && !errors.IsNotFound(err) {
-// 		reqLogger.Error(err, "Failed to get service", "Service.Namespace", instance.Namespace, "Service.Name", ServiceName)
-// 		return err
-// 	}
+	err := client.Get(ctx, types.NamespacedName{Name: ServiceName, Namespace: instance.Namespace}, service)
+	if err != nil && !errors.IsNotFound(err) {
+		reqLogger.Error(err, "Failed to get service", "Service.Namespace", instance.Namespace, "Service.Name", ServiceName)
+		return err
+	}
 
-// 	desiredService, err := r.getDesiredService(ctx, instance, needToRequeue)
-// 	if err != nil {
-// 		return err
-// 	}
+	desiredService, err := getDesiredService(ctx, client, instance, needToRequeue)
+	if err != nil {
+		return err
+	}
 
-// 	if err != nil && errors.IsNotFound(err) {
-// 		reqLogger.Info("Creating a new service", "Service.Namespace", desiredService.Namespace, "Service.Name", desiredService.Name)
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("Creating a new service", "Service.Namespace", desiredService.Namespace, "Service.Name", desiredService.Name)
 
-// 		err = r.Client.Create(ctx, desiredService)
-// 		if err != nil {
-// 			if errors.IsAlreadyExists(err) {
-// 				// Service already exists from a previous reconcile
-// 				reqLogger.Info("Service already exists")
-// 				*needToRequeue = true
-// 			} else {
-// 				// Failed to create a new service
-// 				reqLogger.Info("Failed to create a new service", "Service.Namespace", desiredService.Namespace, "Service.Name", desiredService.Name)
-// 				return err
-// 			}
-// 		} else {
-// 			// Requeue after creating new service
-// 			*needToRequeue = true
-// 		}
-// 	} else {
-// 		// Determine if current service has changed
-// 		reqLogger.Info("Comparing current and desired services")
+		err = client.Create(ctx, desiredService)
+		if err != nil {
+			if errors.IsAlreadyExists(err) {
+				// Service already exists from a previous reconcile
+				reqLogger.Info("Service already exists")
+				*needToRequeue = true
+			} else {
+				// Failed to create a new service
+				reqLogger.Info("Failed to create a new service", "Service.Namespace", desiredService.Namespace, "Service.Name", desiredService.Name)
+				return err
+			}
+		} else {
+			// Requeue after creating new service
+			*needToRequeue = true
+		}
+	} else {
+		// Determine if current service has changed
+		reqLogger.Info("Comparing current and desired services")
 
-// 		if !IsServiceEqual(service, desiredService) {
-// 			reqLogger.Info("Updating service", "Service.Namespace", service.Namespace, "Service.Name", service.Name)
+		if !IsServiceEqual(service, desiredService) {
+			reqLogger.Info("Updating service", "Service.Namespace", service.Namespace, "Service.Name", service.Name)
 
-// 			service.ObjectMeta.Name = desiredService.ObjectMeta.Name
-// 			service.ObjectMeta.Labels = desiredService.ObjectMeta.Labels
-// 			service.Spec.Ports = desiredService.Spec.Ports
-// 			service.Spec.Selector = desiredService.Spec.Selector
+			service.ObjectMeta.Name = desiredService.ObjectMeta.Name
+			service.ObjectMeta.Labels = desiredService.ObjectMeta.Labels
+			service.Spec.Ports = desiredService.Spec.Ports
+			service.Spec.Selector = desiredService.Spec.Selector
 
-// 			err = r.Client.Update(ctx, service)
-// 			if err != nil {
-// 				reqLogger.Error(err, "Failed to update service", "Service.Namespace", service.Namespace, "Service.Name", service.Name)
-// 				return err
-// 			}
-// 		}
-// 	}
+			err = client.Update(ctx, service)
+			if err != nil {
+				reqLogger.Error(err, "Failed to update service", "Service.Namespace", service.Namespace, "Service.Name", service.Name)
+				return err
+			}
+		}
+	}
 
-// 	return nil
-// }
+	return nil
+}
