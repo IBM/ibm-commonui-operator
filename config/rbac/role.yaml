@@ -1,0 +1,245 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  creationTimestamp: null
+  labels:
+    app.kubernetes.io/instance: ibm-commonui-operator
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
+  name: ibm-commonui-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  - services
+  - services/finalizers
+  - configmaps
+  - secrets
+  - serviceaccounts
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - apps
+  resources:
+  - deployments
+  - daemonsets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - monitoring.coreos.com
+  resources:
+  - servicemonitors
+  verbs:
+  - get
+  - create
+- apiGroups:
+  - apps
+  resourceNames:
+  - common-webui
+  resources:
+  - deployments/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - ""
+  resources:
+  - pods
+  verbs:
+  - get
+- apiGroups:
+  - apps
+  resources:
+  - replicasets
+  - deployments
+  verbs:
+  - get
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - '*'
+  - ingresses
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operators.ibm.com
+  resources:
+  - commonwebuis
+  - legacyheaders
+  - commonwebuis/finalizers
+  - legacyheaders/finalizers
+  - legacyheaders/status
+  - commonwebuis/status
+  - switcheritems
+  - switcheritems/finalizers
+  - switcheritems/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - foundation.ibm.com
+  resources:
+  - navconfigurations
+  - navconfigurations/finalizers
+  - navconfigurations/status
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - certmanager.k8s.io
+  resources:
+  - '*'
+  - certificates
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: ibm-commonui-operator
+  labels:
+    app.kubernetes.io/instance: ibm-commonui-operator
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - statefulsets
+  - persistentvolumeclaims
+  - pods
+  - nodes
+  - events
+  - services
+  verbs: 
+  - get
+  - list
+- apiGroups:
+  - route.openshift.io
+  resources:
+    - routes
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+  - apps
+  resources:
+    - deployments
+    - daemonsets
+    - statefulsets
+  verbs:
+    - get
+    - list
+- apiGroups:
+  - extensions
+  resources:
+    - ingresses
+  verbs:
+    - get
+    - list
+- apiGroups:
+    - ""
+  resources:
+    - namespaces
+  verbs:
+    - get
+- apiGroups:
+    - redis.databases.cloud.ibm.com
+  resources:
+    - redissentinels
+    - redissentinels/finalizers
+    - redissentinels/status
+  verbs:
+    - get
+    - create
+    - delete
+    - update
+- apiGroups:
+    - console.openshift.io
+  resources:
+    - consolelinks
+    - consolelinks/finalizers
+    - consolelinks/status
+  verbs:
+    - create
+    - delete
+    - get
+    - list
+    - update
+- apiGroups:
+    - foundation.ibm.com
+  resources:
+    - navconfigurations
+    - navconfigurations/finalizers
+    - navconfigurations/status
+  verbs:
+    - update
+- apiGroups:
+    - internal.open-cluster-management.io
+  resources:
+    - managedclusterinfos
+  verbs:
+    - get
+    - list
+- apiGroups:
+    - operator.open-cluster-management.io
+  resources:
+    - multiclusterhubs
+  verbs:
+    - get
+    - list
+- apiGroups:
+    - action.open-cluster-management.io
+  resources:
+    - managedclusteractions
+  verbs:
+    - get
+    - list
+    - create
+- nonResourceURLs:
+    - /products
+    - /health
+  verbs:
+    - get
