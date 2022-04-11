@@ -1,0 +1,37 @@
+apiVersion: operators.ibm.com/v1alpha1
+kind: CommonWebUI
+metadata:
+  name: example-commonwebui
+  labels:
+    app.kubernetes.io/instance: example-commonwebui
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
+spec:
+  replicas: 1
+  resources:
+    requests:
+      memory: 256Mi
+      cpu: 300m
+    limits:
+      memory: 256Mi
+      cpu: 300m
+  globalUIConfig:
+    cloudPakVersion: 3.5.3
+    defaultAdminUser: admin
+    sessionPollingInterval: 5000
+    enterpriseLDAP: ''
+    defaultAuth: ''
+    enterpriseSAML: ''
+    osAuth: ''
+  commonWebUIConfig:
+    ingressPath: /common-nav
+    landingPage: ''
+    cpuLimits: "300"
+    cpuMemory: "256"
+    requestLimits: "300"
+    requestMemory: "256"
+    imageRegistry: quay.io/opencloudio
+    imageTag: 1.15.0
+    serviceName: common-web-ui
+  operatorVersion: 1.15.0
+  version: 1.15.0

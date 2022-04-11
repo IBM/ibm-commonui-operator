@@ -8,53 +8,72 @@ metadata:
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: controller-manager
-  namespace: system
+  name: ibm-commonui-operator
   labels:
-    control-plane: controller-manager
+    app.kubernetes.io/instance: ibm-commonui-operator
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
 spec:
+  replicas: 1
   selector:
     matchLabels:
-      control-plane: controller-manager
-  replicas: 1
+      name: ibm-commonui-operator
   template:
     metadata:
-      annotations:
-        kubectl.kubernetes.io/default-container: manager
       labels:
-        control-plane: controller-manager
+        name: ibm-commonui-operator
+        app.kubernetes.io/instance: ibm-commonui-operator
+        app.kubernetes.io/managed-by: ibm-commonui-operator
+        app.kubernetes.io/name: ibm-commonui-operator
+        intent: projected
+      annotations:
+        productName: IBM Cloud Platform Common Services
+        productID: "068a62892a1e4db39641342e592daa25"
+        productVersion: "3.4.0"
+        productMetric: FREE
+        "openshift.io/scc": "restricted"
     spec:
-      securityContext:
-        runAsNonRoot: true
+      serviceAccountName: ibm-commonui-operator
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+                - ppc64le
+                - s390x
       containers:
-      - command:
-        - /manager
-        args:
-        - --leader-elect
-        image: controller:latest
-        name: manager
-        securityContext:
-          allowPrivilegeEscalation: false
-        livenessProbe:
-          httpGet:
-            path: /healthz
-            port: 8081
-          initialDelaySeconds: 15
-          periodSeconds: 20
-        readinessProbe:
-          httpGet:
-            path: /readyz
-            port: 8081
-          initialDelaySeconds: 5
-          periodSeconds: 10
-        # TODO(user): Configure the resources accordingly based on the project requirements.
-        # More info: https://kubernetes.io/docs/concepts/configuration/manage-resources-containers/
-        resources:
-          limits:
-            cpu: 500m
-            memory: 128Mi
-          requests:
-            cpu: 10m
-            memory: 64Mi
-      serviceAccountName: controller-manager
-      terminationGracePeriodSeconds: 10
+        - name: ibm-commonui-operator
+          # Replace this with the built image name
+          image: quay.io/opencloudio/ibm-commonui-operator:1.15.0
+          command:
+          - ibm-commonui-operator
+          imagePullPolicy: Always
+          env:
+            - name: WATCH_NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: COMMON_WEB_UI_IMAGE
+              value: "quay.io/opencloudio/common-web-ui:1.15.0"
+            - name: LEGACYHEADER_IMAGE_TAG_OR_SHA
+              value: "sha256:5c785b6c4dc2b53af8e0219415388e4bafcfce354c13c6ff62912a9e7c3abb46"
+          resources:
+            limits:
+              cpu: 40m
+              memory: 150Mi
+            requests:
+              cpu: 10m
+              memory: 25Mi
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+              - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
+            runAsNonRoot: true
+
