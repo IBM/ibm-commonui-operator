@@ -2,7 +2,7 @@ apiVersion: v1
 kind: Namespace
 metadata:
   labels:
-    control-plane: controller-manager
+    control-plane: ibm-commonui-operator
   name: system
 ---
 apiVersion: apps/v1
