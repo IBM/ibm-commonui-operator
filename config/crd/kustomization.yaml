@@ -3,6 +3,7 @@
 # It should be run by config/default
 resources:
 - bases/operators.ibm.com_commonwebuis.yaml
+- bases/operators.ibm.com_switcheritems.yaml
 #+kubebuilder:scaffold:crdkustomizeresource
 
 patchesStrategicMerge:

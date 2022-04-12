@@ -1,0 +1,53 @@
+apiVersion: operators.coreos.com/v1alpha1
+kind: ClusterServiceVersion
+metadata:
+  annotations:
+    alm-examples: '[]'
+    capabilities: Basic Install
+  name: ibm-commonui-operator.v0.0.0
+  namespace: placeholder
+spec:
+  apiservicedefinitions: {}
+  customresourcedefinitions:
+    owned:
+    - description: CommonWebUI is the Schema for the commonwebuis API
+      displayName: Common Web UI
+      kind: CommonWebUI
+      name: commonwebuis.operators.ibm.com
+      version: v1alpha1
+  description: A common service UI operator used to manage the resource lifecycle
+    of Platform UI service
+  displayName: ibm-commonui-operator
+  icon:
+  - base64data: ""
+    mediatype: ""
+  install:
+    spec:
+      deployments: null
+    strategy: ""
+  installModes:
+  - supported: false
+    type: OwnNamespace
+  - supported: false
+    type: SingleNamespace
+  - supported: false
+    type: MultiNamespace
+  - supported: true
+    type: AllNamespaces
+  keywords:
+  - IBM
+  - Cloud
+  - Web Console
+  - Common Services
+  links:
+  - name: Ibm Commonui Operator
+    url: https://ibm-commonui-operator.domain
+  maintainers:
+  - email: siddarth.patel@ibm.com
+    name: Siddarth Patel
+  - email: sgrube@ibm.com
+    name: Steve Grube
+  maturity: alpha
+  provider:
+    name: IBM
+  version: 0.0.0
