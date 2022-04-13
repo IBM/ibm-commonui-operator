@@ -49,7 +49,6 @@ spec:
                   logoURL:
                     type: string
                 type: object
-              license: {}
               operatorVersion:
                 type: string
               version:
