@@ -32,11 +32,13 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
-	commonwebuicontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
 	routesv1 "github.com/openshift/api/route/v1"
+
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	commonwebuicontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
+	commonwebuizencontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebuizen"
 	//+kubebuilder:scaffold:imports
 )
 
@@ -105,6 +107,13 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "CommonWebUI")
+		os.Exit(1)
+	}
+	if err = (&commonwebuizencontrollers.CommonWebUIZenReconciler{
+		Client: mgr.GetClient(),
+		Scheme: mgr.GetScheme(),
+	}).SetupWithManager(mgr); err != nil {
+		setupLog.Error(err, "unable to create controller", "controller", "CommonWebUIZen")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder
