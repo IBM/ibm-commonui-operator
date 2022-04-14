@@ -709,7 +709,9 @@ spec:
                         - s390x
               containers:
               - command:
-                - ibm-commonui-operator
+                - /manager
+                args:
+                - --enable-leader-election
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
@@ -720,6 +722,22 @@ spec:
                 image: quay.io/opencloudio/ibm-commonui-operator:1.16.0
                 imagePullPolicy: Always
                 name: ibm-commonui-operator
+                livenessProbe:
+                  failureThreshold: 10
+                  httpGet:
+                    path: /readyz
+                    port: 8081
+                  initialDelaySeconds: 120
+                  periodSeconds: 60
+                  timeoutSeconds: 10
+                readinessProbe:
+                  failureThreshold: 10
+                  httpGet:
+                    path: /healthz
+                    port: 8081
+                  initialDelaySeconds: 3
+                  periodSeconds: 20
+                  timeoutSeconds: 3
                 resources:
                   limits:
                     cpu: 40m

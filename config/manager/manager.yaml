@@ -50,7 +50,9 @@ spec:
           # Replace this with the built image name
           image: quay.io/opencloudio/ibm-commonui-operator:1.16.0
           command:
-          - ibm-commonui-operator
+          - /manager
+          args:
+          - --enable-leader-election
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
@@ -59,6 +61,22 @@ spec:
                   fieldPath: metadata.namespace
             - name: COMMON_WEB_UI_IMAGE
               value: "quay.io/opencloudio/common-web-ui:1.16.0"
+          livenessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /readyz
+              port: 8081
+            initialDelaySeconds: 120
+            periodSeconds: 60
+            timeoutSeconds: 10
+          readinessProbe:
+            failureThreshold: 10
+            httpGet:
+              path: /healthz
+              port: 8081
+            initialDelaySeconds: 3
+            periodSeconds: 20
+            timeoutSeconds: 3
           resources:
             limits:
               cpu: 40m
