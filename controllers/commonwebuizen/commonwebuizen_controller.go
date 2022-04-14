@@ -18,12 +18,27 @@ package controllers
 
 import (
 	"context"
+	"os"
 
+	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
+	appsv1 "k8s.io/api/apps/v1"
+
+	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
-	"sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/reconcile"
+	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	version "github.com/IBM/ibm-commonui-operator/version"
 )
+
+var log = logf.Log.WithName("controller_commonwebuizen")
 
 // CommonWebUIZenReconciler reconciles a CommonWebUIZen object
 type CommonWebUIZenReconciler struct {
@@ -44,18 +59,66 @@ type CommonWebUIZenReconciler struct {
 //
 // For more details, check Reconcile and its Result here:
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
-func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, error) {
-	_ = log.FromContext(ctx)
+func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
+	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
+	reqLogger.Info("Reconciling CommonWebUIZen")
 
-	// TODO(user): your logic here
+	namespace := os.Getenv("WATCH_NAMESPACE")
+	reqLogger.Info("In CommonWebUIZen Reconcile -- Common Services Pod namespace: " + namespace)
+	reqLogger.Info("In CommonWebUIZen Reconcile -- Operator version: " + version.Version)
 
 	return ctrl.Result{}, nil
+}
+
+func zenDeploymentPredicate() predicate.Predicate {
+	namespace := os.Getenv("WATCH_NAMESPACE")
+	return predicate.Funcs{
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			if e.Object.GetName() == res.ZenDeploymentName && e.Object.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+		CreateFunc: func(e event.CreateEvent) bool {
+			if e.Object.GetName() == res.ZenDeploymentName && e.Object.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+	}
+}
+
+func zenProductCmPredicate() predicate.Predicate {
+	namespace := os.Getenv("WATCH_NAMESPACE")
+	return predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			if e.ObjectNew.GetName() == res.ZenProductConfigMapName && e.ObjectNew.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+		CreateFunc: func(e event.CreateEvent) bool {
+			if e.Object.GetName() == res.ZenProductConfigMapName && e.Object.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+	}
 }
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIZenReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	return ctrl.NewControllerManagedBy(mgr).
-		// Uncomment the following line adding a pointer to an instance of the controlled resource as an argument
-		// For().
+		Watches(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForObject{}).
+		WithEventFilter(zenDeploymentPredicate()).
+		Watches(&source.Kind{Type: &corev1.ConfigMap{}}, handler.EnqueueRequestsFromMapFunc(func(a client.Object) []reconcile.Request {
+			return []reconcile.Request{
+				{NamespacedName: types.NamespacedName{
+					Name:      "RECONCILE-ZEN-PRODUCT-CONFIGMAP",
+					Namespace: a.GetNamespace(),
+				}},
+			}
+		})).
+		WithEventFilter(zenProductCmPredicate()).
 		Complete(r)
 }

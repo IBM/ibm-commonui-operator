@@ -90,6 +90,9 @@ const AdminHubOnZenConfigMapName = "adminhub-on-zen-cm"
 
 const ZenCardsConfigMapName = "common-web-ui-zen-card-extensions"
 
+const ZenDeploymentName = "zen-core"
+const ZenProductConfigMapName = "product-configmap"
+
 var ZenNginxConfig = `
 	location /common-nav {
 		access_by_lua_file /nginx_data/checkjwt.lua;
