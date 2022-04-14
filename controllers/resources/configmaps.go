@@ -31,6 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
+const affirm = "true"
+
 func createConfigMap(ctx context.Context, client client.Client, cm *corev1.ConfigMap, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "createConfigMap", "instance.Name", instance.Name, "configmap.Name", cm.Name)
 
@@ -97,7 +99,7 @@ func ReconcileZenCardsConfigMap(ctx context.Context, client client.Client, insta
 	if err != nil {
 		if errors.IsNotFound(err) {
 			metaLabels := LabelsForMetadata(ZenCardsConfigMapName)
-			metaLabels["icpdata_addon"] = "true"
+			metaLabels["icpdata_addon"] = affirm
 			metaLabels["icpdata_addon_version"] = "v" + instance.Spec.Version
 
 			cm = &corev1.ConfigMap{
@@ -148,7 +150,7 @@ func ReconcileExtensionsConfigMap(ctx context.Context, client client.Client, ins
 			reqLogger.Info(fmt.Sprintf("Current cp-console route: %s", route.Spec.Host))
 
 			metaLabels := LabelsForMetadata(ExtensionsConfigMapName)
-			metaLabels["icpdata_addon"] = "true"
+			metaLabels["icpdata_addon"] = affirm
 
 			cm = &corev1.ConfigMap{
 				ObjectMeta: metav1.ObjectMeta{

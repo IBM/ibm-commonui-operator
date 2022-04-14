@@ -586,6 +586,7 @@ var UICertificateData = CertificateData{
 const AdminHubNavConfigName = "common-web-ui-config"
 const CP4INavConfigName = "icp4i"
 
+//nolint
 var AdminHubNavConfig = `
 {
 	"apiVersion": "foundation.ibm.com/v1",

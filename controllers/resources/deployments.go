@@ -32,6 +32,7 @@ import (
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
+//nolint
 func getDesiredDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool, needToRequeue *bool) (*appsv1.Deployment, error) {
 	reqLogger := log.WithValues("func", "getDesiredDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
@@ -198,6 +199,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 	return deployment, nil
 }
 
+//nolint
 func ReconcileDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling deployment")

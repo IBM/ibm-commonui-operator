@@ -30,7 +30,7 @@ import (
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
-func getDesiredService(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*corev1.Service, error) {
+func getDesiredService(client client.Client, instance *operatorsv1alpha1.CommonWebUI) (*corev1.Service, error) {
 	reqLogger := log.WithValues("func", "getDesiredService", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	metaLabels := LabelsForMetadata(ServiceName)
@@ -82,7 +82,7 @@ func ReconcileService(ctx context.Context, client client.Client, instance *opera
 		return err
 	}
 
-	desiredService, err := getDesiredService(ctx, client, instance, needToRequeue)
+	desiredService, err := getDesiredService(client, instance)
 	if err != nil {
 		return err
 	}

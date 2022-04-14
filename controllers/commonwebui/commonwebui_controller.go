@@ -84,7 +84,6 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// set a default Status value
 	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR
-		// instance.Status.Versions = operatorsv1alpha1.Versions{Reconciled: ver.Version}
 		err = r.Client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set CommonWebUI default status")
@@ -147,13 +146,13 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	}
 
 	// Update admin hub nav config, if it exists.
-	err = res.ReconcileAdminHubNavConfig(ctx, r.Client, instance, &needToRequeue)
+	err = res.ReconcileAdminHubNavConfig(ctx, r.Client, instance)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
 
 	// Update cp4i nav config, if it exists.
-	err = res.ReconcileCP4INavConfig(ctx, r.Client, instance, &needToRequeue)
+	err = res.ReconcileCP4INavConfig(ctx, r.Client, instance)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
