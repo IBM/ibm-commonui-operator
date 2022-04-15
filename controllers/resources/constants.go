@@ -87,11 +87,22 @@ var Log4jsConfigMapData = map[string]string{
 }
 
 const AdminHubOnZenConfigMapName = "adminhub-on-zen-cm"
-
-const ZenCardsConfigMapName = "common-web-ui-zen-card-extensions"
+const CommonConfigMapName = "common-web-ui-config"
+const ZenCardExtensionsConfigMapName = "common-web-ui-zen-card-extensions"
+const ZenCardExtensionsConfigMapNameCncf = "common-web-ui-zen-card-extension-cncf"
+const ZenQuickNavExtensionsConfigMapName = "common-web-ui-zen-quicknav-extensions"
+const ZenWalkmeExtensionsConfigMapName = "common-web-ui-zen-walkme-extensions"
 
 const ZenDeploymentName = "zen-core"
 const ZenProductConfigMapName = "product-configmap"
+
+var ZenPcmMap = map[string]string{
+	"CLOUD_PAK_TYPE":           "admin",
+	"CLOUD_PAK_URL":            "https://common-web-ui:3000/common-nav/zen/meta",
+	"CLOUD_PAK_AUTH_URL":       "https://common-web-ui:3000/common-nav/zen/meta",
+	"IBM_PRODUCT_NAME":         "IBM Cloud Pak | Administration",
+	"IBM_DEFAULT_PRODUCT_NAME": "IBM Cloud Pak | Administration",
+}
 
 var ZenNginxConfig = `
 	location /common-nav {
@@ -103,6 +114,31 @@ var ZenNginxConfig = `
 		proxy_read_timeout 10m;
 	}
 `
+
+var ZenQuickNavExtensions = `
+[
+      {
+        "extension_point_id": "homepage_quick_navigation",
+        "extension_name": "homepage_quick_navigation_id_providers",
+        "display_name": "{{ .global_zen_homepage_nav_id_providers }}",
+        "order_hint": 100,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "extension_type": "ootb",
+          "reference": {
+            "nav_item": "nav-id-providers"
+          }
+        },
+        "details": {
+          "label": "{{ .global_adminhub_id_providers }}",
+          "nav_link": "/common-nav/zen/idproviders"
+        }
+      }
+]
+`
+
 var ZenCardExtensions = `
 [
 	  {
@@ -396,9 +432,202 @@ var ZenCardExtensions = `
     ]
 `
 
-const ExtensionsConfigMapName = "common-webui-ui-extensions"
+var ZenCardExtensionsCncf = `
+[
+	  {
+        "extension_point_id": "left_menu_item",
+        "extension_name": "nav-id-providers",
+        "display_name": "{{ .global_adminhub_id_providers }}",
+        "order_hint": 600,
+        "match_permissions": "administrator",
+        "meta": {},
+        "details": {
+			"parent_folder": "dap-header-administer",
+			"href": "/common-nav/zen/idproviders"
+        }
+      },
+      {
+        "extension_point_id": "homepage_resource",
+        "extension_name": "homepage_resource_documentation",
+        "display_name": "{{ .global_zen_homepage_nav_documentation }}",
+        "order_hint": 100,
+        "match_permissions": "",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {},
+        "details": {
+          "label": "{{ .global_adminhub_documentation }}",
+          "nav_link": "https://ibm.biz/cpcs_adminui",
+          "carbon_icon": "Document16"
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_cluster_inventory",
+        "display_name": "{{ .global_zen_homepage_card_inventory_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 1,
+            "row": 0
+          }
+        },
+        "details": {
+		  "card_id": "homepage_card_cluster_inventory",
+		  "title": "{{ .global_adminhub_cluster_inventory }}",
+          "description": "{{ .global_zen_homepage_card_inventory_description }}",
+          "drilldown_url": "",
+          "window_open_target": "ah_cluster_inventory",
+          "template_type": "number_list",
+          "data_url": "/common-nav/zen/api/v1/inventory"
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_deployments",
+        "display_name": "{{ .global_zen_homepage_card_deployments_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 2,
+            "row": 0
+          }
+        },
+        "details": {
+		  "card_id": "homepage_card_deployments",
+		  "title": "{{ .global_adminhub_deployments }}",
+          "description": "{{ .global_zen_homepage_card_deployments_description }}",
+          "drilldown_url": "",
+          "template_type": "number_list",
+          "data_url": "/common-nav/zen/api/v1/deployments",
+          "empty_state": {
+            "main_text": "{{ .global_adminhub_deployments_empty_main_text }}",
+            "sub_text": "{{ .global_adminhub_deployments_empty_sub_text }}"
+          }
+        }
+      },
+      {
+       "extension_point_id": "homepage_card",
+       "extension_name": "homepage_card_events",
+       "display_name": "{{ .global_zen_homepage_card_events_name }}",
+       "order_hint": 0,
+       "match_permissions": "administrator",
+       "match_instance_id": "",
+       "match_instance_role": "",
+       "meta": {
+          "preferences": {
+            "column": 0,
+            "row": 2
+          }
+       },
+       "details": {
+         "card_id": "homepage_card_events",
+         "title": "{{ .global_adminhub_system_events }}",
+         "description": "{{ .global_zen_homepage_card_events_description }}",
+         "drilldown_url": "",
+         "template_type": "text_list",
+         "data_url": "/common-nav/zen/api/v1/events",
+         "empty_state": {
+			"main_text": "{{ .global_adminhub_system_events_empty_main_text }}",
+			"sub_text": "{{ .global_adminhub_system_events_empty_sub_text }}"
+         }
+       }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_identity_and_users_access",
+        "display_name": "{{ .global_zen_homepage_card_requests_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 1,
+            "row": 2
+          }
+        },
+        "details": {
+          "card_id": "homepage_card_identity_and_users_access",
+          "title": "{{ .global_adminhub_identity_and_users_access }}",
+          "description": "{{ .global_zen_homepage_card_requests_description }}",
+          "drilldown_url": "",
+          "template_type": "number_list",
+          "data_url": "/common-nav/zen/api/v1/users",
+          "empty_state": {
+            "main_text": "{{ .global_zen_homepage_card_requests_details_empty_state_main_text }}",
+            "sub_text": "{{ .global_zen_homepage_card_requests_details_empty_state_sub_text }}"
+          }
+        }
+      },
+      {
+        "extension_point_id": "homepage_card",
+        "extension_name": "homepage_card_license_products",
+        "display_name": "{{ .global_zen_homepage_card_requests_name }}",
+        "order_hint": 0,
+        "match_permissions": "administrator",
+        "match_instance_id": "",
+        "match_instance_role": "",
+        "meta": {
+          "preferences": {
+            "column": 2,
+            "row": 2
+          }
+        },
+        "details": {
+          "card_id": "homepage_card_license_products",
+          "title": "{{ .global_adminhub_license_products }}",
+          "description": "{{ .global_zen_homepage_card_requests_description }}",
+          "drilldown_url": "",
+          "template_type": "number_list",
+          "data_url": "/common-nav/zen/api/v1/license_products",
+          "empty_state": {
+            "main_text": "{{ .global_zen_homepage_card_requests_details_empty_state_main_text }}",
+            "sub_text": "{{ .global_zen_homepage_card_requests_details_empty_state_sub_text }}"
+          }
+        }
+      }
+    ]
+`
 
-var ExtensionsConfigMapData = `
+var ZenWalkmeExtensions = `
+[
+	{
+		"extension_point_id":"generic_preferences",
+		"extension_name":"guided_tours",
+		"display_name":"Guided tours",
+		"description":"",
+		"match_permissions":"",
+		"meta":null,
+		"details":{
+		  "lite_tours_src": "/common-nav/walkme/walkme_760e1a0cad93453f8cc129ce436f336e_https.js"
+		},
+		"status":"enabled"
+	},
+	{
+	  "extension_point_id": "zen_platform_customization",
+	  "extension_name": "mypak_customization_tours",
+	  "order_hint": 300,
+	  "details": {
+		"title": "{{.global_zen_platform_customization_tours_title}}",
+		"description": "{{.global_zen_platform_customization_tours_description}}",
+		"icon": "Crossroads20",
+		"icon_alt": "{{.global_zen_platform_customization_tours_title}}",
+		"nav_url": "/zen/#/guidedToursCustomization"
+	  }
+	}
+]
+`
+
+const ZenLeftNavExtensionsConfigMapName = "common-webui-ui-extensions"
+
+var ZenLeftNavExtensionsConfigMapData = `
 [
 	{
 		"extension_point_id": "left_menu_item",
@@ -557,9 +786,30 @@ var ConsoleLinkTemplate = `{
 		"name": "admin-hub"
 	},
 	"spec": {
+		"applicationMenu": {
+			"imageURL": "https://raw.githubusercontent.com/carbon-design-system/carbon/main/packages/icons/src/svg/32/cloud.svg",
+			"section": "IBM Cloud Paks"
+		},
 		"href": "https://%s/common-nav/dashboard",
 		"location": "ApplicationMenu",
-		"text": "Cloud Pak Administration Hub"
+		"text": "Administration"
+	}
+}`
+
+var ConsoleLinkTemplate2 = `{
+	"apiVersion": "console.openshift.io/v1",
+	"kind": "ConsoleLink",
+	"metadata": {
+		"name": "admin-hub-zen"
+	},
+	"spec": {
+		"applicationMenu": {
+			"imageURL": "https://raw.githubusercontent.com/carbon-design-system/carbon/main/packages/icons/src/svg/32/cloud.svg",
+			"section": "IBM Cloud Paks"
+		},
+		"href": "https://%s/common-nav/dashboard",
+		"location": "ApplicationMenu",
+		"text": "Administration"
 	}
 }`
 

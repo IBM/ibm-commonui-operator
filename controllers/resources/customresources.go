@@ -33,7 +33,15 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 	reqLogger.Info("Reconciling ConsoleLink CR")
 
 	var consoleLink map[string]interface{}
-	err := json.Unmarshal([]byte(ConsoleLinkTemplate), &consoleLink)
+	var consoleLinkTemplate string
+
+	if isZen {
+		consoleLinkTemplate = ConsoleLinkTemplate2
+	} else {
+		consoleLinkTemplate = ConsoleLinkTemplate
+	}
+
+	err := json.Unmarshal([]byte(consoleLinkTemplate), &consoleLink)
 	if err != nil {
 		reqLogger.Info("Failed to unmarshall ConsoleLink CR template")
 		return err
@@ -88,6 +96,25 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 			reqLogger.Error(err, "Failed to delete Redis finalizer")
 		} else {
 			reqLogger.Info("Deleted Redis Finalizer")
+		}
+	}
+
+	if getErr == nil {
+		reqLogger.Info("CR already present, checking for updates")
+		if unstruct.Object["spec"].(map[string]interface{})["applicationMenu"] == nil {
+			reqLogger.Info("Console link CR missing attributes, trying to update")
+			var currentTemplate map[string]interface{}
+			crTemplateErr := json.Unmarshal([]byte(consoleLinkTemplate), &currentTemplate)
+			if crTemplateErr != nil {
+				reqLogger.Info("Failed to console link cr")
+				return crTemplateErr
+			}
+			var unstruct2 unstructured.Unstructured
+			unstruct2.Object = currentTemplate
+			if updateErr := updateConsoleLink(ctx, client, unstruct, unstruct2, isZen, instance.Namespace); updateErr != nil {
+				reqLogger.Error(updateErr, "Failed to update console link CR")
+				return updateErr
+			}
 		}
 	}
 
@@ -146,5 +173,42 @@ func createCustomResource(ctx context.Context, client client.Client, unstruct un
 		return err
 	}
 
+	return nil
+}
+
+//nolint
+func updateConsoleLink(ctx context.Context, client client.Client, unstruct unstructured.Unstructured, unstruct2 unstructured.Unstructured, isZen bool, namespace string) error {
+	reqLogger := log.WithValues("func", "updateCustomResource")
+	reqLogger.Info("Updating console link cr")
+
+	currentRoute := &routesv1.Route{}
+	if isZen {
+		err2 := client.Get(ctx, types.NamespacedName{Name: "cpd", Namespace: namespace}, currentRoute)
+		if err2 != nil {
+			reqLogger.Error(err2, "Failed to get route for cpd, try again later")
+			return err2
+		}
+		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+		var href = "https://" + currentRoute.Spec.Host
+		unstruct2.Object["spec"].(map[string]interface{})["href"] = href
+		unstruct2.Object["spec"].(map[string]interface{})["applicationMenu"].(map[string]interface{})["imageURL"] = href + "/common-nav/graphics/settings.svg"
+	} else {
+		err2 := client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: namespace}, currentRoute)
+		if err2 != nil {
+			reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
+			return err2
+		}
+		reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+		var href = "https://" + currentRoute.Spec.Host
+		unstruct2.Object["spec"].(map[string]interface{})["href"] = href + "/common-nav/dashboard"
+		unstruct2.Object["spec"].(map[string]interface{})["applicationMenu"].(map[string]interface{})["imageURL"] = href + "/common-nav/graphics/settings.svg"
+	}
+
+	unstruct.Object["spec"] = unstruct2.Object["spec"]
+	crUpdateErr := client.Update(ctx, &unstruct)
+	if crUpdateErr != nil && !errors.IsAlreadyExists(crUpdateErr) {
+		reqLogger.Error(crUpdateErr, "Failed to Create the Custom Resource")
+		return crUpdateErr
+	}
 	return nil
 }

@@ -134,11 +134,12 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	}
 
 	// Check if the ConsoleLink CR already exists. If not, create a new one.
-	err = res.ReconcileConsoleLink(ctx, r.Client, instance, isZen, &needToRequeue)
-	if err != nil {
-		return ctrl.Result{}, err
+	if !isCncf {
+		err = res.ReconcileConsoleLink(ctx, r.Client, instance, isZen, &needToRequeue)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
-
 	// Check if the certificates already exists. If not, create new ones.
 	err = res.ReconcileCertificates(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
