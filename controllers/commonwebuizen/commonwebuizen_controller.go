@@ -142,22 +142,20 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 				return ctrl.Result{}, updateErr
 			}
 		}
-
 		// Set env var USE_ZEN to true and update CLUSTER_TYPE
 		updateErr = r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
 			return ctrl.Result{}, updateErr
 		}
-	} else {
 
+	} else {
 		// Delete zen admin hub resources
 		deleteErr := r.deleteZenAdminHubRes(ctx, namespace)
 		if deleteErr != nil {
 			reqLogger.Error(deleteErr, "Error deleting zen admin hub resources")
 			return ctrl.Result{}, deleteErr
 		}
-
 		// Set env var USE_ZEN to false and update CLUSTER_TYPE
 		updateErr := r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
 		if updateErr != nil {
