@@ -172,6 +172,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
+	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
 	return ctrl.Result{}, nil
 }
 
