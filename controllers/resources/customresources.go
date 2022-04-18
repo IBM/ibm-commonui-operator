@@ -20,12 +20,13 @@ import (
 	"context"
 	"encoding/json"
 
-	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	routesv1 "github.com/openshift/api/route/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
 func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, needToRequeue *bool) error {

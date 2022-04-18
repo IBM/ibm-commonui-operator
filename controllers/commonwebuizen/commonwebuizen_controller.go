@@ -21,7 +21,6 @@ import (
 	"encoding/json"
 	"os"
 
-	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -36,6 +35,8 @@ import (
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
 	"sigs.k8s.io/controller-runtime/pkg/source"
+
+	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
 
 	version "github.com/IBM/ibm-commonui-operator/version"
 )
@@ -63,7 +64,7 @@ type CommonWebUIZenReconciler struct {
 // - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.11.0/pkg/reconcile
 func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.Request) (ctrl.Result, error) {
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
-	reqLogger.Info("Reconciling CommonWebUIZen")
+	reqLogger.Info("Reconciling CommonWebUIZen Controller")
 
 	namespace := os.Getenv("WATCH_NAMESPACE")
 	reqLogger.Info("In CommonWebUIZen Reconcile -- Common Services Pod namespace: " + namespace)

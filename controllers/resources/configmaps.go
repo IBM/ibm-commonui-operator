@@ -21,9 +21,10 @@ import (
 	"fmt"
 	"strings"
 
+	routesv1 "github.com/openshift/api/route/v1"
+
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	version "github.com/IBM/ibm-commonui-operator/version"
-	routesv1 "github.com/openshift/api/route/v1"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"

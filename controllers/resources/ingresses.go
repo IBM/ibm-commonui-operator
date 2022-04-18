@@ -19,13 +19,14 @@ package resources
 import (
 	"context"
 
-	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
 // type DesiredStateGetter func(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error)
