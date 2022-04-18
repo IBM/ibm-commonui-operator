@@ -101,25 +101,25 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 		}
 
 		// Create common-web-ui-config which contains the common ui app version needed for zen nls post
-		err := res.ReconcileConfigMapsZen(ctx, r.Client, namespace, res.CommonConfigMapName)
+		err := res.ReconcileConfigMapsZen(ctx, r.Client, version.Version, namespace, res.CommonConfigMapName)
 		if err != nil {
 			return ctrl.Result{}, err
 		}
 		if isCncf {
 			// Create Zen card extensions for common ui on CNCF
-			err = res.ReconcileConfigMapsZen(ctx, r.Client, namespace, res.ZenCardExtensionsConfigMapNameCncf)
+			err = res.ReconcileConfigMapsZen(ctx, r.Client, version.Version, namespace, res.ZenCardExtensionsConfigMapNameCncf)
 			if err != nil {
 				return ctrl.Result{}, err
 			}
 		} else {
 			// Create Zen card extensions for common ui on openshift
-			err = res.ReconcileConfigMapsZen(ctx, r.Client, namespace, res.ZenCardExtensionsConfigMapName)
+			err = res.ReconcileConfigMapsZen(ctx, r.Client, version.Version, namespace, res.ZenCardExtensionsConfigMapName)
 			if err != nil {
 				return ctrl.Result{}, err
 			}
 		}
 		// Create Zen quick nav extensions for common ui
-		err = res.ReconcileConfigMapsZen(ctx, r.Client, namespace, res.ZenQuickNavExtensionsConfigMapName)
+		err = res.ReconcileConfigMapsZen(ctx, r.Client, version.Version, namespace, res.ZenQuickNavExtensionsConfigMapName)
 		if err != nil {
 			return ctrl.Result{}, err
 		}

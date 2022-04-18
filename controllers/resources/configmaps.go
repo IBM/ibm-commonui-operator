@@ -24,7 +24,6 @@ import (
 	routesv1 "github.com/openshift/api/route/v1"
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
-	version "github.com/IBM/ibm-commonui-operator/version"
 
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -189,7 +188,7 @@ func ReconcileZenProductConfigMap(ctx context.Context, client client.Client, req
 
 }
 
-func ReconcileConfigMapsZen(ctx context.Context, client client.Client, namespace, nameOfCM string) error {
+func ReconcileConfigMapsZen(ctx context.Context, client client.Client, version, namespace, nameOfCM string) error {
 	reqLogger := log.WithValues("func", "ReconcileConfigMapsZen")
 
 	reqLogger.Info("Checking if config map: " + nameOfCM + " exists")
@@ -205,26 +204,26 @@ func ReconcileConfigMapsZen(ctx context.Context, client client.Client, namespace
 				"nginx.conf": ZenNginxConfig,
 				"extensions": ZenCardExtensions,
 			}
-			newConfigMap = ZenCardExtensionsConfigMap(ZenCardExtensionsConfigMapName, namespace, version.Version, ExtensionsData)
+			newConfigMap = ZenCardExtensionsConfigMap(ZenCardExtensionsConfigMapName, namespace, version, ExtensionsData)
 		} else if nameOfCM == ZenCardExtensionsConfigMapNameCncf {
 			reqLogger.Info("Creating zen card extensions config map for CNCF")
 			var ExtensionsData = map[string]string{
 				"nginx.conf": ZenNginxConfig,
 				"extensions": ZenCardExtensionsCncf,
 			}
-			newConfigMap = ZenCardExtensionsConfigMap(ZenCardExtensionsConfigMapNameCncf, namespace, version.Version, ExtensionsData)
+			newConfigMap = ZenCardExtensionsConfigMap(ZenCardExtensionsConfigMapNameCncf, namespace, version, ExtensionsData)
 		} else if nameOfCM == ZenQuickNavExtensionsConfigMapName {
 			reqLogger.Info("Creating zen quick nav extensions config map")
 			var ExtensionsData = map[string]string{
 				"extensions": ZenQuickNavExtensions,
 			}
-			newConfigMap = ZenCardExtensionsConfigMap(ZenQuickNavExtensionsConfigMapName, namespace, version.Version, ExtensionsData)
+			newConfigMap = ZenCardExtensionsConfigMap(ZenQuickNavExtensionsConfigMapName, namespace, version, ExtensionsData)
 		} else if nameOfCM == ZenWalkmeExtensionsConfigMapName {
 			reqLogger.Info("Creating zen walkme extensions config map")
 			var ExtensionsData = map[string]string{
 				"extensions": ZenWalkmeExtensions,
 			}
-			newConfigMap = ZenCardExtensionsConfigMap(ZenWalkmeExtensionsConfigMapName, namespace, version.Version, ExtensionsData)
+			newConfigMap = ZenCardExtensionsConfigMap(ZenWalkmeExtensionsConfigMapName, namespace, version, ExtensionsData)
 		} else if nameOfCM == CommonConfigMapName {
 			reqLogger.Info("Creating common-web-ui-config config map")
 			newConfigMap = CommonWebUIConfigMap(namespace)
