@@ -239,19 +239,18 @@ build-archs: build-amd64 build-ppc64le build-s390x
 
 build-amd64:
 	@echo "Building the ${IMG} amd64 binary..."
-	@GOARCH=amd64 common/scripts/gobuild.sh bin/manager main.go
+	@GOARCH=amd64 common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
 
 build-ppc64le:
 	@echo "Building the ${IMG} ppc64le binary..."
-	@GOARCH=ppc64le common/scripts/gobuild.sh bin/manager main.go
+	@GOARCH=ppc64le common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
 
 build-s390x:
 	@echo "Building the ${IMG} s390x binary..."
-	@GOARCH=s390x common/scripts/gobuild.sh bin/manager main.go
+	@GOARCH=s390x common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
 
 build-local:
-	@GOOS=darwin common/scripts/gobuild.sh bin/manager main.go
-
+	@GOOS=darwin common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
 ############################################################
 # images section
 ############################################################
