@@ -399,7 +399,7 @@ func (r *ReconcileCommonWebUI) deploymentForUI(instance *operatorsv1alpha1.Commo
 	selectorLabels := res.LabelsForSelector(res.DeploymentName, commonwebuiserviceCrType, instance.Name)
 	podLabels := res.LabelsForPodMetadata(res.DeploymentName, commonwebuiserviceCrType, instance.Name)
 	Annotations := res.DeploymentAnnotations
-	var replicas int32 = instance.Spec.Replicas
+	var replicas = instance.Spec.Replicas
 	var cpuLimits, cpuMemory, reqLimits, reqMemory int64
 	var errLim error
 
