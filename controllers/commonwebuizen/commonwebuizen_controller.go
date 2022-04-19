@@ -30,6 +30,8 @@ import (
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+
+	"sigs.k8s.io/controller-runtime/pkg/controller"
 	"sigs.k8s.io/controller-runtime/pkg/event"
 	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
@@ -37,7 +39,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
-
 	version "github.com/IBM/ibm-commonui-operator/version"
 )
 
@@ -523,17 +524,30 @@ func zenProductCmPredicate() predicate.Predicate {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIZenReconciler) SetupWithManager(mgr ctrl.Manager) error {
-	return ctrl.NewControllerManagedBy(mgr).
-		Watches(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForObject{}).
-		WithEventFilter(zenDeploymentPredicate()).
-		Watches(&source.Kind{Type: &corev1.ConfigMap{}}, handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
+	// Create a new controller
+	c, err := controller.New("commonwebuizen-controller", mgr, controller.Options{Reconciler: r})
+	if err != nil {
+		return err
+	}
+
+	err = c.Watch(&source.Kind{Type: &appsv1.Deployment{}}, &handler.EnqueueRequestForObject{}, zenDeploymentPredicate())
+	if err != nil {
+		return err
+	}
+
+	err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}},
+		handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
 			return []ctrl.Request{
 				{NamespacedName: types.NamespacedName{
 					Name:      "RECONCILE-ZEN-PRODUCT-CONFIGMAP",
 					Namespace: a.GetNamespace(),
 				}},
 			}
-		})).
-		WithEventFilter(zenProductCmPredicate()).
-		Complete(r)
+		}),
+		zenProductCmPredicate())
+	if err != nil {
+		return err
+	}
+
+	return nil
 }
