@@ -24,8 +24,4 @@ resources:
   kind: SwitcherItem
   path: github.com/IBM/ibm-commonui-operator/api/v1alpha1
   version: v1alpha1
-- controller: true
-  domain: ibm.com
-  kind: CommonWebUIZen
-  version: v1alpha1
 version: "3"
