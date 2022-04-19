@@ -1,23 +1,4 @@
-# Build the manager binary
-FROM golang:1.18.1 as builder
-
-WORKDIR /workspace
-# Copy the Go Modules manifests
-COPY go.mod go.mod
-COPY go.sum go.sum
-# cache deps before building and copying source so that we don't need to re-download as much
-# and so that source changes don't invalidate our downloaded layer
-RUN go mod download
-
-# Copy the go source
-COPY main.go main.go
-COPY api/ api/
-COPY controllers/ controllers/
-
-# Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -o manager main.go
-
-FROM hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/build-images/ubi8-minimal:latest
+FROM hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com/build-images/ubi8-minimal:latest-amd64
 
 ARG IMAGE_NAME
 ARG IMAGE_DISPLAY_NAME
@@ -51,13 +32,16 @@ LABEL org.label-schema.vendor="$IMAGE_VENDOR" \
       io.k8s.description="$IMAGE_DESCRIPTION" \
       io.openshift.tags="$IMAGE_OPENSHIFT_TAGS"
 
-WORKDIR /
-COPY --from=builder /workspace/manager .
+ENV BINARY=/usr/local/bin/ibm-commonui-operator \
+  USER_UID=1001 
+
+# install the binary
+COPY build/_output/bin/ibm-commonui-operator ${BINARY}
 
 # copy licenses
 RUN mkdir /licenses
 COPY LICENSE /licenses
 
-USER 1001
+ENTRYPOINT ["ibm-commonui-operator"]
 
-ENTRYPOINT ["/manager"]
+USER ${USER_UID}
