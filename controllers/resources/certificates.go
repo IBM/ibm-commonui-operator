@@ -98,7 +98,7 @@ func ReconcileCertificates(ctx context.Context, client client.Client, instance *
 
 		err := client.Get(ctx, types.NamespacedName{Name: certData.Name, Namespace: instance.Namespace}, certificate)
 		if err != nil && !errors.IsNotFound(err) {
-			reqLogger.Error(err, "Failed to get certificate", "Certificate.Namespace", instance.Namespace, "Certificate.Name", ServiceName)
+			reqLogger.Error(err, "Failed to get certificate", "Certificate.Namespace", instance.Namespace, "Certificate.Name", certData.Name)
 			return err
 		}
 
