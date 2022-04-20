@@ -150,21 +150,7 @@ var ZenCardExtensions = `
         "meta": {},
         "details": {
 			"parent_folder": "dap-header-administer",
-			"href": "/common-nav/zen/id/providers"
-        }
-      },
-      {
-        "extension_point_id": "homepage_quick_navigation",
-        "extension_name": "homepage_quick_navigation_id_providers",
-        "display_name": "{{ .global_zen_homepage_nav_id_providers }}",
-        "order_hint": 100,
-        "match_permissions": "",
-        "match_instance_id": "",
-        "match_instance_role": "",
-        "meta": {},
-        "details": {
-          "label": "{{ .global_adminhub_id_providers }}",
-          "nav_link": "/common-nav/zen/idproviders"
+			"href": "/common-nav/zen/idproviders"
         }
       },
       {
@@ -178,7 +164,7 @@ var ZenCardExtensions = `
         "meta": {},
         "details": {
           "label": "{{ .global_adminhub_documentation }}",
-          "nav_link": "http://ibm.biz/cpcs_adminui",
+          "nav_link": "https://ibm.biz/cpcs_adminui",
           "carbon_icon": "Document16"
         }
       },
@@ -197,6 +183,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "service_defined_id": "homepage_card_memory_usage",
           "title": "{{ .global_adminhub_memory_usage }}",
           "description": "{{ .global_zen_homepage_memory_usage_description }}",
           "drilldown_url": "",
@@ -219,7 +206,8 @@ var ZenCardExtensions = `
           }
         },
         "details": {
-          "title": "{{ .global_adminhub_cluster_inventory }}",
+		  "service_defined_id": "homepage_card_cluster_inventory",
+		  "title": "{{ .global_adminhub_cluster_inventory }}",
           "description": "{{ .global_zen_homepage_card_inventory_description }}",
           "drilldown_url": "",
           "window_open_target": "ah_cluster_inventory",
@@ -242,14 +230,15 @@ var ZenCardExtensions = `
           }
         },
         "details": {
-          "title": "{{ .global_adminhub_deployments }}",
+		  "service_defined_id": "homepage_card_deployments",
+		  "title": "{{ .global_adminhub_deployments }}",
           "description": "{{ .global_zen_homepage_card_deployments_description }}",
           "drilldown_url": "",
           "template_type": "number_list",
           "data_url": "/common-nav/zen/api/v1/deployments",
           "empty_state": {
-            "main_text": "No Cloud Paks found.",
-            "sub_text": "When data is available, all Cloud Paks in this cluster will appear here."
+            "main_text": "{{ .global_adminhub_deployments_empty_main_text }}",
+            "sub_text": "{{ .global_adminhub_deployments_empty_sub_text }}"
           }
         }
       },
@@ -268,6 +257,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "service_defined_id": "homepage_card_monitoring_trends",
           "title": "{{ .global_adminhub_monitoring_trends }}",
           "description": "{{ .global_zen_homepage_vulnerabilities_description }}",
           "drilldown_url": "",
@@ -294,14 +284,15 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "service_defined_id": "homepage_card_system_utility_status",
           "title": "{{ .global_adminhub_system_utility_status }}",
           "description": "{{ .global_common_core_homepage_card_recent_projects_description }}",
           "drilldown_url": "",
           "template_type": "condensed_list",
           "data_url": "/common-nav/zen/api/v1/system_utility_status",
           "empty_state": {
-            "main_text": "No services found",
-            "sub_text": "When data is available, services in this cluster will appear here.",
+            "main_text": "{{ .global_adminhub_system_utility_status_empty_main_text }}",
+            "sub_text": "{{ .global_adminhub_system_utility_status_empty_sub_text }}",
             "button_text": "",
             "button_url": ""
           }
@@ -322,6 +313,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "service_defined_id": "homepage_card_workload_summary",
           "title": "{{ .global_adminhub_workload_summary }}",
           "description": "{{ .global_zen_homepage_memory_workload_summary }}",
           "drilldown_url": "",
@@ -344,14 +336,15 @@ var ZenCardExtensions = `
           }
        },
        "details": {
+         "service_defined_id": "homepage_card_events",
          "title": "{{ .global_adminhub_system_events }}",
          "description": "{{ .global_zen_homepage_card_events_description }}",
          "drilldown_url": "",
          "template_type": "text_list",
          "data_url": "/common-nav/zen/api/v1/events",
          "empty_state": {
-           "main_text": "No events found",
-           "sub_text": "When data is available, all events in this cluster will appear here."
+			"main_text": "{{ .global_adminhub_system_events_empty_main_text }}",
+			"sub_text": "{{ .global_adminhub_system_events_empty_sub_text }}"
          }
        }
       },
@@ -370,6 +363,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "service_defined_id": "homepage_card_identity_and_users_access",
           "title": "{{ .global_adminhub_identity_and_users_access }}",
           "description": "{{ .global_zen_homepage_card_requests_description }}",
           "drilldown_url": "",
@@ -396,6 +390,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "service_defined_id": "homepage_card_license_products",
           "title": "{{ .global_adminhub_license_products }}",
           "description": "{{ .global_zen_homepage_card_requests_description }}",
           "drilldown_url": "",
@@ -422,6 +417,7 @@ var ZenCardExtensions = `
           }
         },
         "details": {
+          "service_defined_id": "homepage_card_diagnostics",
           "title": "Diagnostics",
           "description": "{{ .global_common_core_homepage_card_diagnostics_description }}",
           "template_type": "iframe",
@@ -476,7 +472,7 @@ var ZenCardExtensionsCncf = `
           }
         },
         "details": {
-		  "card_id": "homepage_card_cluster_inventory",
+		  "service_defined_id": "homepage_card_cluster_inventory",
 		  "title": "{{ .global_adminhub_cluster_inventory }}",
           "description": "{{ .global_zen_homepage_card_inventory_description }}",
           "drilldown_url": "",
@@ -500,7 +496,7 @@ var ZenCardExtensionsCncf = `
           }
         },
         "details": {
-		  "card_id": "homepage_card_deployments",
+		  "service_defined_id": "homepage_card_deployments",
 		  "title": "{{ .global_adminhub_deployments }}",
           "description": "{{ .global_zen_homepage_card_deployments_description }}",
           "drilldown_url": "",
@@ -527,7 +523,7 @@ var ZenCardExtensionsCncf = `
           }
        },
        "details": {
-         "card_id": "homepage_card_events",
+         "service_defined_id": "homepage_card_events",
          "title": "{{ .global_adminhub_system_events }}",
          "description": "{{ .global_zen_homepage_card_events_description }}",
          "drilldown_url": "",
@@ -554,7 +550,7 @@ var ZenCardExtensionsCncf = `
           }
         },
         "details": {
-          "card_id": "homepage_card_identity_and_users_access",
+          "service_defined_id": "homepage_card_identity_and_users_access",
           "title": "{{ .global_adminhub_identity_and_users_access }}",
           "description": "{{ .global_zen_homepage_card_requests_description }}",
           "drilldown_url": "",
@@ -581,7 +577,7 @@ var ZenCardExtensionsCncf = `
           }
         },
         "details": {
-          "card_id": "homepage_card_license_products",
+          "service_defined_id": "homepage_card_license_products",
           "title": "{{ .global_adminhub_license_products }}",
           "description": "{{ .global_zen_homepage_card_requests_description }}",
           "drilldown_url": "",
