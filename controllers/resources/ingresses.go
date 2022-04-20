@@ -31,7 +31,7 @@ import (
 
 // type DesiredStateGetter func(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error)
 
-func getDesiredAPIIngress(client client.Client, instance *operatorsv1alpha1.CommonWebUI) (*netv1.Ingress, error) {
+func getDesiredAPIIngress(client client.Client, instance *operatorsv1alpha1.CommonWebUI, isCncf bool) (*netv1.Ingress, error) {
 	reqLogger := log.WithValues("func", "getDesiredAPIIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	metaLabels := LabelsForMetadata(APIIngressName)
@@ -41,40 +41,31 @@ func getDesiredAPIIngress(client client.Client, instance *operatorsv1alpha1.Comm
 	logoutIngressPath := ingressPath + "/logout/"
 
 	pathType := netv1.PathType("ImplementationSpecific")
+	var ingress = &netv1.Ingress{}
 
-	ingress := &netv1.Ingress{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:        APIIngressName,
-			Annotations: APIIngressAnnotations,
-			Labels:      metaLabels,
-			Namespace:   instance.Namespace,
-		},
-		Spec: netv1.IngressSpec{
-			Rules: []netv1.IngressRule{
-				{
-					IngressRuleValue: netv1.IngressRuleValue{
-						HTTP: &netv1.HTTPIngressRuleValue{
-							Paths: []netv1.HTTPIngressPath{
-								{
-									Path:     apiIngressPath,
-									PathType: &pathType,
-									Backend: netv1.IngressBackend{
-										Service: &netv1.IngressServiceBackend{
-											Name: instance.Spec.CommonWebUIConfig.ServiceName,
-											Port: netv1.ServiceBackendPort{
-												Number: 3000,
-											},
-										},
-									},
-								},
-								{
-									Path:     logoutIngressPath,
-									PathType: &pathType,
-									Backend: netv1.IngressBackend{
-										Service: &netv1.IngressServiceBackend{
-											Name: instance.Spec.CommonWebUIConfig.ServiceName,
-											Port: netv1.ServiceBackendPort{
-												Number: 3000,
+	if isCncf {
+		ingress = &netv1.Ingress{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        APIIngressName,
+				Annotations: APIIngressAnnotations,
+				Labels:      metaLabels,
+				Namespace:   instance.Namespace,
+			},
+			Spec: netv1.IngressSpec{
+				Rules: []netv1.IngressRule{
+					{
+						IngressRuleValue: netv1.IngressRuleValue{
+							HTTP: &netv1.HTTPIngressRuleValue{
+								Paths: []netv1.HTTPIngressPath{
+									{
+										Path:     apiIngressPath,
+										PathType: &pathType,
+										Backend: netv1.IngressBackend{
+											Service: &netv1.IngressServiceBackend{
+												Name: instance.Spec.CommonWebUIConfig.ServiceName,
+												Port: netv1.ServiceBackendPort{
+													Number: 3000,
+												},
 											},
 										},
 									},
@@ -84,7 +75,52 @@ func getDesiredAPIIngress(client client.Client, instance *operatorsv1alpha1.Comm
 					},
 				},
 			},
-		},
+		}
+	} else {
+		ingress = &netv1.Ingress{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:        APIIngressName,
+				Annotations: APIIngressAnnotations,
+				Labels:      metaLabels,
+				Namespace:   instance.Namespace,
+			},
+			Spec: netv1.IngressSpec{
+				Rules: []netv1.IngressRule{
+					{
+						IngressRuleValue: netv1.IngressRuleValue{
+							HTTP: &netv1.HTTPIngressRuleValue{
+								Paths: []netv1.HTTPIngressPath{
+									{
+										Path:     apiIngressPath,
+										PathType: &pathType,
+										Backend: netv1.IngressBackend{
+											Service: &netv1.IngressServiceBackend{
+												Name: instance.Spec.CommonWebUIConfig.ServiceName,
+												Port: netv1.ServiceBackendPort{
+													Number: 3000,
+												},
+											},
+										},
+									},
+									{
+										Path:     logoutIngressPath,
+										PathType: &pathType,
+										Backend: netv1.IngressBackend{
+											Service: &netv1.IngressServiceBackend{
+												Name: instance.Spec.CommonWebUIConfig.ServiceName,
+												Port: netv1.ServiceBackendPort{
+													Number: 3000,
+												},
+											},
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		}
 	}
 
 	err := controllerutil.SetControllerReference(instance, ingress, client.Scheme())
@@ -96,11 +132,11 @@ func getDesiredAPIIngress(client client.Client, instance *operatorsv1alpha1.Comm
 	return ingress, nil
 }
 
-func ReconcileAPIIngress(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+func ReconcileAPIIngress(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isCncf bool, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileAPIIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling API ingress")
 
-	desiredIngress, err := getDesiredAPIIngress(client, instance)
+	desiredIngress, err := getDesiredAPIIngress(client, instance, isCncf)
 	if err != nil {
 		return err
 	}

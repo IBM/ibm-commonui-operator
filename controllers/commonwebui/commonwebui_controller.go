@@ -116,7 +116,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	}
 
 	// Check if the API ingress already exists. If not, create a new one.
-	err = res.ReconcileAPIIngress(ctx, r.Client, instance, &needToRequeue)
+	err = res.ReconcileAPIIngress(ctx, r.Client, instance, isCncf, &needToRequeue)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
