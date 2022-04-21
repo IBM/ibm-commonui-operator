@@ -140,7 +140,11 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 			return ctrl.Result{}, err
 		}
 	}
-	// Check if the certificates already exists. If not, create new ones.
+
+	// For 1.15.0 operator version, check if v1alpha1 certs exits on upgrade and delete if so
+	r.deleteCertsv1alpha1(ctx, instance)
+
+	// Check if the certificates already exists. If not, create new v1 certs.
 	err = res.ReconcileCertificates(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		return ctrl.Result{}, err
@@ -174,6 +178,36 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
 	return ctrl.Result{}, nil
+}
+
+func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
+	reqLogger := log.WithValues("func", "deleteCertsv1alpha1", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+
+	certificate := &certmgr.Certificate{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      res.UICertName,
+			Namespace: instance.Namespace,
+		},
+	}
+	err := r.Client.Get(ctx, types.NamespacedName{Name: res.UICertName, Namespace: instance.Namespace}, certificate)
+
+	if err != nil && errors.IsNotFound(err) {
+		reqLogger.Info("common-web-ui-ca-cert certificate not found")
+	} else {
+		reqLogger.Info("Certificate common-web-ui-ca-cert found, checking api version..")
+		reqLogger.Info("API version is: " + certificate.APIVersion)
+		if certificate.APIVersion == res.Certv1alpha1APIVersion {
+			reqLogger.Info("deleting cert: " + res.UICertName)
+			err = r.Client.Delete(ctx, certificate)
+			if err != nil {
+				reqLogger.Error(err, "Failed to delete")
+			} else {
+				reqLogger.Info("Successfully deleted")
+			}
+		} else {
+			reqLogger.Info("API version is NOT v1alpha1, returning..")
+		}
+	}
 }
 
 func (r *CommonWebUIReconciler) deleteDaemonSet(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
