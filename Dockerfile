@@ -33,7 +33,8 @@ LABEL org.label-schema.vendor="$IMAGE_VENDOR" \
       io.openshift.tags="$IMAGE_OPENSHIFT_TAGS"
 
 ENV BINARY=/usr/local/bin/ibm-commonui-operator \
-  USER_UID=1001 
+  USER_UID=1001 \
+  USER_NAME=ibm-commonui-operator
 
 # install the binary
 COPY build/_output/bin/ibm-commonui-operator ${BINARY}
