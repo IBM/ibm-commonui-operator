@@ -1,0 +1,5 @@
+# This file is to satisfy an issue with the yaml lint command
+#@${FINDFILES} \( -name '*.yml' -o -name '*.yaml' \) -print0 | ${XARGS} grep -L -e "{{" | ${CLEANXARGS} yamllint -c ./common/config/.yamllint.yml 
+# The issue is with the grep portion of the command which is attempting to throw away any yaml files containing "{{", however if no files
+# have "{{", then this command and make fails with a 123 error code.  Currently after operator sdk migration we don't have any files that 
+# meet this criteria.  To avoid changing the lint command, we will create a dummy file with {{ (ok, we already did that :) )

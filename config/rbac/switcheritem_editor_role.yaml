@@ -1,0 +1,24 @@
+# permissions for end users to edit switcheritems.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: switcheritem-editor-role
+rules:
+- apiGroups:
+  - operators.ibm.com
+  resources:
+  - switcheritems
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - operators.ibm.com
+  resources:
+  - switcheritems/status
+  verbs:
+  - get
