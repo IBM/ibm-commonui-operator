@@ -1,0 +1,32 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-commonui-operator
+  labels:
+    app.kubernetes.io/instance: ibm-commonui-operator
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
+subjects:
+- kind: ServiceAccount
+  name: ibm-commonui-operator
+roleRef:
+  kind: Role
+  name: ibm-commonui-operator
+  apiGroup: rbac.authorization.k8s.io
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: ibm-commonui-operator
+  labels:
+    app.kubernetes.io/instance: ibm-commonui-operator
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
+subjects:
+- kind: ServiceAccount
+  name: ibm-commonui-operator
+  namespace: ibm-common-services
+roleRef:
+  kind: ClusterRole
+  name: ibm-commonui-operator
+  apiGroup: rbac.authorization.k8s.io

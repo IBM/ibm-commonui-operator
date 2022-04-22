@@ -1,0 +1,75 @@
+apiVersion: foundation.ibm.com/v1
+kind: NavConfiguration
+metadata:
+  name: icp4i
+  labels:
+    app.kubernetes.io/instance: icp4i
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
+    name: icp4i
+spec:
+  header:
+    logoUrl: "/common-nav/graphics/ibm-cloudpak-integration.svg"
+    logoAltText: "Cloud Pak for Integration"
+    disabledItems:
+      - "createResource"
+      - "catalog"
+      - "bookmark"
+  navItems:
+    - id: "metering"
+      label: "Metering"
+      url: "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
+      serviceName: "metering-ui"
+      serviceId: "metering-ui"
+      detectionServiceName: true
+    - id: "monitoring"
+      label: "Monitoring"
+      url: "/grafana"
+      serviceName: "ibm-monitoring-grafana"
+      serviceId: "monitoring-ui"
+      target: "_blank"
+      detectionServiceName: true
+      isAuthorized:
+        - "Administrator"
+        - "ClusterAdministrator"
+        - "Operator"
+    - id: "id-access"
+      label: "Identity and access"
+      serviceId: "webui-nav"
+    - id: "providers"
+      parentId: "id-access"
+      label: "Identity providers"
+      serviceId: "webui-nav"
+      url: "/common-nav/identity-access/realms?useNav=icp4i"
+    - id: "teams-ids"
+      parentId: "id-access"
+      label: "Teams and service IDs"
+      serviceId: "webui-nav"
+      url: "/common-nav/identity-access/teams?useNav=icp4i"
+    - id: "logging"
+      label: "Logging"
+      url: "/kibana"
+      serviceId: "kibana"
+      target: "_blank"
+      serviceName: "kibana"
+      detectionServiceName: true
+    - id: "releases"
+      label: "Helm Releases"
+      url: "/catalog/instances?useNav=icp4i"
+      serviceId: "catalog-ui"
+      serviceName: "catalog-ui"
+      detectionServiceName: true
+    - id: "repos"
+      label: "Helm Repositories"
+      url: "/catalog/repositories?useNav=icp4i"
+      serviceId: "catalog-ui"
+      serviceName: "catalog-ui"
+      detectionServiceName: true
+    - id: "licensing"
+      label: "Licensing"
+      url: "/license-service-reporter"
+      serviceId: "ibm-license-service-reporter"
+      detectionServiceName: true
+      isAuthorized:
+        - "ClusterAdministrator"
+        - "CloudPakAdministrator"
