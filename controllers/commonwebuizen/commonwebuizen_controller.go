@@ -400,9 +400,11 @@ func (r *CommonWebUIZenReconciler) updateCommonUIDeployment(ctx context.Context,
 				return updateErr
 			}
 		}
-	} else {
+	} else if getError != nil && !errors.IsNotFound(getError) {
 		reqLogger.Info("Failed to get Common UI deployment")
 		return getError
+	} else {
+		reqLogger.Info("Common UI deployment not found")
 	}
 	return nil
 }

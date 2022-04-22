@@ -115,10 +115,6 @@ func GetKubernetesClusterType(ctx context.Context, client client.Client, namespa
 		if clusterType == "cncf" {
 			return true
 		}
-	}
-
-	if errors.IsNotFound(getError) {
-		reqLogger.Info("ibm project k config map not found in cs namepace")
 	} else {
 		reqLogger.Error(getError, "error getting ibm project k config map in cs namepace")
 	}
