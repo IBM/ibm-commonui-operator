@@ -235,7 +235,7 @@ endif
 # build section
 ############################################################
 
-build: generate fmt vet build-amd64 build-ppc64le build-s390x
+build: generate fmt vet build-amd64 build-ppc64le build-s390x ## Build manager binary.
 
 build-amd64:
 	@echo "Building the ${IMG} amd64 binary..."
