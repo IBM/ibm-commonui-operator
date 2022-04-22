@@ -659,9 +659,7 @@ spec:
                         - s390x
               containers:
               - command:
-                - /manager
-                args:
-                - --enable-leader-election
+                - ibm-commonui-operator
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
@@ -671,7 +669,7 @@ spec:
                   value: quay.io/opencloudio/common-web-ui:1.16.0
                 image: quay.io/opencloudio/ibm-commonui-operator:1.16.0
                 imagePullPolicy: Always
-                name: ibm-commonui-operator
+                name: manager
                 livenessProbe:
                   failureThreshold: 10
                   httpGet:

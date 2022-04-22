@@ -46,13 +46,11 @@ spec:
                 - ppc64le
                 - s390x
       containers:
-        - name: ibm-commonui-operator
+        - name: manager
           # Replace this with the built image name
           image: quay.io/opencloudio/ibm-commonui-operator:1.16.0
           command:
-          - /manager
-          args:
-          - --enable-leader-election
+          - ibm-commonui-operator
           imagePullPolicy: Always
           env:
             - name: WATCH_NAMESPACE
