@@ -33,7 +33,7 @@ import (
 )
 
 //nolint
-func getDesiredDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool, needToRequeue *bool) (*appsv1.Deployment, error) {
+func getDesiredDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool) (*appsv1.Deployment, error) {
 	reqLogger := log.WithValues("func", "getDesiredDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	volumes := []corev1.Volume{}
@@ -206,7 +206,7 @@ func ReconcileDeployment(ctx context.Context, client client.Client, instance *op
 
 	deployment := &appsv1.Deployment{}
 
-	desiredDeployment, desiredErr := getDesiredDeployment(ctx, client, instance, isZen, isCncf, needToRequeue)
+	desiredDeployment, desiredErr := getDesiredDeployment(ctx, client, instance, isZen, isCncf)
 	if desiredErr != nil {
 		return desiredErr
 	}
