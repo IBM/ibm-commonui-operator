@@ -206,16 +206,12 @@ func ReconcileDeployment(ctx context.Context, client client.Client, instance *op
 
 	deployment := &appsv1.Deployment{}
 
-	err := client.Get(ctx, types.NamespacedName{Name: DeploymentName, Namespace: instance.Namespace}, deployment)
-	if err != nil && !errors.IsNotFound(err) {
-		reqLogger.Error(err, "Failed to get deployment", "Deployment.Namespace", instance.Namespace, "Deployment.Name", DeploymentName)
-		return err
+	desiredDeployment, desiredErr := getDesiredDeployment(ctx, client, instance, isZen, isCncf, needToRequeue)
+	if desiredErr != nil {
+		return desiredErr
 	}
 
-	desiredDeployment, err := getDesiredDeployment(ctx, client, instance, isZen, isCncf, needToRequeue)
-	if err != nil {
-		return err
-	}
+	err := client.Get(ctx, types.NamespacedName{Name: DeploymentName, Namespace: instance.Namespace}, deployment)
 
 	if err != nil && errors.IsNotFound(err) {
 		reqLogger.Info("Creating a new deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
@@ -235,6 +231,9 @@ func ReconcileDeployment(ctx context.Context, client client.Client, instance *op
 			// Requeue after creating new deployment
 			*needToRequeue = true
 		}
+	} else if err != nil && !errors.IsNotFound(err) {
+		reqLogger.Error(err, "Failed to get deployment", "Deployment.Namespace", instance.Namespace, "Deployment.Name", DeploymentName)
+		return err
 	} else {
 		// Determine if current deployment has changed
 		reqLogger.Info("Comparing current and desired deployments")

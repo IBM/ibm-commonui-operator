@@ -76,16 +76,12 @@ func ReconcileService(ctx context.Context, client client.Client, instance *opera
 
 	service := &corev1.Service{}
 
-	err := client.Get(ctx, types.NamespacedName{Name: ServiceName, Namespace: instance.Namespace}, service)
-	if err != nil && !errors.IsNotFound(err) {
-		reqLogger.Error(err, "Failed to get service", "Service.Namespace", instance.Namespace, "Service.Name", ServiceName)
-		return err
+	desiredService, desiredErr := getDesiredService(client, instance)
+	if desiredErr != nil {
+		return desiredErr
 	}
 
-	desiredService, err := getDesiredService(client, instance)
-	if err != nil {
-		return err
-	}
+	err := client.Get(ctx, types.NamespacedName{Name: ServiceName, Namespace: instance.Namespace}, service)
 
 	if err != nil && errors.IsNotFound(err) {
 		reqLogger.Info("Creating a new service", "Service.Namespace", desiredService.Namespace, "Service.Name", desiredService.Name)
@@ -105,6 +101,9 @@ func ReconcileService(ctx context.Context, client client.Client, instance *opera
 			// Requeue after creating new service
 			*needToRequeue = true
 		}
+	} else if err != nil && !errors.IsNotFound(err) {
+		reqLogger.Error(err, "Failed to get service", "Service.Namespace", instance.Namespace, "Service.Name", ServiceName)
+		return err
 	} else {
 		// Determine if current service has changed
 		reqLogger.Info("Comparing current and desired services")

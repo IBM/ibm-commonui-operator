@@ -96,16 +96,12 @@ func ReconcileCertificates(ctx context.Context, client client.Client, instance *
 
 		certificate := &certmgr.Certificate{}
 
-		err := client.Get(ctx, types.NamespacedName{Name: certData.Name, Namespace: instance.Namespace}, certificate)
-		if err != nil && !errors.IsNotFound(err) {
-			reqLogger.Error(err, "Failed to get certificate", "Certificate.Namespace", instance.Namespace, "Certificate.Name", certData.Name)
-			return err
+		desiredCertificate, desiredErr := getDesiredCertificate(ctx, client, instance, certData)
+		if desiredErr != nil {
+			return desiredErr
 		}
 
-		desiredCertificate, err := getDesiredCertificate(ctx, client, instance, certData)
-		if err != nil {
-			return err
-		}
+		err := client.Get(ctx, types.NamespacedName{Name: certData.Name, Namespace: instance.Namespace}, certificate)
 
 		if err != nil && errors.IsNotFound(err) {
 			reqLogger.Info("Creating a new certificate", "Certificate.Namespace", desiredCertificate.Namespace, "Certificate.Name", desiredCertificate.Name)
@@ -125,6 +121,9 @@ func ReconcileCertificates(ctx context.Context, client client.Client, instance *
 				// Requeue after creating new certificate
 				*needToRequeue = true
 			}
+		} else if err != nil && !errors.IsNotFound(err) {
+			reqLogger.Error(err, "Failed to get certificate", "Certificate.Namespace", instance.Namespace, "Certificate.Name", certData.Name)
+			return err
 		} else {
 			// Determine if current certificate has changed
 			reqLogger.Info("Comparing current and desired certificates")
