@@ -163,7 +163,7 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 }
 
 func createCustomResource(ctx context.Context, client client.Client, unstruct unstructured.Unstructured, name, href string) error {
-	reqLogger := log.WithValues("func", "createCustomResource", "CR.Name", name)
+	reqLogger := log.WithValues("func", "createCustomResource")
 	reqLogger.Info("Creating CR ", name)
 
 	unstruct.Object["spec"].(map[string]interface{})["href"] = href
