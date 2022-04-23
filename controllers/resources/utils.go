@@ -73,7 +73,7 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 // returns a bool after checking for a zen instance in cs namespace
 func IsAdminHubOnZen(ctx context.Context, client client.Client, namespace string) bool {
 	reqLogger := log.WithValues("func", "adminHubOnZen")
-	reqLogger.Info("Checking zen optional install condition in commonui controller")
+	reqLogger.Info("Checking zen optional install condition")
 
 	zenDeployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -84,13 +84,13 @@ func IsAdminHubOnZen(ctx context.Context, client client.Client, namespace string
 	getError := client.Get(ctx, types.NamespacedName{Name: "zen-core", Namespace: namespace}, zenDeployment)
 
 	if getError == nil {
-		reqLogger.Info("Got ZEN Deployment in commonui controller")
+		reqLogger.Info("Got ZEN Deployment")
 		return true
 	}
 	if errors.IsNotFound(getError) {
-		reqLogger.Info("ZEN deployment not found in commonui controller")
+		reqLogger.Info("ZEN deployment not found")
 	} else {
-		reqLogger.Error(getError, "Error getting ZEN deployment  in commonui controller")
+		reqLogger.Error(getError, "Error getting ZEN deployment")
 	}
 	return false
 }
@@ -109,14 +109,14 @@ func GetKubernetesClusterType(ctx context.Context, client client.Client, namespa
 	getError := client.Get(ctx, types.NamespacedName{Name: "ibm-cpp-config", Namespace: namespace}, ibmProjectK)
 
 	if getError == nil {
-		reqLogger.Info("Got ibm project k config map")
+		reqLogger.Info("Got ibm-cpp-config configmap")
 		clusterType := ibmProjectK.Data["kubernetes_cluster_type"]
 		reqLogger.Info("Kubernetes cluster type is " + clusterType)
 		if clusterType == "cncf" {
 			return true
 		}
 	} else {
-		reqLogger.Error(getError, "error getting ibm project k config map in cs namepace")
+		reqLogger.Error(getError, "error getting ibm-cpp-config configmap in cs namepace")
 	}
 
 	return false
