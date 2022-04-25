@@ -30,6 +30,7 @@ import (
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
+	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -41,6 +42,8 @@ import (
 	commonwebuizencontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebuizen"
 	//+kubebuilder:scaffold:imports
 )
+
+var log = logf.Log.WithName("cmd")
 
 var (
 	scheme   = runtime.NewScheme()
@@ -99,6 +102,34 @@ func main() {
 	})
 	if err != nil {
 		setupLog.Error(err, "unable to start manager")
+		os.Exit(1)
+	}
+
+	// Setup Scheme for all resources
+	if err := clientgoscheme.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	if err := operatorsv1alpha1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	// Setup Scheme for cert-manager
+	if err := certmgr.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	if err := cmmeta.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
+		os.Exit(1)
+	}
+
+	//routes Scheme
+	if err := routesv1.AddToScheme(mgr.GetScheme()); err != nil {
+		log.Error(err, "")
 		os.Exit(1)
 	}
 
