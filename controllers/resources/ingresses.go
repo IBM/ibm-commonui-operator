@@ -41,7 +41,7 @@ func getDesiredAPIIngress(client client.Client, instance *operatorsv1alpha1.Comm
 	logoutIngressPath := ingressPath + "/logout/"
 
 	pathType := netv1.PathType("ImplementationSpecific")
-	var ingress = &netv1.Ingress{}
+	var ingress *netv1.Ingress
 
 	if isCncf {
 		ingress = &netv1.Ingress{
