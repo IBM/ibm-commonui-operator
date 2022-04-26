@@ -1,0 +1,27 @@
+domain: ibm.com
+layout:
+- go.kubebuilder.io/v3
+plugins:
+  manifests.sdk.operatorframework.io/v2: {}
+  scorecard.sdk.operatorframework.io/v2: {}
+projectName: ibm-commonui-operator
+repo: github.com/IBM/ibm-commonui-operator
+resources:
+- api:
+    crdVersion: v1
+    namespaced: true
+  controller: true
+  domain: ibm.com
+  group: operators
+  kind: CommonWebUI
+  path: github.com/IBM/ibm-commonui-operator/api/v1alpha1
+  version: v1alpha1
+- api:
+    crdVersion: v1
+    namespaced: true
+  domain: ibm.com
+  group: operators
+  kind: SwitcherItem
+  path: github.com/IBM/ibm-commonui-operator/api/v1alpha1
+  version: v1alpha1
+version: "3"

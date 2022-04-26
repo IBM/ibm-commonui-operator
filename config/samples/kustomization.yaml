@@ -1,0 +1,5 @@
+## Append samples you want in your CSV to this file as resources ##
+resources:
+- operators.ibm.com_v1alpha1_commonwebui_cr.yaml
+- operators.ibm.com_v1alpha1_switcheritem_cr.yaml
+#+kubebuilder:scaffold:manifestskustomizesamples
