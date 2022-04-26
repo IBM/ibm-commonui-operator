@@ -19,11 +19,11 @@ package resources
 import (
 	"context"
 	"os"
+	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
-	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -123,13 +123,27 @@ func GetKubernetesClusterType(ctx context.Context, client client.Client, namespa
 }
 
 // Returns the int64 representation of a resource string if properly formatted. Otherwise, returns the given default value.
-func GetResourceValueWithDefault(valueStr string, defaultValue int64) int64 {
+func GetResourceLimitsWithDefault(valueStr string, defaultValue int64) int64 {
 	value := defaultValue
 
 	if valueStr != "" {
-		quantity, err := resource.ParseQuantity(valueStr)
-		if err == nil {
-			value = quantity.Value()
+		limit, errLim := strconv.ParseInt(valueStr[0:len(valueStr)-1], 10, 64)
+		if errLim == nil {
+			value = limit
+		}
+	}
+
+	return value
+}
+
+// Returns the int64 representation of a resource string if properly formatted. Otherwise, returns the given default value.
+func GetResourceMemoryWithDefault(valueStr string, defaultValue int64) int64 {
+	value := defaultValue
+
+	if valueStr != "" {
+		memory, errLim := strconv.ParseInt(valueStr[0:len(valueStr)-2], 10, 64)
+		if errLim == nil {
+			value = memory
 		}
 	}
 

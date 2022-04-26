@@ -49,10 +49,10 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 		replicas = 1
 	}
 
-	cpuLimits := GetResourceValueWithDefault(instance.Spec.Resources.Limits.CPULimits, 1000)
-	cpuMemory := GetResourceValueWithDefault(instance.Spec.Resources.Limits.CPUMemory, 512)
-	reqLimits := GetResourceValueWithDefault(instance.Spec.Resources.Requests.RequestLimits, 300)
-	reqMemory := GetResourceValueWithDefault(instance.Spec.Resources.Requests.RequestMemory, 512)
+	cpuLimits := GetResourceLimitsWithDefault(instance.Spec.Resources.Limits.CPULimits, 1000)
+	cpuMemory := GetResourceMemoryWithDefault(instance.Spec.Resources.Limits.CPUMemory, 512)
+	reqLimits := GetResourceLimitsWithDefault(instance.Spec.Resources.Requests.RequestLimits, 300)
+	reqMemory := GetResourceMemoryWithDefault(instance.Spec.Resources.Requests.RequestMemory, 512)
 
 	imageRegistry := GetStringWithDefault(instance.Spec.CommonWebUIConfig.ImageRegistry, DefaultImageRegistry)
 	imageTag := GetStringWithDefault(instance.Spec.CommonWebUIConfig.ImageTag, DefaultImageTag)
