@@ -235,11 +235,11 @@ build-amd64:
 
 build-ppc64le:
 	@echo "Building the ${IMG} ppc64le binary..."
-	@GOARCH=ppc64le common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
+	@GOARCH=ppc64le common/scripts/gobuild.sh build/_output/bin/$(IMG)-ppc64le main.go
 
 build-s390x:
 	@echo "Building the ${IMG} s390x binary..."
-	@GOARCH=s390x common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
+	@GOARCH=s390x common/scripts/gobuild.sh build/_output/bin/$(IMG)-s390x main.go
 
 build-local:
 	@GOOS=darwin common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
