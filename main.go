@@ -20,12 +20,13 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
-	"k8s.io/apimachinery/pkg/runtime"
+	runtimescheme "k8s.io/apimachinery/pkg/runtime"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -40,15 +41,22 @@ import (
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	commonwebuicontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
 	commonwebuizencontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebuizen"
+	"github.com/IBM/ibm-commonui-operator/version"
 	//+kubebuilder:scaffold:imports
 )
 
 var log = logf.Log.WithName("cmd")
 
 var (
-	scheme   = runtime.NewScheme()
+	scheme   = runtimescheme.NewScheme()
 	setupLog = ctrl.Log.WithName("setup")
 )
+
+func printVersion() {
+	log.Info(fmt.Sprintf("Operator Version: %s", version.Version))
+	log.Info(fmt.Sprintf("Go Version: %s", runtime.Version()))
+	log.Info(fmt.Sprintf("Go OS/Arch: %s/%s", runtime.GOOS, runtime.GOARCH))
+}
 
 func init() {
 	// add default kubernetes schemes to controller
@@ -84,6 +92,8 @@ func main() {
 	flag.Parse()
 
 	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+
+	printVersion()
 
 	watchNamespace, err := getWatchNamespace()
 	if err != nil {
