@@ -30,7 +30,7 @@ spec:
     cpuMemory: "256"
     requestLimits: "300"
     requestMemory: "256"
-    imageRegistry: quay.io/opencloudio
+    imageRegistry: icr.io/cpopen
     imageTag: 1.16.0
     serviceName: common-web-ui
   operatorVersion: 1.16.0
