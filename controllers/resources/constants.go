@@ -43,7 +43,7 @@ const CertRestartLabel = "certmanager.k8s.io/time-restarted"
 const NSSAnnotation = "nss.ibm.com/namespaceList"
 
 const DefaultNamespace = "ibm-common-services"
-const DefaultImageRegistry = "icr.io/cpopen"
+const DefaultImageRegistry = "icr.io/cpopen/cpfs"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.2.1"
 
@@ -109,7 +109,7 @@ var ZenNginxConfig = `
 		access_by_lua_file /nginx_data/checkjwt.lua;
 		set_by_lua $nsdomain 'return os.getenv("NS_DOMAIN")';
 		proxy_set_header Host $host;
-		proxy_set_header zen-namespace-domain $nsdomain;      
+		proxy_set_header zen-namespace-domain $nsdomain;
 		proxy_pass https://common-web-ui:3000;
 		proxy_read_timeout 10m;
 	}
