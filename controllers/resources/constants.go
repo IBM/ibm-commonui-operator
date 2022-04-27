@@ -43,7 +43,7 @@ const CertRestartLabel = "certmanager.k8s.io/time-restarted"
 const NSSAnnotation = "nss.ibm.com/namespaceList"
 
 const DefaultNamespace = "ibm-common-services"
-const DefaultImageRegistry = "quay.io/opencloudio"
+const DefaultImageRegistry = "icr.io/cpopen"
 const DefaultImageName = "common-web-ui"
 const DefaultImageTag = "1.2.1"
 

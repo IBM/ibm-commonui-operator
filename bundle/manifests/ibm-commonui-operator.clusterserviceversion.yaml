@@ -47,7 +47,7 @@ metadata:
             "commonWebUIConfig": {
               "cpuLimits": "300",
               "cpuMemory": "256",
-              "imageRegistry": "quay.io/opencloudio",
+              "imageRegistry": "icr.io/cpopen/cpfs",
               "imageTag": "1.16.0",
               "ingressPath": "/common-nav",
               "landingPage": "",
@@ -399,7 +399,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: quay.io/opencloudio/ibm-commonui-operator:1.16.0
+    containerImage: icr.io/cpopen/ibm-commonui-operator:1.16.0
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
     olm.skipRange: '<1.16.0'
@@ -666,14 +666,14 @@ spec:
                     fieldRef:
                       fieldPath: metadata.annotations['olm.targetNamespaces']
                 - name: COMMON_WEB_UI_IMAGE
-                  value: quay.io/opencloudio/common-web-ui:1.16.0
-                image: quay.io/opencloudio/ibm-commonui-operator:1.16.0
+                  value: icr.io/cpopen/cpfs/common-web-ui:1.16.0
+                image: icr.io/cpopen/ibm-commonui-operator:1.16.0
                 imagePullPolicy: Always
                 name: manager
                 livenessProbe:
                   failureThreshold: 10
                   httpGet:
-                    path: /readyz
+                    path: /healthz
                     port: 8081
                   initialDelaySeconds: 120
                   periodSeconds: 60
@@ -681,7 +681,7 @@ spec:
                 readinessProbe:
                   failureThreshold: 10
                   httpGet:
-                    path: /healthz
+                    path: /readyz
                     port: 8081
                   initialDelaySeconds: 3
                   periodSeconds: 20
@@ -873,8 +873,8 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: quay.io/opencloudio/ibm-commonui-operator:1.16.0
+  - image: icr.io/cpopen/ibm-commonui-operator:1.16.0
     name: COMMON_WEB_UI_OPERATOR_IMAGE
-  - image: quay.io/opencloudio/common-web-ui:1.16.0
+  - image: icr.io/cpopen/cpfs/common-web-ui:1.16.0
     name: COMMON_WEB_UI_IMAGE
   version: 1.16.0
