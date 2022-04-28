@@ -21,8 +21,6 @@ import (
 	"encoding/json"
 	"os"
 
-	"golang.org/x/exp/slices"
-
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -372,9 +370,13 @@ func (r *CommonWebUIZenReconciler) updateCommonUIDeployment(ctx context.Context,
 		//Check for env vars that were added and add if necessary (this is quasi migration code from 3.6 EUS forward)
 		// The variables are referred to positionally so they must get added in the correct order
 
-		isZenIdx := slices.IndexFunc(commonDeployment.Spec.Template.Spec.Containers[0].Env,
-			func(v corev1.EnvVar) bool { return v.Name == "USE_ZEN" })
-
+		isZenIdx := -1
+		for i := range commonDeployment.Spec.Template.Spec.Containers[0].Env {
+			if commonDeployment.Spec.Template.Spec.Containers[0].Env[i].Name == "USE_ZEN" {
+				isZenIdx = i
+				break
+			}
+		}
 		if isZenIdx < 0 {
 			commonDeployment.Spec.Template.Spec.Containers[0].Env = append(commonDeployment.Spec.Template.Spec.Containers[0].Env,
 				corev1.EnvVar{Name: "USE_ZEN", Value: isZenStr},
@@ -382,29 +384,30 @@ func (r *CommonWebUIZenReconciler) updateCommonUIDeployment(ctx context.Context,
 			)
 			needUpdate = true
 			reqLogger.Info("Adding env vars to container def: USE_ZEN and APP_VERSION", "USE_ZEN", isZenStr, "APP_VERSION", "")
-		} else {
-			if commonDeployment.Spec.Template.Spec.Containers[0].Env[22].Value != isZenStr {
-				commonDeployment.Spec.Template.Spec.Containers[0].Env[22].Value = isZenStr
-				needUpdate = true
-				reqLogger.Info("Setting container env var USE_ZEN", "USE_ZEN", isZenStr)
-			}
+		} else if commonDeployment.Spec.Template.Spec.Containers[0].Env[22].Value != isZenStr {
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[22].Value = isZenStr
+			needUpdate = true
+			reqLogger.Info("Setting container env var USE_ZEN", "USE_ZEN", isZenStr)
 		}
 
 		//Check for CLUSTER_TYPE env var
-		clusterTypeIdx := slices.IndexFunc(commonDeployment.Spec.Template.Spec.Containers[0].Env,
-			func(v corev1.EnvVar) bool { return v.Name == "CLUSTER_TYPE" })
+		clusterTypeIdx := -1
+		for i := range commonDeployment.Spec.Template.Spec.Containers[0].Env {
+			if commonDeployment.Spec.Template.Spec.Containers[0].Env[i].Name == "CLUSTER_TYPE" {
+				clusterTypeIdx = i
+				break
+			}
+		}
 		if clusterTypeIdx < 0 {
 			commonDeployment.Spec.Template.Spec.Containers[0].Env = append(commonDeployment.Spec.Template.Spec.Containers[0].Env,
 				corev1.EnvVar{Name: "CLUSTER_TYPE", Value: clusterTypeStr},
 			)
 			needUpdate = true
 			reqLogger.Info("Adding env vars to container def: CLUSTER_TYPE", "CLUSTER_TYPE", clusterTypeStr)
-		} else {
-			if commonDeployment.Spec.Template.Spec.Containers[0].Env[24].Value != clusterTypeStr {
-				commonDeployment.Spec.Template.Spec.Containers[0].Env[24].Value = clusterTypeStr
-				needUpdate = true
-				reqLogger.Info("Setting container env var CLUSTER_TYPE", "CLUSTER_TYPE", isZenStr)
-			}
+		} else if commonDeployment.Spec.Template.Spec.Containers[0].Env[24].Value != clusterTypeStr {
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[24].Value = clusterTypeStr
+			needUpdate = true
+			reqLogger.Info("Setting container env var CLUSTER_TYPE", "CLUSTER_TYPE", isZenStr)
 		}
 
 		if needUpdate {
