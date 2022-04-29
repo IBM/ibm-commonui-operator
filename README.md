@@ -113,15 +113,10 @@ Use the following commands to debug the operator installation:
   oc get commonwebuis.operators.ibm.com
   oc describe commonwebuis.operators.ibm.com example-commonwebui
   oc get commonwebuis.operators.ibm.com example-commonwebui -o yaml
-
-  oc get legacyheaders.operators.ibm.com
-  oc describe legacyheaders.operators.ibm.com example-legacyheaderservice
-  oc get legacyheaders.operators.ibm.com example-legacyheaderservice -o yaml
   ```
 
-  If there are nodes for the `commonwebuis` or `legacyheaders` instances, the nodes are deployed successfully.
-
-  Additionally, you can check the logs for each of deployed container.
+  If there are nodes for the `commonwebuis` instances, the nodes are deployed successfully.
+  Additionally, you can check the logs for each of deployed containers for any errors.
 
 - Check the logs for a deployed container:
 
@@ -135,6 +130,15 @@ Use the following commands to debug the operator installation:
   oc describe po -l name=ibm-commonui-operator
   oc logs -f $(oc get po -l name=ibm-commonui-operator -o name)
   ```
+
+- Access the common ui via the route name
+Use the following command to obtain the route for the common ui:
+
+```bash
+oc get route
+```
+
+Use the URL from the HOST/PORT column for the route named cp-console.
 
 ### End-to-End testing
 
