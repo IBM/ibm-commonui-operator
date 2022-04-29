@@ -229,10 +229,9 @@ func (r *CommonWebUIZenReconciler) deleteClassicAdminHubRes(ctx context.Context,
 			reqLogger.Info("Deleted Common UI bind info configmap")
 		}
 	} else if !errors.IsNotFound(getBindinfo) {
-		reqLogger.Error(getBindinfo, "Not found Common UI bind info configmap")
-		return getBindinfo
-	} else {
 		reqLogger.Error(getBindinfo, "Failed to get Common UI bind info configmap")
+	} else {
+		reqLogger.Info("Common UI bind info configmap not found")
 	}
 
 	//Get and delete classic admin hub left nav menu item
