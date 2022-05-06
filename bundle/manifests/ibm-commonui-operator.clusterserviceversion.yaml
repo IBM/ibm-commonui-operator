@@ -877,4 +877,5 @@ spec:
     name: COMMON_WEB_UI_OPERATOR_IMAGE
   - image: icr.io/cpopen/cpfs/common-web-ui:1.16.0
     name: COMMON_WEB_UI_IMAGE
+  replaces: ibm-commonui-operator.v1.15.0
   version: 1.16.0
