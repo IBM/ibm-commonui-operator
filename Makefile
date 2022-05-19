@@ -80,7 +80,8 @@ IMG ?= ibm-commonui-operator
 REGISTRY_DEV ?= quay.io/sgrube
 CSV_VERSION ?= $(VERSION)
 NAMESPACE=ibm-common-services
-COMMON_TAG ?= 1.16.0
+VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
+COMMON_TAG ?= $(VERSION)
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.23
 
