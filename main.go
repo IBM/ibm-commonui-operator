@@ -36,6 +36,7 @@ import (
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
+	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	routesv1 "github.com/openshift/api/route/v1"
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
@@ -64,6 +65,7 @@ func init() {
 
 	// add cert manager scheme to controller
 	utilruntime.Must(certmgr.AddToScheme(scheme))
+	utilruntime.Must(certmgrv1alpha1.AddToScheme(scheme))
 
 	// add cert manager scheme to controller
 	utilruntime.Must(cmmeta.AddToScheme(scheme))

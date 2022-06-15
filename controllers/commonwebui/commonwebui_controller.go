@@ -21,6 +21,7 @@ import (
 	"reflect"
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -183,7 +184,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
 	reqLogger := log.WithValues("func", "deleteCertsv1alpha1", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
-	certificate := &certmgr.Certificate{
+	certificate := &certmgrv1alpha1.Certificate{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      res.UICertName,
 			Namespace: instance.Namespace,
@@ -191,22 +192,26 @@ func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instanc
 	}
 	err := r.Client.Get(ctx, types.NamespacedName{Name: res.UICertName, Namespace: instance.Namespace}, certificate)
 
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("common-web-ui-ca-cert certificate not found")
-	} else {
-		reqLogger.Info("Certificate common-web-ui-ca-cert found, checking api version..")
-		reqLogger.Info("API version is: " + certificate.APIVersion)
-		if certificate.APIVersion == res.Certv1alpha1APIVersion {
-			reqLogger.Info("deleting cert: " + res.UICertName)
-			err = r.Client.Delete(ctx, certificate)
-			if err != nil {
-				reqLogger.Error(err, "Failed to delete")
-			} else {
-				reqLogger.Info("Successfully deleted")
-			}
+	if err != nil {
+		if errors.IsNotFound(err) {
+			reqLogger.Info("common-web-ui-ca-cert certificate not found")
 		} else {
-			reqLogger.Info("API version is NOT v1alpha1, returning..")
+			reqLogger.Error(err, "Error loading common-web-ui-ca-cert certificate")
 		}
+		return
+	}
+	reqLogger.Info("Certificate common-web-ui-ca-cert found, checking api version..")
+	reqLogger.Info("API version is: " + certificate.APIVersion)
+	if certificate.APIVersion == res.Certv1alpha1APIVersion {
+		reqLogger.Info("deleting cert: " + res.UICertName)
+		err = r.Client.Delete(ctx, certificate)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete")
+		} else {
+			reqLogger.Info("Successfully deleted")
+		}
+	} else {
+		reqLogger.Info("API version is NOT v1alpha1, returning..")
 	}
 }
 
