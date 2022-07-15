@@ -132,18 +132,17 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 					} else {
 						reqLogger.Error(err, "Failed to get route for cpd, try again later")
 					}
-				} else {
-					reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-					//Will hold href for admin hub console link
-					var href = "https://" + currentRoute.Spec.Host
-
-					// Create Custom resource
-					if createErr := createCustomResource(ctx, client, unstruct, name, href); createErr != nil {
-						reqLogger.Error(createErr, "Failed to create CR")
-						return createErr
-					}
+					return err
 				}
-				return err
+				reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+				//Will hold href for admin hub console link
+				var href = "https://" + currentRoute.Spec.Host
+
+				// Create Custom resource
+				if createErr := createCustomResource(ctx, client, unstruct, name, href); createErr != nil {
+					reqLogger.Error(createErr, "Failed to create CR")
+					return createErr
+				}
 			} else { //Get the cp-console route
 				err := client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
 				if err != nil {
@@ -152,18 +151,17 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 					} else {
 						reqLogger.Error(err, "Failed to get route for cp-console, try again later")
 					}
-				} else {
-					reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-					//Will hold href for admin hub console link
-					var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
-
-					// Create Custom resource
-					if createErr := createCustomResource(ctx, client, unstruct, name, href); createErr != nil {
-						reqLogger.Error(createErr, "Failed to create CR")
-						return createErr
-					}
+					return err
 				}
-				return err
+				reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
+				//Will hold href for admin hub console link
+				var href = "https://" + currentRoute.Spec.Host + "/common-nav/dashboard"
+
+				// Create Custom resource
+				if createErr := createCustomResource(ctx, client, unstruct, name, href); createErr != nil {
+					reqLogger.Error(createErr, "Failed to create CR")
+					return createErr
+				}
 			}
 		} else {
 			reqLogger.Error(err, "Failed to get ConsoleLink CR", "ConsoleLink.Namespace", instance.Namespace, "ConsoleLink.Name", name)
