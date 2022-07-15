@@ -129,11 +129,10 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 				if err != nil {
 					if errors.IsNotFound(err) {
 						reqLogger.Info("cpd route not found")
-						return err
 					} else {
 						reqLogger.Error(err, "Failed to get route for cpd, try again later")
-						return err
 					}
+					return err
 				} else {
 					reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 					//Will hold href for admin hub console link
@@ -150,11 +149,10 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 				if err != nil {
 					if errors.IsNotFound(err) {
 						reqLogger.Info("cp-console route not found")
-						return err
 					} else {
 						reqLogger.Error(err, "Failed to get route for cp-console, try again later")
-						return err
 					}
+					return err
 				} else {
 					reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 					//Will hold href for admin hub console link
