@@ -6,7 +6,6 @@ metadata:
   creationTimestamp: null
   name: commonwebuis.operators.ibm.com
 spec:
-  x-kubernetes-preserve-unknown-fields: true
   group: operators.ibm.com
   names:
     kind: CommonWebUI
@@ -33,6 +32,7 @@ spec:
           metadata:
             type: object
           spec:
+            x-kubernetes-preserve-unknown-fields: true
             description: CommonWebUISpec defines the desired state of CommonWebUI
             properties:
               commonWebUIConfig:
