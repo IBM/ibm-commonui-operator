@@ -48,7 +48,7 @@ metadata:
               "cpuLimits": "300",
               "cpuMemory": "256",
               "imageRegistry": "icr.io/cpopen/cpfs",
-              "imageTag": "1.18.0",
+              "imageTag": "1.19.0",
               "ingressPath": "/common-nav",
               "landingPage": "",
               "requestLimits": "300",
@@ -76,7 +76,7 @@ metadata:
                 "memory": "256Mi"
               }
             },
-            "version": "1.18.0"
+            "version": "1.19.0"
           }
         },
         {
@@ -399,16 +399,16 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: icr.io/cpopen/ibm-commonui-operator:1.18.0
+    containerImage: icr.io/cpopen/ibm-commonui-operator:1.19.0
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
-    olm.skipRange: '<1.18.0'
+    olm.skipRange: '<1.19.0'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
     operators.operatorframework.io/builder: operator-sdk-v1.18.0+git
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     operators.operatorframework.io/operator-type: 'non-standalone'
-  name: ibm-commonui-operator.v1.18.0
+  name: ibm-commonui-operator.v1.19.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -667,8 +667,8 @@ spec:
                     fieldRef:
                       fieldPath: metadata.annotations['olm.targetNamespaces']
                 - name: COMMON_WEB_UI_IMAGE
-                  value: icr.io/cpopen/cpfs/common-web-ui:1.18.0
-                image: icr.io/cpopen/ibm-commonui-operator:1.18.0
+                  value: icr.io/cpopen/cpfs/common-web-ui:1.19.0
+                image: icr.io/cpopen/ibm-commonui-operator:1.19.0
                 imagePullPolicy: Always
                 name: manager
                 livenessProbe:
@@ -874,8 +874,8 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: icr.io/cpopen/ibm-commonui-operator:1.18.0
+  - image: icr.io/cpopen/ibm-commonui-operator:1.19.0
     name: COMMON_WEB_UI_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/common-web-ui:1.18.0
+  - image: icr.io/cpopen/cpfs/common-web-ui:1.19.0
     name: COMMON_WEB_UI_IMAGE
-  version: 1.18.0
+  version: 1.19.0
