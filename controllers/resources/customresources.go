@@ -127,7 +127,12 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 			if isZen {
 				err := client.Get(ctx, types.NamespacedName{Name: "cpd", Namespace: instance.Namespace}, currentRoute)
 				if err != nil {
-					reqLogger.Error(err, "Failed to get route for cpd, try again later")
+					if errors.IsNotFound(err) {
+						reqLogger.Info("cpd route not found")
+					} else {
+						reqLogger.Error(err, "Failed to get route for cpd, try again later")
+					}
+					return err
 				}
 				reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 				//Will hold href for admin hub console link
@@ -141,7 +146,12 @@ func ReconcileConsoleLink(ctx context.Context, client client.Client, instance *o
 			} else { //Get the cp-console route
 				err := client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: instance.Namespace}, currentRoute)
 				if err != nil {
-					reqLogger.Error(err, "Failed to get route for cp-console, try again later")
+					if errors.IsNotFound(err) {
+						reqLogger.Info("cp-console route not found")
+					} else {
+						reqLogger.Error(err, "Failed to get route for cp-console, try again later")
+					}
+					return err
 				}
 				reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
 				//Will hold href for admin hub console link

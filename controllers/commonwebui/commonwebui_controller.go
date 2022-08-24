@@ -19,6 +19,7 @@ package controllers
 import (
 	"context"
 	"reflect"
+	"time"
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
@@ -135,10 +136,12 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	}
 
 	// Check if the ConsoleLink CR already exists. If not, create a new one.
+	ifRouteFound := true
 	if !isCncf {
 		err = res.ReconcileConsoleLink(ctx, r.Client, instance, isZen, &needToRequeue)
 		if err != nil {
-			return ctrl.Result{}, err
+			reqLogger.Info(err.Error())
+			ifRouteFound = false
 		}
 	}
 
@@ -175,6 +178,10 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	err = r.updateStatus(ctx, instance)
 	if err != nil {
 		return ctrl.Result{}, err
+	}
+
+	if !ifRouteFound {
+		return ctrl.Result{RequeueAfter: 1 * time.Minute}, nil
 	}
 
 	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
