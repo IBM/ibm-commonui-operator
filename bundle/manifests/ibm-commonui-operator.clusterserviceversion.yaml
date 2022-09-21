@@ -408,6 +408,7 @@ metadata:
     support: IBM
     operators.operatorframework.io/builder: operator-sdk-v1.18.0+git
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
+    operators.operatorframework.io/operator-type: 'non-standalone'
   name: ibm-commonui-operator.v1.17.4
   namespace: placeholder
 spec:
