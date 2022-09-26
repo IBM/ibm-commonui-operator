@@ -5,7 +5,7 @@ metadata:
     alm-examples: '[]'
     capabilities: Basic Install
     operators.operatorframework.io/operator-type: 'non-standalone'
-  name: ibm-commonui-operator.v1.19.0
+  name: ibm-commonui-operator.v1.20.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -131,8 +131,8 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: icr.io/cpopen/ibm-commonui-operator:1.19.0
+  - image: icr.io/cpopen/ibm-commonui-operator:1.20.0
     name: COMMON_WEB_UI_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/common-web-ui:1.19.0
+  - image: icr.io/cpopen/cpfs/common-web-ui:1.20.0
     name: COMMON_WEB_UI_IMAGE
-  version: 1.19.0
+  version: 1.20.0
