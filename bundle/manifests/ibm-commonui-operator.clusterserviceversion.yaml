@@ -48,7 +48,7 @@ metadata:
               "cpuLimits": "300",
               "cpuMemory": "256",
               "imageRegistry": "icr.io/cpopen/cpfs",
-              "imageTag": "1.17.4",
+              "imageTag": "1.17.5",
               "ingressPath": "/common-nav",
               "landingPage": "",
               "requestLimits": "300",
@@ -64,7 +64,7 @@ metadata:
               "osAuth": "",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "1.17.4",
+            "operatorVersion": "1.17.5",
             "replicas": 1,
             "resources": {
               "limits": {
@@ -76,7 +76,7 @@ metadata:
                 "memory": "256Mi"
               }
             },
-            "version": "1.17.4"
+            "version": "1.17.5"
           }
         },
         {
@@ -400,16 +400,16 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: icr.io/cpopen/ibm-commonui-operator:1.17.4
+    containerImage: icr.io/cpopen/ibm-commonui-operator:1.17.5
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
-    olm.skipRange: '<1.17.4'
+    olm.skipRange: '<1.17.5'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
     operators.operatorframework.io/builder: operator-sdk-v1.18.0+git
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     operators.operatorframework.io/operator-type: 'non-standalone'
-  name: ibm-commonui-operator.v1.17.4
+  name: ibm-commonui-operator.v1.17.5
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -668,8 +668,8 @@ spec:
                     fieldRef:
                       fieldPath: metadata.annotations['olm.targetNamespaces']
                 - name: COMMON_WEB_UI_IMAGE
-                  value: icr.io/cpopen/cpfs/common-web-ui:1.17.4
-                image: icr.io/cpopen/ibm-commonui-operator:1.17.4
+                  value: icr.io/cpopen/cpfs/common-web-ui:1.17.5
+                image: icr.io/cpopen/ibm-commonui-operator:1.17.5
                 imagePullPolicy: Always
                 name: manager
                 livenessProbe:
@@ -875,9 +875,9 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: icr.io/cpopen/ibm-commonui-operator:1.17.4
+  - image: icr.io/cpopen/ibm-commonui-operator:1.17.5
     name: COMMON_WEB_UI_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/common-web-ui:1.17.4
+  - image: icr.io/cpopen/cpfs/common-web-ui:1.17.5
     name: COMMON_WEB_UI_IMAGE
-  replaces: ibm-commonui-operator.v1.17.3
-  version: 1.17.4
+  replaces: ibm-commonui-operator.v1.17.4
+  version: 1.17.5
