@@ -158,7 +158,7 @@ var ZenCardExtensions = `
         "extension_name": "homepage_resource_documentation",
         "display_name": "{{ .global_zen_homepage_nav_documentation }}",
         "order_hint": 100,
-        "match_permissions": "",
+        "match_permissions": "administrator",
         "match_instance_id": "",
         "match_instance_role": "",
         "meta": {},
@@ -303,7 +303,7 @@ var ZenCardExtensions = `
         "extension_name": "homepage_card_workload_summary",
         "display_name": "{{ .global_zen_homepage_card_workload_summary }}",
         "order_hint": 0,
-        "match_permissions": "",
+        "match_permissions": "administrator",
         "match_instance_id": "",
         "match_instance_role": "",
         "meta": {
@@ -447,7 +447,7 @@ var ZenCardExtensionsCncf = `
         "extension_name": "homepage_resource_documentation",
         "display_name": "{{ .global_zen_homepage_nav_documentation }}",
         "order_hint": 100,
-        "match_permissions": "",
+        "match_permissions": "administrator",
         "match_instance_id": "",
         "match_instance_role": "",
         "meta": {},
@@ -599,7 +599,7 @@ var ZenWalkmeExtensions = `
 		"extension_name":"guided_tours",
 		"display_name":"Guided tours",
 		"description":"",
-		"match_permissions":"",
+		"match_permissions":"administrator",
 		"meta":null,
 		"details":{
 		  "lite_tours_src": "/common-nav/walkme/walkme_760e1a0cad93453f8cc129ce436f336e_https.js"
