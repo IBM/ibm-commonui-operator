@@ -926,7 +926,8 @@ var AdminHubNavConfig = `
 		  "logrotate, v3.8.6, GPL v2",
 		  "checker-qual, version 2.0.0, GPLv2",
 		  "ocrad-bower, v1.0.0, GPL v3",
-		  "Grafana, v7.5.12, AGPL"
+		  "Grafana, v7.5.12, AGPL",
+		  "IBM Semeru Runtime Open Edition binaries, GPL v2"
 		],
 		"logoUrl": "IBM Cloud Pak | Administration Hub",
 		"logoAltText": "IBM Cloud Pak | Administration Hub"
