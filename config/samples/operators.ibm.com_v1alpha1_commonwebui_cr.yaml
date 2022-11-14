@@ -31,7 +31,7 @@ spec:
     requestLimits: "300"
     requestMemory: "256"
     imageRegistry: icr.io/cpopen/cpfs
-    imageTag: 1.20.0
+    imageTag: 4.0.0
     serviceName: common-web-ui
-  operatorVersion: 1.20.0
-  version: 1.20.0
+  operatorVersion: 4.0.0
+  version: 4.0.0
