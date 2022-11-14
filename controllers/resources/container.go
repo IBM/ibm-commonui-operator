@@ -213,5 +213,9 @@ var CommonContainer = corev1.Container{
 			Name:  "CLUSTER_TYPE",
 			Value: "unknown",
 		},
+		{
+			Name:  "STANDALONE_MODE",
+			Value: "false",
+		},
 	},
 }

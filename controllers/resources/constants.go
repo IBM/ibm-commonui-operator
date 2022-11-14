@@ -95,6 +95,7 @@ const ZenWalkmeExtensionsConfigMapName = "common-web-ui-zen-walkme-extensions"
 
 const ZenDeploymentName = "zen-core"
 const ZenProductConfigMapName = "product-configmap"
+const IbmCppConfigMapName = "ibm-cpp-config"
 
 var ZenPcmMap = map[string]string{
 	"CLOUD_PAK_TYPE":           "admin",

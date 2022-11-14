@@ -19,6 +19,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -33,7 +34,7 @@ import (
 )
 
 //nolint
-func getDesiredDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool) (*appsv1.Deployment, error) {
+func getDesiredDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isStandaloneMode bool, isCncf bool) (*appsv1.Deployment, error) {
 	reqLogger := log.WithValues("func", "getDesiredDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
 	volumes := []corev1.Volume{}
@@ -89,6 +90,9 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 		reqLogger.Info("Setting cluster type env var to cncf")
 		container.Env[24].Value = "cncf"
 	}
+
+	reqLogger.Info("Setting standalonemode to " + strconv.FormatBool(isStandaloneMode))
+	container.Env[25].Value = strconv.FormatBool(isStandaloneMode)
 
 	deployment := &appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -200,13 +204,13 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 }
 
 //nolint
-func ReconcileDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool, needToRequeue *bool) error {
+func ReconcileDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool, isStandaloneMode bool, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling deployment")
 
 	deployment := &appsv1.Deployment{}
 
-	desiredDeployment, desiredErr := getDesiredDeployment(ctx, client, instance, isZen, isCncf)
+	desiredDeployment, desiredErr := getDesiredDeployment(ctx, client, instance, isZen, isStandaloneMode, isCncf)
 	if desiredErr != nil {
 		return desiredErr
 	}
