@@ -86,7 +86,7 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 	}
 
 	// Check to see if Zen instance exists in common services namespace
-	isZen := res.IsAdminHubOnZen(ctx, r.Client, namespace)
+	isZen := false //ZEN Support is currently DISABLED res.IsAdminHubOnZen(ctx, r.Client, namespace)
 
 	// Check to see kubernetes cluster type is cncf
 	isCncf := res.GetKubernetesClusterType(ctx, r.Client, namespace)
