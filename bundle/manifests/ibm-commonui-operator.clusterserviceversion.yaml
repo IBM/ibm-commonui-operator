@@ -524,6 +524,7 @@ spec:
   install:
     spec:
       clusterPermissions:
+      - rules:
         - nonResourceURLs:
           - /products
           - /health
