@@ -612,6 +612,14 @@ spec:
       permissions:
       - rules:
         - apiGroups:
+          - route.openshift.io
+          resources:
+          - routes
+          verbs:
+          - get
+          - list
+          - watch
+        - apiGroups:
           - ""
           resources:
           - pods
