@@ -9,6 +9,14 @@ metadata:
   name: ibm-commonui-operator
 rules:
 - apiGroups:
+  - route.openshift.io
+  resources:
+  - routes
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
   - ""
   resources:
   - pods
