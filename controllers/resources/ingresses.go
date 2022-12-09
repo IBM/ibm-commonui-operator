@@ -32,13 +32,17 @@ import (
 // type DesiredStateGetter func(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error)
 
 func ReconcileRemoveIngresses(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) {
-	//reqLogger := log.WithValues("func", "reconcileRemoveIngresses", "Name", ingressName, "Namespace", ingressNS)
+	reqLogger := log.WithValues("func", "ReconcileRemoveIngresses")
 
 	//No error checking as we will just make a best attempt to remove the legacy ingresses
 	//Do not fail based on inability to delete the ingresses
-	DeleteIngress(ctx, client, APIIngressName, instance.Namespace, needToRequeue)
-	DeleteIngress(ctx, client, CallbackIngressName, instance.Namespace, needToRequeue)
-	DeleteIngress(ctx, client, NavIngressName, instance.Namespace, needToRequeue)
+	ingresses := []string{APIIngressName, CallbackIngressName, NavIngressName}
+	for _, iname := range ingresses {
+		err := DeleteIngress(ctx, client, iname, instance.Namespace, needToRequeue)
+		if err != nil {
+			reqLogger.Info("Failed to delete legacy ingress " + iname)
+		}
+	}
 }
 
 func DeleteIngress(ctx context.Context, client client.Client, ingressName string, ingressNS string, needToRequeue *bool) error {

@@ -31,11 +31,11 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
-const CN_ROUTE_NAME = "common-web-ui"
-const CN_ROUTE_PATH = "/common-nav"
+const CnRouteName = "common-web-ui"
+const CnRoutePath = "/common-nav"
 
-const CB_ROUTE_NAME = "common-web-ui-callback"
-const CB_ROUTE_PATH = "/auth/liberty/callback"
+const CbRouteName = "common-web-ui-callback"
+const CbRoutePath = "/auth/liberty/callback"
 
 func ReconcileRoutes(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 
@@ -72,24 +72,24 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 		return err
 	}
 
-	if clusterInfoConfigMap.Data == nil || len(clusterInfoConfigMap.Data["cluster_address"]) <= 0 {
+	if clusterInfoConfigMap.Data == nil || len(clusterInfoConfigMap.Data["cluster_address"]) == 0 {
 		return fmt.Errorf("cluster_address is not set in configmap %s", ClusterInfoConfigmapName)
 	}
 
 	routeHost = clusterInfoConfigMap.Data["cluster_address"]
 
-	cnAnnotations := map[string]string{"haproxy.router.openshift.io/rewrite-target": CN_ROUTE_PATH,
+	cnAnnotations := map[string]string{"haproxy.router.openshift.io/rewrite-target": CnRoutePath,
 		"haproxy.router.openshift.io/timeout": "90s"}
 
-	err = ReconcileRoute(ctx, client, instance, CN_ROUTE_NAME, cnAnnotations, routeHost, CN_ROUTE_PATH, destinationCAcert, needToRequeue)
+	err = ReconcileRoute(ctx, client, instance, CnRouteName, cnAnnotations, routeHost, CnRoutePath, destinationCAcert, needToRequeue)
 	if err != nil {
 		return err
 	}
 
-	cbAnnotations := map[string]string{"haproxy.router.openshift.io/rewrite-target": CB_ROUTE_PATH,
+	cbAnnotations := map[string]string{"haproxy.router.openshift.io/rewrite-target": CbRoutePath,
 		"haproxy.router.openshift.io/timeout": "90s"}
 
-	err = ReconcileRoute(ctx, client, instance, CB_ROUTE_NAME, cbAnnotations, routeHost, CB_ROUTE_PATH, destinationCAcert, needToRequeue)
+	err = ReconcileRoute(ctx, client, instance, CbRoutePath, cbAnnotations, routeHost, CbRoutePath, destinationCAcert, needToRequeue)
 	if err != nil {
 		return err
 	}
