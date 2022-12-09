@@ -21,6 +21,7 @@ import (
 	"reflect"
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	route "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -373,6 +374,42 @@ func IsIngressEqual(oldIngress, newIngress *netv1.Ingress) bool {
 	}
 
 	logger.Info("Ingresses are equal", "Ingress.Name", oldIngress.ObjectMeta.Name)
+
+	return true
+}
+
+// Use DeepEqual to determine if 2 routes are equal.
+// Check annotations and Spec.
+// If there are any differences, return false. Otherwise, return true.
+func IsRouteEqual(oldRoute, newRoute *route.Route) bool {
+	logger := log.WithValues("func", "IsRouteEqual")
+
+	if !reflect.DeepEqual(oldRoute.ObjectMeta.Name, newRoute.ObjectMeta.Name) {
+		logger.Info("Names not equal", "old", oldRoute.ObjectMeta.Name, "new", newRoute.ObjectMeta.Name)
+		return false
+	}
+
+	if !reflect.DeepEqual(oldRoute.ObjectMeta.Annotations, newRoute.ObjectMeta.Annotations) {
+		logger.Info("Annotations not equal",
+			"old", fmt.Sprintf("%v", oldRoute.ObjectMeta.Annotations),
+			"new", fmt.Sprintf("%v", newRoute.ObjectMeta.Annotations))
+		return false
+	}
+
+	if !reflect.DeepEqual(oldRoute.Spec, newRoute.Spec) {
+		//ugly, but don't print the CA to the log
+		logger.Info("Specs not equal", "oldHost", oldRoute.Spec.Host, "newHost", newRoute.Spec.Host,
+			"oldPath", oldRoute.Spec.Path, "newHost", newRoute.Spec.Path,
+			"oldWildcardPolicy", oldRoute.Spec.WildcardPolicy, "newWildcardPolicy", newRoute.Spec.WildcardPolicy,
+			"oldPort", fmt.Sprintf("%v", oldRoute.Spec.Port), "newPort", fmt.Sprintf("%v", newRoute.Spec.Port),
+			"oldToService", fmt.Sprintf("%v", oldRoute.Spec.To), "newToService", fmt.Sprintf("%v", newRoute.Spec.To),
+			"old.tls.termination", oldRoute.Spec.TLS.Termination, "new.tls.termination", newRoute.Spec.TLS.Termination,
+			"old.tls.insecureEdgeTerminationPolicy", oldRoute.Spec.TLS.InsecureEdgeTerminationPolicy,
+			"new.tls.insecureEdgeTerminationPolicy", newRoute.Spec.TLS.InsecureEdgeTerminationPolicy)
+		return false
+	}
+
+	logger.Info("Routes are equal")
 
 	return true
 }
