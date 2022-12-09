@@ -83,7 +83,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	if request.Name == "NON_OWNED_OBJECT_RECONCILE" {
 		crList := &operatorsv1alpha1.CommonWebUIList{}
 		err := r.Client.List(ctx, crList, client.InNamespace(instance.Namespace))
-		if err != nil || len(crList.Items) <= 0 {
+		if err != nil || len(crList.Items) == 0 {
 			reqLogger.Error(err, "Cluster config configmap has changed, but unable to load list of CommonWebUI CRs")
 			return ctrl.Result{}, err
 		}

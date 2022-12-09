@@ -89,7 +89,7 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 	cbAnnotations := map[string]string{"haproxy.router.openshift.io/rewrite-target": CbRoutePath,
 		"haproxy.router.openshift.io/timeout": "90s"}
 
-	err = ReconcileRoute(ctx, client, instance, CbRoutePath, cbAnnotations, routeHost, CbRoutePath, destinationCAcert, needToRequeue)
+	err = ReconcileRoute(ctx, client, instance, CbRouteName, cbAnnotations, routeHost, CbRoutePath, destinationCAcert, needToRequeue)
 	if err != nil {
 		return err
 	}
