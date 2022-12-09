@@ -619,6 +619,24 @@ spec:
           - get
           - list
           - watch
+          - create
+          - delete
+          - update
+          - patch
+        - apiGroups:
+          - route.openshift.io
+          resources:
+          - routes/custom-host
+          verbs:
+          - create
+        - apiGroups:
+          - route.openshift.io
+          resources:
+          - routes/status
+          verbs:
+          - get
+          - list
+          - watch
         - apiGroups:
           - ""
           resources:

@@ -18,11 +18,13 @@ package controllers
 
 import (
 	"context"
+	"os"
 	"reflect"
 	"time"
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
+	route "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
@@ -31,8 +33,13 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
 	ctrl "sigs.k8s.io/controller-runtime"
+	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
+	"sigs.k8s.io/controller-runtime/pkg/event"
+	"sigs.k8s.io/controller-runtime/pkg/handler"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
+	"sigs.k8s.io/controller-runtime/pkg/predicate"
+	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
@@ -63,22 +70,36 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling CommonWebUI Controller")
 
+	var err error
+
 	// if we need to create several resources, set a flag so we just requeue one time instead of after each create.
 	needToRequeue := false
 
 	// Fetch the CommonWebUIService CR instance
 	instance := &operatorsv1alpha1.CommonWebUI{}
 
-	err := r.Client.Get(ctx, request.NamespacedName, instance)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			// Request object not found, could have been deleted after reconcile request.
-			// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
-			// Return and don't requeue
-			return ctrl.Result{}, nil
+	//If the ibmcloud-cluster-info configmap has been updated then we need to reconcile routes
+	//Since this isn't owned by our CR, we need to look our CR up
+	if request.Name == "NON_OWNED_OBJECT_RECONCILE" {
+		crList := &operatorsv1alpha1.CommonWebUIList{}
+		err := r.Client.List(ctx, crList, client.InNamespace(instance.Namespace))
+		if err != nil || len(crList.Items) <= 0 {
+			reqLogger.Error(err, "Cluster config configmap has changed, but unable to load list of CommonWebUI CRs")
+			return ctrl.Result{}, err
 		}
-		// Error reading the object - requeue the request.
-		return ctrl.Result{}, err
+		instance = &crList.Items[0]
+	} else {
+		err = r.Client.Get(ctx, request.NamespacedName, instance)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				// Request object not found, could have been deleted after reconcile request.
+				// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.
+				// Return and don't requeue
+				return ctrl.Result{}, nil
+			}
+			// Error reading the object - requeue the request.
+			return ctrl.Result{}, err
+		}
 	}
 
 	reqLogger.Info("CommonWebUI instance version: " + instance.Spec.OperatorVersion)
@@ -117,23 +138,17 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	// Check if the API ingress already exists. If not, create a new one.
-	err = res.ReconcileAPIIngress(ctx, r.Client, instance, isCncf, &needToRequeue)
-	if err != nil {
-		return ctrl.Result{}, err
+	// Reconcile the required routes if this is not a cncf cluster
+	if !isCncf {
+		err = res.ReconcileRoutes(ctx, r.Client, instance, &needToRequeue)
+		if err != nil {
+			return ctrl.Result{}, err
+		}
 	}
 
-	// Check if the callback ingress already exists. If not, create a new one.
-	err = res.ReconcileCallbackIngress(ctx, r.Client, instance, &needToRequeue)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
-	// Check if the common-nav ingress already exists. If not, create a new one.
-	err = res.ReconcileNavIngress(ctx, r.Client, instance, &needToRequeue)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
+	// Remove any legacy ingresses if they are found (this would only be on migration)
+	// This was for cloudpak 3.0 work
+	res.ReconcileRemoveIngresses(ctx, r.Client, instance, &needToRequeue)
 
 	// Check if the ConsoleLink CR already exists. If not, create a new one.
 	ifRouteFound := true
@@ -280,8 +295,27 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 	return nil
 }
 
+func clusterInfoCmPredicate() predicate.Predicate {
+	namespace := os.Getenv("WATCH_NAMESPACE")
+	return predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			if e.ObjectNew.GetName() == res.ClusterInfoConfigmapName && e.ObjectNew.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+		CreateFunc: func(e event.CreateEvent) bool {
+			if e.Object.GetName() == res.ClusterInfoConfigmapName && e.Object.GetNamespace() == namespace {
+				return true
+			}
+			return false
+		},
+	}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&operatorsv1alpha1.CommonWebUI{}).
 		Owns(&corev1.ConfigMap{}).
@@ -289,5 +323,15 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Service{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&certmgr.Certificate{}).
+		Owns(&route.Route{}).
+		Watches(&source.Kind{Type: &corev1.ConfigMap{}},
+			handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
+				return []ctrl.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      "NON_OWNED_OBJECT_RECONCILE",
+						Namespace: a.GetNamespace(),
+					}},
+				}
+			}), builder.WithPredicates(clusterInfoCmPredicate())).
 		Complete(r)
 }

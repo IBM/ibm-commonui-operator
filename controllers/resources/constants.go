@@ -37,6 +37,8 @@ const ServiceName = "common-web-ui"
 const CommonWebUICRType = "commonwebuiservice_cr"
 const ConsoleRouteName = "cp-console"
 
+const ClusterInfoConfigmapName = "ibmcloud-cluster-info"
+
 const DaemonSetName = "common-web-ui"
 
 const CertRestartLabel = "certmanager.k8s.io/time-restarted"
