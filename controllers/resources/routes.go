@@ -20,7 +20,6 @@ import (
 	"context"
 	"fmt"
 
-	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	route "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -29,6 +28,8 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
 const CnRouteName = "common-web-ui"
