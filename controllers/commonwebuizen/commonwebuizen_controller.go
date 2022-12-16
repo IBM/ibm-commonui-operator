@@ -75,15 +75,16 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 	// if we need to create several resources, set a flag so we just requeue one time instead of after each create.
 	needToRequeue := false
 
-	if request.Name == "RECONCILE-ZEN-PRODUCT-CONFIGMAP" {
-		reqLogger.Info("Change to zen product configmap " + res.ZenProductConfigMapName + " detected - reconciling common webui updates")
-		// Check if the config maps already exist. If not, create a new one.
-		err := res.ReconcileZenProductConfigMap(ctx, r.Client, request, &needToRequeue)
-		if err != nil {
-			return ctrl.Result{}, err
-		}
-		return ctrl.Result{}, nil
-	}
+	//ZEN support is currently DISABLED
+	//if request.Name == "RECONCILE-ZEN-PRODUCT-CONFIGMAP" {
+	//	reqLogger.Info("Change to zen product configmap " + res.ZenProductConfigMapName + " detected - reconciling common webui updates")
+	// Check if the config maps already exist. If not, create a new one.
+	//	err := res.ReconcileZenProductConfigMap(ctx, r.Client, request, &needToRequeue)
+	//	if err != nil {
+	//		return ctrl.Result{}, err
+	//	}
+	//	return ctrl.Result{}, nil
+	//}
 
 	// Check to see if Zen instance exists in common services namespace
 	isZen := false //ZEN Support is currently DISABLED res.IsAdminHubOnZen(ctx, r.Client, namespace)
