@@ -163,6 +163,17 @@ var CommonContainer = corev1.Container{
 			},
 		},
 		{
+			Name: "OSAUTH_ENABLED",
+			ValueFrom: &corev1.EnvVarSource{
+				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
+					LocalObjectReference: corev1.LocalObjectReference{
+						Name: "platform-auth-idp",
+					},
+					Key: "OSAUTH_ENABLED",
+				},
+			},
+		},	
+		{
 			Name:  "USE_HTTPS",
 			Value: "true",
 		},
