@@ -172,7 +172,7 @@ var CommonContainer = corev1.Container{
 					Key: "OSAUTH_ENABLED",
 				},
 			},
-		},	
+		},
 		{
 			Name:  "USE_HTTPS",
 			Value: "true",
