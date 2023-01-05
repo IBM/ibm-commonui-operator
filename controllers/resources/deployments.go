@@ -70,7 +70,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 	container.Env[9].Value = instance.Spec.GlobalUIConfig.EnterpriseLDAP
 	container.Env[10].Value = instance.Spec.GlobalUIConfig.EnterpriseSAML
 	container.Env[11].Value = instance.Spec.GlobalUIConfig.OSAuth
-	container.Env[20].Value = instance.Spec.CommonWebUIConfig.LandingPage
+	container.Env[19].Value = instance.Spec.CommonWebUIConfig.LandingPage
 	container.Resources.Limits["cpu"] = *resource.NewMilliQuantity(cpuLimits, resource.DecimalSI)
 	container.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
 	container.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
@@ -79,15 +79,15 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 
 	if isZen {
 		reqLogger.Info("Setting use zen to true in container def")
-		container.Env[23].Value = "true"
+		container.Env[22].Value = "true"
 	} else {
 		reqLogger.Info("Setting use zen to false in container def")
-		container.Env[23].Value = "false"
+		container.Env[22].Value = "false"
 	}
 
 	if isCncf {
 		reqLogger.Info("Setting cluster type env var to cncf")
-		container.Env[25].Value = "cncf"
+		container.Env[24].Value = "cncf"
 	}
 
 	deployment := &appsv1.Deployment{
@@ -215,7 +215,7 @@ func ReconcileDeployment(ctx context.Context, client client.Client, instance *op
 
 	if err != nil && errors.IsNotFound(err) {
 		reqLogger.Info("Creating a new deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
-		reqLogger.Info("ENV OF NEW DEPLOYMENT", "ENV", desiredDeployment.Spec.Template.Spec.Containers[0].Env)
+
 		err = client.Create(ctx, desiredDeployment)
 		if err != nil {
 			if errors.IsAlreadyExists(err) {
