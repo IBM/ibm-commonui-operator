@@ -126,6 +126,12 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
+	// Check if the common-web-ui-config configmap already exists. If not, create a new one.
+	err = res.ReconcileCommonUIConfigConfigMap(ctx, r.Client, instance, &needToRequeue)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// Check if the deployment already exists. If not, create a new one.
 	err = res.ReconcileDeployment(ctx, r.Client, instance, isZen, isCncf, &needToRequeue)
 	if err != nil {
