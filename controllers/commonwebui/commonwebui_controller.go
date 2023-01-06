@@ -105,7 +105,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	// Check if the log4js configmap already exists. If not, create a new one.
+	// Check if the common-web-ui-config configmap already exists. If not, create a new one.
 	err = res.ReconcileCommonUIConfigConfigMap(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		return ctrl.Result{}, err
