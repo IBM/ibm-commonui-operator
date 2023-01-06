@@ -91,6 +91,38 @@ func ReconcileLog4jsConfigMap(ctx context.Context, client client.Client, instanc
 	return nil
 }
 
+func ReconcileCommonUIConfigConfigMap(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
+	reqLogger := log.WithValues("func", "reconcileCommonUiConfigConfigMap", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+	reqLogger.Info("Reconciling common-web-ui-config configmap")
+
+	cm := &corev1.ConfigMap{}
+
+	// Check if the log4js configmap already exists, if not create a new one
+	err := client.Get(ctx, types.NamespacedName{Name: CommonConfigMapName, Namespace: instance.Namespace}, cm)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			cm = &corev1.ConfigMap{
+				ObjectMeta: metav1.ObjectMeta{
+					Name:      CommonConfigMapName,
+					Namespace: instance.Namespace,
+					Labels: map[string]string{"app.kubernetes.io/instance": "ibm-commonui-operator",
+						"app.kubernetes.io/name": CommonConfigMapName, "app.kubernetes.io/managed-by": "ibm-commonui-operator"},
+				},
+			}
+
+			err = createConfigMap(ctx, client, cm, instance, needToRequeue)
+			if err != nil {
+				return err
+			}
+		} else {
+			reqLogger.Error(err, "Failed to get common-web-ui-config configmap")
+			return err
+		}
+	}
+
+	return nil
+}
+
 func ZenLeftNavExtensionsConfigMap(namespace string, data map[string]string) *corev1.ConfigMap {
 	reqLogger := log.WithValues("func", "ZenLeftNavExtensionsConfigMap")
 	reqLogger.Info("CS??? Entry")
