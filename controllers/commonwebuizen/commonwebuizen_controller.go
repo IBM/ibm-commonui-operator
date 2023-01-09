@@ -484,25 +484,8 @@ func (r *CommonWebUIZenReconciler) deleteZenAdminHubRes(ctx context.Context, nam
 		}
 	}
 
-	currentConfigMap2 := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.CommonConfigMapName,
-			Namespace: namespace,
-		},
-	}
-	getError3 := r.Client.Get(ctx, types.NamespacedName{Name: res.CommonConfigMapName, Namespace: namespace}, currentConfigMap2)
-
-	if getError3 == nil {
-		reqLogger.Info("Got common web ui config")
-		err := r.Client.Delete(ctx, currentConfigMap2)
-		if err != nil {
-			reqLogger.Error(err, "Failed to delete common web ui config")
-		} else {
-			reqLogger.Info("Deleted common web ui config")
-		}
-	} else if !errors.IsNotFound(getError3) {
-		reqLogger.Error(getError3, "Failed to get common web ui config")
-	}
+	//We are no longer deleting the common-web-ui-config configmap as it is used for other settiongs
+	//Additionally, the commonwebui_controller will also attempt to create this configmap
 
 	return nil
 }
