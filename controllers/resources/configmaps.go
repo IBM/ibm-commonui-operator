@@ -29,7 +29,6 @@ import (
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
-	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
@@ -169,55 +168,6 @@ func CommonWebUIConfigMap(namespace string) *corev1.ConfigMap {
 	}
 
 	return configmap
-}
-
-func ReconcileZenProductConfigMap(ctx context.Context, client client.Client, request ctrl.Request, needToRequeue *bool) error {
-	reqLogger := log.WithValues("func", "ReconcileZenProductConfigMap", "request", request)
-
-	productConfigMap := &corev1.ConfigMap{}
-	err := client.Get(ctx, types.NamespacedName{Name: ZenProductConfigMapName, Namespace: request.Namespace}, productConfigMap)
-	if err != nil {
-		if errors.IsNotFound(err) {
-			//The zen product-configmap doesn't exist, if this is a zen adminhub instance then there is nothing to do, however
-			//in this case the product-configmap will already exist so in theory we should never get here in that condition
-			reqLogger.Info("Zen product configmap " + ZenProductConfigMapName + " was not found - assumed to be deleted")
-			return nil
-		}
-
-		reqLogger.Error(err, "Failed to get zen product configmap "+ZenProductConfigMapName)
-		return err
-	}
-
-	//If the requested fields are missing or not equal, then update the configmap
-	update := false
-
-	if productConfigMap.Data == nil {
-		productConfigMap.Data = map[string]string{}
-	}
-
-	for key, element := range ZenPcmMap {
-		zelement, ok := productConfigMap.Data[key]
-		if !ok || element != zelement {
-			productConfigMap.Data[key] = element
-			update = true
-			log.Info("updated zen product configmap "+ZenProductConfigMapName, "key", key, "value", element)
-		}
-	}
-
-	if update {
-		updateErr := client.Update(ctx, productConfigMap)
-		if updateErr != nil {
-			reqLogger.Info("Could not update zen product configmap "+ZenProductConfigMapName, updateErr)
-			return updateErr
-		}
-		reqLogger.Info("Zen product configmap " + ZenProductConfigMapName + " updated with meta values")
-		*needToRequeue = true
-	} else {
-		reqLogger.Info("No updates required for commonwebui in zen product configmap " + ZenProductConfigMapName)
-	}
-
-	return nil
-
 }
 
 func ReconcileConfigMapsZen(ctx context.Context, client client.Client, version, namespace, nameOfCM string) error {
