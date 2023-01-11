@@ -488,24 +488,6 @@ func zenDeploymentPredicate() predicate.Predicate {
 	}
 }
 
-func zenProductCmPredicate() predicate.Predicate {
-	namespace := os.Getenv("WATCH_NAMESPACE")
-	return predicate.Funcs{
-		UpdateFunc: func(e event.UpdateEvent) bool {
-			if e.ObjectNew.GetName() == res.ZenProductConfigMapName && e.ObjectNew.GetNamespace() == namespace {
-				return true
-			}
-			return false
-		},
-		CreateFunc: func(e event.CreateEvent) bool {
-			if e.Object.GetName() == res.ZenProductConfigMapName && e.Object.GetNamespace() == namespace {
-				return true
-			}
-			return false
-		},
-	}
-}
-
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIZenReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Create a new controller
