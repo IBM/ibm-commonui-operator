@@ -15,16 +15,7 @@ metadata:
               {
                 "operands": [
                   {
-                    "name": "ibm-iam-operator"
-                  },
-                  {
-                    "name": "ibm-management-ingress-operator"
-                  },
-                  {
-                    "name": "ibm-platform-api-operator"
-                  },
-                  {
-                    "name": "ibm-cert-manager-operator"
+                    "name": "ibm-im-operator"
                   }
                 ],
                 "registry": "common-service"
