@@ -200,12 +200,6 @@ func ReconcileConfigMapsZen(ctx context.Context, client client.Client, version, 
 				"extensions": ZenQuickNavExtensions,
 			}
 			newConfigMap = ZenCardExtensionsConfigMap(ZenQuickNavExtensionsConfigMapName, namespace, version, ExtensionsData)
-		} else if nameOfCM == ZenWalkmeExtensionsConfigMapName {
-			reqLogger.Info("Creating zen walkme extensions config map")
-			var ExtensionsData = map[string]string{
-				"extensions": ZenWalkmeExtensions,
-			}
-			newConfigMap = ZenCardExtensionsConfigMap(ZenWalkmeExtensionsConfigMapName, namespace, version, ExtensionsData)
 		} else if nameOfCM == CommonConfigMapName {
 			reqLogger.Info("Creating common-web-ui-config config map")
 			newConfigMap = CommonWebUIConfigMap(namespace)
