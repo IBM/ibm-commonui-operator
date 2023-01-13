@@ -20,6 +20,7 @@ import (
 	"context"
 	"os"
 	"reflect"
+	"strings"
 	"time"
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
@@ -302,16 +303,17 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 }
 
 func clusterInfoCmPredicate() predicate.Predicate {
-	namespace := os.Getenv("WATCH_NAMESPACE")
+	namespaces := strings.Split(os.Getenv("WATCH_NAMESPACE"), ",")
+
 	return predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			if e.ObjectNew.GetName() == res.ClusterInfoConfigmapName && e.ObjectNew.GetNamespace() == namespace {
+			if e.ObjectNew.GetName() == res.ClusterInfoConfigmapName && res.ContainsString(namespaces, e.ObjectNew.GetNamespace()) {
 				return true
 			}
 			return false
 		},
 		CreateFunc: func(e event.CreateEvent) bool {
-			if e.Object.GetName() == res.ClusterInfoConfigmapName && e.Object.GetNamespace() == namespace {
+			if e.Object.GetName() == res.ClusterInfoConfigmapName && res.ContainsString(namespaces, e.Object.GetNamespace()) {
 				return true
 			}
 			return false
