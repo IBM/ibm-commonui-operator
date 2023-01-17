@@ -93,7 +93,6 @@ const CommonConfigMapName = "common-web-ui-config"
 const ZenCardExtensionsConfigMapName = "common-web-ui-zen-card-extensions"
 const ZenCardExtensionsConfigMapNameCncf = "common-web-ui-zen-card-extension-cncf"
 const ZenQuickNavExtensionsConfigMapName = "common-web-ui-zen-quicknav-extensions"
-const ZenWalkmeExtensionsConfigMapName = "common-web-ui-zen-walkme-extensions"
 
 const ZenDeploymentName = "zen-core"
 const ZenProductConfigMapName = "product-configmap"
@@ -592,35 +591,6 @@ var ZenCardExtensionsCncf = `
         }
       }
     ]
-`
-
-var ZenWalkmeExtensions = `
-[
-	{
-		"extension_point_id":"generic_preferences",
-		"extension_name":"guided_tours",
-		"display_name":"Guided tours",
-		"description":"",
-		"match_permissions":"administrator",
-		"meta":null,
-		"details":{
-		  "lite_tours_src": "/common-nav/walkme/walkme_760e1a0cad93453f8cc129ce436f336e_https.js"
-		},
-		"status":"enabled"
-	},
-	{
-	  "extension_point_id": "zen_platform_customization",
-	  "extension_name": "mypak_customization_tours",
-	  "order_hint": 300,
-	  "details": {
-		"title": "{{.global_zen_platform_customization_tours_title}}",
-		"description": "{{.global_zen_platform_customization_tours_description}}",
-		"icon": "Crossroads20",
-		"icon_alt": "{{.global_zen_platform_customization_tours_title}}",
-		"nav_url": "/zen/#/guidedToursCustomization"
-	  }
-	}
-]
 `
 
 const ZenLeftNavExtensionsConfigMapName = "common-webui-ui-extensions"
