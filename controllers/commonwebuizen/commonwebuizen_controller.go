@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"strings"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -67,7 +68,7 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling CommonWebUIZen Controller")
 
-	namespace := os.Getenv("WATCH_NAMESPACE")
+	namespace := request.Namespace
 	reqLogger.Info("In CommonWebUIZen Reconcile -- Common Services Pod namespace: " + namespace)
 	reqLogger.Info("In CommonWebUIZen Reconcile -- Operator version: " + version.Version)
 
@@ -471,16 +472,17 @@ func (r *CommonWebUIZenReconciler) deleteZenAdminHubRes(ctx context.Context, nam
 }
 
 func zenDeploymentPredicate() predicate.Predicate {
-	namespace := os.Getenv("WATCH_NAMESPACE")
+	namespaces := strings.Split(os.Getenv("WATCH_NAMESPACE"), ",")
+
 	return predicate.Funcs{
 		DeleteFunc: func(e event.DeleteEvent) bool {
-			if e.Object.GetName() == res.ZenDeploymentName && e.Object.GetNamespace() == namespace {
+			if e.Object.GetName() == res.ZenDeploymentName && res.ContainsString(namespaces, e.Object.GetNamespace()) {
 				return true
 			}
 			return false
 		},
 		CreateFunc: func(e event.CreateEvent) bool {
-			if e.Object.GetName() == res.ZenDeploymentName && e.Object.GetNamespace() == namespace {
+			if e.Object.GetName() == res.ZenDeploymentName && res.ContainsString(namespaces, e.Object.GetNamespace()) {
 				return true
 			}
 			return false
