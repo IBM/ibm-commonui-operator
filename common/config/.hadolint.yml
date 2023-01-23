@@ -10,3 +10,4 @@ trustedRegistries:
   - icr.io
   - registry.access.redhat.com
   - hyc-cloud-private-edge-docker-local.artifactory.swg-devops.com
+  - docker-na-public.artifactory.swg-devops.com
