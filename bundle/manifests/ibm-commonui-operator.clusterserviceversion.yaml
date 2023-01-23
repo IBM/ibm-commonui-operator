@@ -191,81 +191,10 @@ metadata:
             },
             "navItems": [
               {
-                "id": "home",
-                "label": "Home",
-                "url": "/common-nav/dashboard",
-                "iconUrl": "/common-nav/graphics/home.svg",
-                "isAuthorized": [
-                  "ClusterAdministrator",
-                  "CloudPakAdministrator"
-                ]
-              },
-              {
-                "id": "id-access",
-                "label": "Identity and access",
-                "serviceId": "webui-nav",
-                "iconUrl": "/common-nav/graphics/password.svg"
-              },
-              {
                 "id": "providers",
-                "parentId": "id-access",
                 "label": "Identity providers",
                 "serviceId": "webui-nav",
                 "url": "/common-nav/identity-access/realms"
-              },
-              {
-                "id": "teams-ids",
-                "parentId": "id-access",
-                "label": "Teams and service IDs",
-                "serviceId": "webui-nav",
-                "url": "/common-nav/identity-access/teams"
-              },
-              {
-                "detectionServiceName": true,
-                "id": "licensing",
-                "label": "Licensing",
-                "serviceId": "ibm-license-service-reporter",
-                "url": "/license-service-reporter",
-                "iconUrl": "/common-nav/graphics/identification.svg",
-                "isAuthorized": [
-                  "ClusterAdministrator",
-                  "CloudPakAdministrator"
-                ]
-              },
-              {
-                "detectionServiceName": true,
-                "id": "metering",
-                "label": "Metering",
-                "serviceId": "metering-ui",
-                "serviceName": "metering-ui",
-                "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main",
-                "iconUrl": "/common-nav/graphics/meter--alt.svg"
-              },
-              {
-                "detectionServiceName": true,
-                "id": "monitoring",
-                "isAuthorized": [
-                  "Administrator",
-                  "ClusterAdministrator",
-                  "CloudPakAdministrator",
-                  "Operator"
-                ],
-                "label": "Monitoring",
-                "serviceId": "monitoring-ui",
-                "serviceName": "ibm-monitoring-grafana",
-                "target": "_blank",
-                "url": "/grafana",
-                "iconUrl": "/common-nav/graphics/activity.svg"
-              },
-              {
-                "detectionServiceName": true,
-                "id": "logging",
-                "label": "Logging",
-                "serviceId": "kibana",
-                "serviceName": "kibana",
-                "target": "_blank",
-                "url": "/kibana",
-                "iconUrl": "/common-nav/graphics/catalog.svg"
               }
             ]
           }
@@ -381,7 +310,7 @@ metadata:
           },
           "spec": {
             "cloudPakInfo": {
-              "display": "IBM Cloud Pak | Administration",
+              "display": "Administration",
               "label": "administration-hub",
               "landingPage": "/common-nav/dashboard",
               "logoURL": ""

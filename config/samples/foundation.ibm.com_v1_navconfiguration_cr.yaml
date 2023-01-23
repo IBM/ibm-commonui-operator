@@ -10,7 +10,7 @@ metadata:
     name: common-web-ui-config
 spec:
   about:
-    logoUrl: "IBM Cloud Pak | Administration Hub"
+    logoUrl: "Administration"
     licenses:
       - "yq, version 3.3.0, MIT+GPL"
       - "MongoDB, version 4.0.16 Community Edition, SSPL"

@@ -182,12 +182,6 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	// Update cp4i nav config, if it exists.
-	err = res.ReconcileCP4INavConfig(ctx, r.Client, instance)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
 	// For 1.3.0 operator version, check if daemonset exits on upgrade and delete if so
 	r.deleteDaemonSet(ctx, instance)
 

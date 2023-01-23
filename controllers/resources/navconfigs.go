@@ -37,13 +37,6 @@ func ReconcileAdminHubNavConfig(ctx context.Context, client client.Client, insta
 	return reconcileNavConfig(ctx, client, instance, AdminHubNavConfigName, AdminHubNavConfig)
 }
 
-func ReconcileCP4INavConfig(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI) error {
-	reqLogger := log.WithValues("func", "reconcileCP4INavConfig", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
-	reqLogger.Info("Reconciling cp4i nav config")
-
-	return reconcileNavConfig(ctx, client, instance, CP4INavConfigName, CP4INavConfig)
-}
-
 func reconcileNavConfig(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, name, config string) error {
 	reqLogger := log.WithValues("func", "reconcileNavConfig", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
