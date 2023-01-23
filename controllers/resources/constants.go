@@ -804,7 +804,6 @@ var UICertificateData = CertificateData{
 }
 
 const AdminHubNavConfigName = "common-web-ui-config"
-const CP4INavConfigName = "icp4i"
 
 //nolint
 var AdminHubNavConfig = `
@@ -901,8 +900,8 @@ var AdminHubNavConfig = `
 		  "Grafana, v7.5.12, AGPL",
 		  "IBM Semeru Runtime Open Edition binaries, GPL v2"
 		],
-		"logoUrl": "IBM Cloud Pak | Administration Hub",
-		"logoAltText": "IBM Cloud Pak | Administration Hub"
+		"logoUrl": "Administration",
+		"logoAltText": "Administration"
 	  },
 	  "header": {
 		"disabledItems": [
@@ -910,7 +909,7 @@ var AdminHubNavConfig = `
 		  "catalog"
 		],
 		"docUrlMapping": "https://ibm.biz/cpcs_adminui",
-		"logoAltText": "IBM Cloud Pak Administration Hub",
+		"logoAltText": "Administration",
 		"logoHeight": "47px",
 		"logoUrl": "/common-nav/graphics/ibm-cloudpack-logo.svg",
 		"logoWidth": "190px"
@@ -929,188 +928,10 @@ var AdminHubNavConfig = `
 	  },
 	  "navItems": [
 		{
-		  "id": "home",
-		  "label": "Home",
-		  "url": "/common-nav/dashboard",
-		  "iconUrl": "/common-nav/graphics/home.svg",
-		  "isAuthorized": [
-			"ClusterAdministrator",
-			"CloudPakAdministrator"
-		  ]
-		},
-		{
-			"id": "id-access",
-			"label": "Identity and access",
-			"serviceId": "webui-nav",
-			"iconUrl": "/common-nav/graphics/password.svg"
-		},
-		{
 			"id": "providers",
-			"parentId": "id-access",
 			"label": "Identity providers",
 			"serviceId": "webui-nav",
 			"url": "/common-nav/identity-access/realms"
-		},
-		{
-			"id": "teams-ids",
-			"parentId": "id-access",
-			"label": "Teams and service IDs",
-			"serviceId": "webui-nav",
-			"url": "/common-nav/identity-access/teams"
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "licensing",
-		  "label": "Licensing",
-		  "serviceId": "ibm-license-service-reporter",
-		  "url": "/license-service-reporter",
-		  "iconUrl": "/common-nav/graphics/identification.svg",
-		  "isAuthorized": [
-			"ClusterAdministrator",
-			"CloudPakAdministrator"
-		  ]
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "metering",
-		  "label": "Metering",
-		  "serviceId": "metering-ui",
-		  "serviceName": "metering-ui",
-		  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main",
-		  "iconUrl": "/common-nav/graphics/meter--alt.svg"
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "monitoring",
-		  "isAuthorized": [
-			"Administrator",
-			"ClusterAdministrator",
-			"CloudPakAdministrator",
-			"Operator"
-		  ],
-		  "label": "Monitoring",
-		  "serviceId": "monitoring-ui",
-		  "serviceName": "ibm-monitoring-grafana",
-		  "target": "_blank",
-		  "url": "/grafana",
-		  "iconUrl": "/common-nav/graphics/activity.svg"
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "logging",
-		  "label": "Logging",
-		  "serviceId": "kibana",
-		  "serviceName": "kibana",
-		  "target": "_blank",
-		  "url": "/kibana",
-		  "iconUrl": "/common-nav/graphics/catalog.svg"
-		}
-	  ]
-	}
-  }
-`
-
-//nolint
-var CP4INavConfig = `
-{
-	"apiVersion": "foundation.ibm.com/v1",
-	"kind": "NavConfiguration",
-	"metadata": {
-	  "labels": {
-		"app.kubernetes.io/instance": "icp4i",
-		"app.kubernetes.io/managed-by": "ibm-commonui-operator",
-		"app.kubernetes.io/name": "ibm-commonui-operator",
-		"name": "icp4i"
-	  },
-	  "name": "icp4i"
-	},
-	"spec": {
-	  "header": {
-		"disabledItems": [
-		  "createResource",
-		  "catalog",
-		  "bookmark"
-		],
-		"logoAltText": "Cloud Pak for Integration",
-		"logoUrl": "/common-nav/graphics/ibm-cloudpak-integration.svg"
-	  },
-	  "navItems": [
-		{
-		  "detectionServiceName": true,
-		  "id": "metering",
-		  "label": "Metering",
-		  "serviceId": "metering-ui",
-		  "serviceName": "metering-ui",
-		  "url": "/metering/dashboard?ace_config={ 'showClusterData': false }\u0026dashboard=cpi.icp.main"
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "monitoring",
-		  "isAuthorized": [
-			"Administrator",
-			"ClusterAdministrator",
-			"Operator"
-		  ],
-		  "label": "Monitoring",
-		  "serviceId": "monitoring-ui",
-		  "serviceName": "ibm-monitoring-grafana",
-		  "target": "_blank",
-		  "url": "/grafana"
-		},
-		{
-			"id": "id-access",
-			"label": "Identity and access",
-			"serviceId": "webui-nav"
-		},
-		{
-			"id": "providers",
-			"parentId": "id-access",
-			"label": "Identity providers",
-			"serviceId": "webui-nav",
-			"url": "/common-nav/identity-access/realms?useNav=icp4i"
-		},
-		{
-			"id": "teams-ids",
-			"parentId": "id-access",
-			"label": "Teams and service IDs",
-			"serviceId": "webui-nav",
-			"url": "/common-nav/identity-access/teams?useNav=icp4i"
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "logging",
-		  "label": "Logging",
-		  "serviceId": "kibana",
-		  "serviceName": "kibana",
-		  "target": "_blank",
-		  "url": "/kibana"
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "releases",
-		  "label": "Helm Releases",
-		  "serviceId": "catalog-ui",
-		  "serviceName": "catalog-ui",
-		  "url": "/catalog/instances?useNav=icp4i"
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "repos",
-		  "label": "Helm Repositories",
-		  "serviceId": "catalog-ui",
-		  "serviceName": "catalog-ui",
-		  "url": "/catalog/repositories?useNav=icp4i"
-		},
-		{
-		  "detectionServiceName": true,
-		  "id": "licensing",
-		  "label": "Licensing",
-		  "serviceId": "ibm-license-service-reporter",
-		  "url": "/license-service-reporter",
-		  "isAuthorized": [
-			"ClusterAdministrator",
-			"CloudPakAdministrator"
-		  ]
 		}
 	  ]
 	}
