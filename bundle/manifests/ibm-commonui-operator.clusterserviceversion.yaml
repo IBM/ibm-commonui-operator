@@ -490,8 +490,9 @@ spec:
                 env:
                 - name: WATCH_NAMESPACE
                   valueFrom:
-                    fieldRef:
-                      fieldPath: metadata.annotations['olm.targetNamespaces']
+                    configMapKeyRef:
+                      name: namespace-scope
+                      key: namespaces
                 - name: COMMON_WEB_UI_IMAGE
                   value: icr.io/cpopen/cpfs/common-web-ui:4.0.0
                 image: icr.io/cpopen/ibm-commonui-operator:4.0.0
