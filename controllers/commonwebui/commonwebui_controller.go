@@ -323,6 +323,7 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
+		Owns(&corev1.Secret{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&certmgr.Certificate{}).
 		Owns(&route.Route{}).
