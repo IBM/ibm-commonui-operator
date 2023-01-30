@@ -27,7 +27,11 @@ import (
 	// to ensure that exec-entrypoint and run can make use of them.
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
+	appsv1 "k8s.io/api/apps/v1"
+	corev1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/labels"
 	runtimescheme "k8s.io/apimachinery/pkg/runtime"
+	"k8s.io/apimachinery/pkg/runtime/schema"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -41,9 +45,11 @@ import (
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	routesv1 "github.com/openshift/api/route/v1"
 
+	"github.com/IBM/controller-filtered-cache/filteredcache"
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	commonwebuicontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
 	commonwebuizencontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebuizen"
+	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
 	"github.com/IBM/ibm-commonui-operator/version"
 	//+kubebuilder:scaffold:imports
 )
@@ -80,6 +86,35 @@ func init() {
 	//+kubebuilder:scaffold:scheme
 }
 
+func getFilteredCache(namespaces []string) cache.NewCacheFunc {
+	commonLabels := map[string]string{
+		"app.kubernetes.io/instance":   "ibm-commonui-operator",
+		"app.kubernetes.io/managed-by": "ibm-commonui-operator",
+	}
+
+	commonSelector := labels.SelectorFromSet(commonLabels).String()
+
+	//We are kind of stuck here - there isn't an enhanced multinamespace cache, but we need
+	//to watch multiple configmaps with different selectors (see below comments).  So for now
+	//we will not limit the cache of configmaps
+	//corev1.SchemeGroupVersion.WithKind("ConfigMap"): {
+	//	LabelSelector: commonSelector,
+	//},
+	gvkLabelsMap := map[schema.GroupVersionKind]filteredcache.Selector{
+		appsv1.SchemeGroupVersion.WithKind("Deployment"): {
+			LabelSelector: commonSelector,
+		},
+		corev1.SchemeGroupVersion.WithKind("Service"): {
+			LabelSelector: commonSelector,
+		},
+		corev1.SchemeGroupVersion.WithKind("Secret"): {
+			FieldSelector: "metadata.name==" + res.UICertSecretName,
+		},
+	}
+
+	return filteredcache.MultiNamespacedFilteredCacheBuilder(gvkLabelsMap, namespaces)
+}
+
 func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
@@ -105,9 +140,10 @@ func main() {
 			"the manager will watch and manage resources in all namespaces")
 	}
 
+	newCache := getFilteredCache(strings.Split(watchNamespace, ","))
+
 	var ctrlOpt ctrl.Options
 	if strings.Contains(watchNamespace, ",") {
-		namespaces := strings.Split(watchNamespace, ",")
 		// Create MultiNamespacedCache with watched namespaces if the watch namespace string contains comma
 		ctrlOpt = ctrl.Options{
 			Scheme:                 scheme,
@@ -116,7 +152,7 @@ func main() {
 			HealthProbeBindAddress: probeAddr,
 			LeaderElection:         enableLeaderElection,
 			LeaderElectionID:       "cf857902.ibm.com",
-			NewCache:               cache.MultiNamespacedCacheBuilder(namespaces),
+			NewCache:               newCache,
 		}
 	} else {
 		// Create manager option for watching all namespaces.
@@ -128,6 +164,7 @@ func main() {
 			LeaderElection:         enableLeaderElection,
 			LeaderElectionID:       "cf857902.ibm.com",
 			Namespace:              watchNamespace, // namespaced-scope when the value is not empty
+			NewCache:               newCache,
 		}
 	}
 
