@@ -191,6 +191,7 @@ func GetDesiredRoute(client client.Client, instance *operatorsv1alpha1.CommonWeb
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: annotations,
+			Labels:      LabelsForMetadata(name),
 		},
 		Spec: route.RouteSpec{
 			Host: routeHost,
