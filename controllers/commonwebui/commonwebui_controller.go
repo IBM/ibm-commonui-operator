@@ -21,7 +21,6 @@ import (
 	"os"
 	"reflect"
 	"strings"
-	"time"
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
@@ -157,16 +156,6 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// This was for cloudpak 3.0 work
 	res.ReconcileRemoveIngresses(ctx, r.Client, instance, &needToRequeue)
 
-	// Check if the ConsoleLink CR already exists. If not, create a new one.
-	ifRouteFound := true
-	if !isCncf {
-		err = res.ReconcileConsoleLink(ctx, r.Client, instance, isZen, &needToRequeue)
-		if err != nil {
-			reqLogger.Info(err.Error())
-			ifRouteFound = false
-		}
-	}
-
 	// For 1.15.0 operator version, check if v1alpha1 certs exits on upgrade and delete if so
 	r.deleteCertsv1alpha1(ctx, instance)
 
@@ -182,8 +171,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	// For 1.3.0 operator version, check if daemonset exits on upgrade and delete if so
-	r.deleteDaemonSet(ctx, instance)
+	// Cleanup any remaining zen artifacts after removal of adminhub
+	r.removeLegacyZenResources(ctx, instance)
 
 	if needToRequeue {
 		// One or more resources were created, so requeue the request
@@ -196,12 +185,30 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
-	if !ifRouteFound {
-		return ctrl.Result{RequeueAfter: 1 * time.Minute}, nil
-	}
-
 	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
 	return ctrl.Result{}, nil
+}
+
+func (r *CommonWebUIReconciler) removeLegacyZenResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
+	reqLogger := log.WithValues("func", "removeZenResources", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+	reqLogger.Info("Removing legacy classic admin hub resources for zen")
+
+	//Delete common ui bind info config map
+	//nolint
+	res.DeleteConfigMap(ctx, r.Client, "ibm-commonui-bindinfo-common-webui-ui-extensions", instance.Namespace)
+
+	//Delete classic admin hub left nav menu item
+	//nolint
+	res.DeleteConfigMap(ctx, r.Client, res.ZenLeftNavExtensionsConfigMapName, instance.Namespace)
+
+	//Delete zen adminhub card extensions
+	//nolint
+	res.DeleteConfigMap(ctx, r.Client, res.ZenCardExtensionsConfigMapName, instance.Namespace)
+
+	//Delete zen adminhub quick nav extensions
+	//nolint
+	res.DeleteConfigMap(ctx, r.Client, res.ZenQuickNavExtensionsConfigMapName, instance.Namespace)
+
 }
 
 func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
@@ -216,10 +223,8 @@ func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instanc
 	err := r.Client.Get(ctx, types.NamespacedName{Name: res.UICertName, Namespace: instance.Namespace}, certificate)
 
 	if err != nil {
-		if errors.IsNotFound(err) {
-			reqLogger.Info("common-web-ui-ca-cert certificate not found")
-		} else {
-			reqLogger.Error(err, "Error loading common-web-ui-ca-cert certificate")
+		if !errors.IsNotFound(err) {
+			reqLogger.Info("Unable to load v1alpha1 certificate - most likely this means the CRD doesn't exist and this can be ignored")
 		}
 		return
 	}
@@ -235,30 +240,6 @@ func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instanc
 		}
 	} else {
 		reqLogger.Info("API version is NOT v1alpha1, returning..")
-	}
-}
-
-func (r *CommonWebUIReconciler) deleteDaemonSet(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
-	reqLogger := log.WithValues("func", "deleteDaemonSet", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
-
-	daemonSet := &appsv1.DaemonSet{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.DaemonSetName,
-			Namespace: res.DefaultNamespace,
-		},
-	}
-
-	err := r.Client.Get(ctx, types.NamespacedName{Name: daemonSet.Name, Namespace: daemonSet.Namespace}, daemonSet)
-	if err != nil && errors.IsNotFound(err) {
-		reqLogger.Info("No CommonWebUI daemonset found")
-	} else {
-		// Delete daemonset if found
-		err = r.Client.Delete(ctx, daemonSet)
-		if err != nil {
-			reqLogger.Error(err, "Failed to delete old CommonWebUI daemonset")
-		} else {
-			reqLogger.Info("Successfully deleted old CommonWebUI daemonset")
-		}
 	}
 }
 

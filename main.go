@@ -25,6 +25,7 @@ import (
 
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
+	"go.uber.org/zap/zapcore"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -48,7 +49,6 @@ import (
 	"github.com/IBM/controller-filtered-cache/filteredcache"
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	commonwebuicontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
-	commonwebuizencontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebuizen"
 	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
 	"github.com/IBM/ibm-commonui-operator/version"
 	//+kubebuilder:scaffold:imports
@@ -130,7 +130,10 @@ func main() {
 	opts.BindFlags(flag.CommandLine)
 	flag.Parse()
 
-	ctrl.SetLogger(zap.New(zap.UseFlagOptions(&opts)))
+	ctrl.SetLogger(zap.New(func(o *zap.Options) {
+		o.Development = true
+		o.TimeEncoder = zapcore.RFC3339TimeEncoder
+	}))
 
 	printVersion()
 
@@ -207,13 +210,6 @@ func main() {
 		Scheme: mgr.GetScheme(),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "CommonWebUI")
-		os.Exit(1)
-	}
-	if err = (&commonwebuizencontrollers.CommonWebUIZenReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
-		setupLog.Error(err, "unable to create controller", "controller", "CommonWebUIZen")
 		os.Exit(1)
 	}
 	//+kubebuilder:scaffold:builder

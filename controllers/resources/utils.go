@@ -21,9 +21,7 @@ import (
 	"os"
 	"strconv"
 
-	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -68,31 +66,6 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 	}
 
 	return imageID
-}
-
-// returns a bool after checking for a zen instance in cs namespace
-func IsAdminHubOnZen(ctx context.Context, client client.Client, namespace string) bool {
-	reqLogger := log.WithValues("func", "adminHubOnZen")
-	reqLogger.Info("Checking zen optional install condition")
-
-	zenDeployment := &appsv1.Deployment{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "zen-core",
-			Namespace: namespace,
-		},
-	}
-	getError := client.Get(ctx, types.NamespacedName{Name: "zen-core", Namespace: namespace}, zenDeployment)
-
-	if getError == nil {
-		reqLogger.Info("Got ZEN Deployment")
-		return true
-	}
-	if errors.IsNotFound(getError) {
-		reqLogger.Info("ZEN deployment not found")
-	} else {
-		reqLogger.Error(getError, "Error getting ZEN deployment")
-	}
-	return false
 }
 
 // returns kubernetes cluster type
