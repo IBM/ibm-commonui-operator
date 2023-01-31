@@ -19,9 +19,6 @@ package resources
 import (
 	"context"
 	"fmt"
-	"strings"
-
-	routesv1 "github.com/openshift/api/route/v1"
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 
@@ -32,8 +29,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
-
-const affirm = "true"
 
 func createConfigMap(ctx context.Context, client client.Client, cm *corev1.ConfigMap, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "createConfigMap", "instance.Name", instance.Name, "configmap.Name", cm.Name)
@@ -122,39 +117,6 @@ func ReconcileCommonUIConfigConfigMap(ctx context.Context, client client.Client,
 	return nil
 }
 
-func ZenLeftNavExtensionsConfigMap(namespace string, data map[string]string) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "ZenLeftNavExtensionsConfigMap")
-	reqLogger.Info("CS??? Entry")
-	metaLabels := LabelsForMetadata(ZenLeftNavExtensionsConfigMapName)
-	metaLabels["icpdata_addon"] = affirm
-	configmap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      ZenLeftNavExtensionsConfigMapName,
-			Namespace: namespace,
-			Labels:    metaLabels,
-		},
-		Data: data,
-	}
-	return configmap
-}
-
-func ZenCardExtensionsConfigMap(name string, namespace string, version string, data map[string]string) *corev1.ConfigMap {
-	reqLogger := log.WithValues("func", "ZenCardExtensionsConfigMap")
-	reqLogger.Info("CS??? Entry")
-	metaLabels := LabelsForMetadata(name)
-	metaLabels["icpdata_addon"] = affirm
-	metaLabels["icpdata_addon_version"] = "v" + version
-	configmap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      name,
-			Namespace: namespace,
-			Labels:    metaLabels,
-		},
-		Data: data,
-	}
-	return configmap
-}
-
 func CommonWebUIConfigMap(namespace string) *corev1.ConfigMap {
 	reqLogger := log.WithValues("func", "CommonWebUIConfigMap")
 	reqLogger.Info("CS??? Entry")
@@ -170,70 +132,35 @@ func CommonWebUIConfigMap(namespace string) *corev1.ConfigMap {
 	return configmap
 }
 
-func ReconcileConfigMapsZen(ctx context.Context, client client.Client, version, namespace, nameOfCM string) error {
-	reqLogger := log.WithValues("func", "ReconcileConfigMapsZen")
+func DeleteConfigMap(ctx context.Context, client client.Client, name string, namespace string) error {
+	reqLogger := log.WithValues("func", "deleteConfigmap", "name", name, "namespace", namespace)
+	reqLogger.Info("Deleting configmap")
 
-	reqLogger.Info("Checking if config map: " + nameOfCM + " exists")
-	// Check if the config map already exists, if not create a new one
-	currentConfigMap := &corev1.ConfigMap{}
-	err := client.Get(ctx, types.NamespacedName{Name: nameOfCM, Namespace: namespace}, currentConfigMap)
-	if err != nil && errors.IsNotFound(err) {
-		// Define a new ConfigMap
-		newConfigMap := &corev1.ConfigMap{}
-		if nameOfCM == ZenCardExtensionsConfigMapName {
-			reqLogger.Info("Creating zen card extensions config map")
-			var ExtensionsData = map[string]string{
-				"nginx.conf": ZenNginxConfig,
-				"extensions": ZenCardExtensions,
-			}
-			newConfigMap = ZenCardExtensionsConfigMap(ZenCardExtensionsConfigMapName, namespace, version, ExtensionsData)
-		} else if nameOfCM == ZenCardExtensionsConfigMapNameCncf {
-			reqLogger.Info("Creating zen card extensions config map for CNCF")
-			var ExtensionsData = map[string]string{
-				"nginx.conf": ZenNginxConfig,
-				"extensions": ZenCardExtensionsCncf,
-			}
-			newConfigMap = ZenCardExtensionsConfigMap(ZenCardExtensionsConfigMapNameCncf, namespace, version, ExtensionsData)
-		} else if nameOfCM == ZenQuickNavExtensionsConfigMapName {
-			reqLogger.Info("Creating zen quick nav extensions config map")
-			var ExtensionsData = map[string]string{
-				"extensions": ZenQuickNavExtensions,
-			}
-			newConfigMap = ZenCardExtensionsConfigMap(ZenQuickNavExtensionsConfigMapName, namespace, version, ExtensionsData)
-		} else if nameOfCM == CommonConfigMapName {
-			reqLogger.Info("Creating common-web-ui-config config map")
-			newConfigMap = CommonWebUIConfigMap(namespace)
-		} else if nameOfCM == ZenLeftNavExtensionsConfigMapName {
-			currentRoute := &routesv1.Route{}
-			//Get the cp-console route and add it to the configmap below
-			err2 := client.Get(ctx, types.NamespacedName{Name: "cp-console", Namespace: namespace}, currentRoute)
-			if err2 != nil {
-				reqLogger.Error(err2, "Failed to get route for cp-console, try again later")
-				return err2
-			}
-			reqLogger.Info("Current route is: " + currentRoute.Spec.Host)
-
-			var ExtensionsData = map[string]string{
-				"extensions": strings.Replace(ZenLeftNavExtensionsConfigMapData, "/common-nav/dashboard", "https://"+currentRoute.Spec.Host+"/common-nav/dashboard", 1),
-			}
-
-			newConfigMap = ZenLeftNavExtensionsConfigMap(namespace, ExtensionsData)
-
+	//Get and delete common ui bind info config map
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      name,
+			Namespace: namespace,
+		},
+	}
+	err := client.Get(ctx, types.NamespacedName{Name: "ibm-commonui-bindinfo-common-webui-ui-extensions", Namespace: namespace}, configMap)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			reqLogger.Info("Configmap not found")
+			return nil
 		}
-
-		reqLogger.Info("Creating a config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
-		err = client.Create(ctx, newConfigMap)
-		if err != nil {
-			reqLogger.Error(err, "Failed to create a config map", "Namespace", newConfigMap.Namespace, "Name", newConfigMap.Name)
-			return err
-		}
-	} else if err != nil {
-		reqLogger.Error(err, "Failed to get Zen Config map")
+		reqLogger.Error(err, "Failed reading configmap")
 		return err
 	}
 
-	reqLogger.Info("Created config map", "Name", nameOfCM)
+	// Delete configmap if found
+	err = client.Delete(ctx, configMap)
+	if err != nil {
+		reqLogger.Error(err, "Failed to delete configmap")
+		return err
+	}
 
+	reqLogger.Info("Deleted configmap")
 	return nil
 
 }
