@@ -5,25 +5,6 @@ metadata:
     alm-examples: |-
       [
         {
-          "apiVersion": "operator.ibm.com/v1alpha1",
-          "kind": "OperandRequest",
-          "metadata": {
-            "name": "ibm-commonui-request"
-          },
-          "spec": {
-            "requests": [
-              {
-                "operands": [
-                  {
-                    "name": "ibm-im-operator"
-                  }
-                ],
-                "registry": "common-service"
-              }
-            ]
-          }
-        },
-        {
           "apiVersion": "operators.ibm.com/v1alpha1",
           "kind": "CommonWebUI",
           "metadata": {
