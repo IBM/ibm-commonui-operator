@@ -141,6 +141,13 @@ func ReconcileRoute(ctx context.Context, client client.Client, instance *operato
 		// Determine if current route has changed
 		reqLogger.Info("Comparing current and desired routes")
 
+		//Update the desired route with any existing annotations specified on the existing route.  This will
+		//ensure that any settings added by the customer will not be removed and any updates to existing
+		//annotations are maintained ... this assumes no one will mess with the rewrite path which feels safe
+		for name, annotation := range route.Annotations {
+			desiredRoute.Annotations[name] = annotation
+		}
+
 		//routeHost is immutable so it must be checked first and the route recreated if it has changed
 		if route.Spec.Host != desiredRoute.Spec.Host {
 			err = client.Delete(ctx, route)
