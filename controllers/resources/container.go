@@ -102,11 +102,11 @@ var CommonContainer = corev1.Container{
 		},
 		{
 			Name:  "PLATFORM_IDENTITY_PROVIDER_URL",
-			Value: "https://icp-management-ingress:443/idprovider",
+			Value: "https://platform-identity-provider:4300",
 		},
 		{
 			Name:  "PLATFORM_AUTH_SERVICE_URL",
-			Value: "https://icp-management-ingress:443/idauth",
+			Value: "https://platform-auth-service:9443",
 		},
 		{
 			Name:  "NAV_PORT",
