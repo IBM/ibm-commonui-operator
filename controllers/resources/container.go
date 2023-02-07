@@ -183,15 +183,8 @@ var CommonContainer = corev1.Container{
 			Value: "",
 		},
 		{
-			Name: "WATCH_NAMESPACE",
-			ValueFrom: &corev1.EnvVarSource{
-				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "namespace-scope",
-					},
-					Key: "namespaces",
-				},
-			},
+			Name:  "WATCH_NAMESPACE",
+			Value: "",
 		},
 		{
 			Name: "POD_NAMESPACE",
