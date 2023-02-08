@@ -25,6 +25,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 )
 
 // Use DeepEqual to determine if 2 deployments are equal.
@@ -440,6 +441,96 @@ func IsCertificateEqual(oldCertificate, newCertificate *certmgr.Certificate) boo
 	}
 
 	logger.Info("Certificates are equal", "Certificate.Name", oldCertificate.ObjectMeta.Name)
+
+	return true
+}
+
+// Use DeepEqual to determine if 2 service accounts are equal.
+// Check metadata.
+// If there are any differences, return false. Otherwise, return true.
+func IsServiceAccountEqual(oldSA, newSA *corev1.ServiceAccount) bool {
+	logger := log.WithValues("func", "IsServiceAccountEqual")
+
+	if !reflect.DeepEqual(oldSA.ObjectMeta.Name, newSA.ObjectMeta.Name) {
+		logger.Info("Names not equal", "old", oldSA.ObjectMeta.Name, "new", newSA.ObjectMeta.Name)
+		return false
+	}
+
+	if !reflect.DeepEqual(oldSA.ObjectMeta.Labels, newSA.ObjectMeta.Labels) {
+		logger.Info("Labels not equal",
+			"old", fmt.Sprintf("%v", oldSA.ObjectMeta.Labels),
+			"new", fmt.Sprintf("%v", newSA.ObjectMeta.Labels))
+		return false
+	}
+
+	logger.Info("Service accounts are equal")
+
+	return true
+}
+
+// Use DeepEqual to determine if 2 roles are equal.
+// Check metadata, labels, and rules.
+// If there are any differences, return false. Otherwise, return true.
+func IsRoleEqual(oldRole, newRole *rbacv1.Role) bool {
+	logger := log.WithValues("func", "IsRoleEqual")
+
+	if !reflect.DeepEqual(oldRole.ObjectMeta.Name, newRole.ObjectMeta.Name) {
+		logger.Info("Names not equal", "old", oldRole.ObjectMeta.Name, "new", newRole.ObjectMeta.Name)
+		return false
+	}
+
+	if !reflect.DeepEqual(oldRole.ObjectMeta.Labels, newRole.ObjectMeta.Labels) {
+		logger.Info("Labels not equal",
+			"old", fmt.Sprintf("%v", oldRole.ObjectMeta.Labels),
+			"new", fmt.Sprintf("%v", newRole.ObjectMeta.Labels))
+		return false
+	}
+
+	if !reflect.DeepEqual(oldRole.Rules, newRole.Rules) {
+		logger.Info("Rules not equal",
+			"old", fmt.Sprintf("%v", oldRole.Rules),
+			"new", fmt.Sprintf("%v", newRole.Rules))
+		return false
+	}
+
+	logger.Info("Roles are equal")
+
+	return true
+}
+
+// Use DeepEqual to determine if 2 role bindings are equal.
+// Check metadata, labels, subjects, and role ref.
+// If there are any differences, return false. Otherwise, return true.
+func IsRoleBindingEqual(oldRoleBinding, newRoleBinding *rbacv1.RoleBinding) bool {
+	logger := log.WithValues("func", "IsRoleBindingEqual")
+
+	if !reflect.DeepEqual(oldRoleBinding.ObjectMeta.Name, newRoleBinding.ObjectMeta.Name) {
+		logger.Info("Names not equal", "old", oldRoleBinding.ObjectMeta.Name, "new", newRoleBinding.ObjectMeta.Name)
+		return false
+	}
+
+	if !reflect.DeepEqual(oldRoleBinding.ObjectMeta.Labels, newRoleBinding.ObjectMeta.Labels) {
+		logger.Info("Labels not equal",
+			"old", fmt.Sprintf("%v", oldRoleBinding.ObjectMeta.Labels),
+			"new", fmt.Sprintf("%v", newRoleBinding.ObjectMeta.Labels))
+		return false
+	}
+
+	if !reflect.DeepEqual(oldRoleBinding.Subjects, newRoleBinding.Subjects) {
+		logger.Info("Rules not equal",
+			"old", fmt.Sprintf("%v", oldRoleBinding.Subjects),
+			"new", fmt.Sprintf("%v", newRoleBinding.Subjects))
+		return false
+	}
+
+	if !reflect.DeepEqual(oldRoleBinding.RoleRef, newRoleBinding.RoleRef) {
+		logger.Info("Rules not equal",
+			"old", fmt.Sprintf("%v", oldRoleBinding.Subjects),
+			"new", fmt.Sprintf("%v", newRoleBinding.Subjects))
+		return false
+	}
+
+	logger.Info("Role bindings are equal")
 
 	return true
 }

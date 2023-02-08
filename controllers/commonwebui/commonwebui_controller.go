@@ -28,6 +28,7 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
+	rbacv1 "k8s.io/api/rbac/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -128,6 +129,21 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	// Check if the common-web-ui-config configmap already exists. If not, create a new one.
 	err = res.ReconcileCommonUIConfigConfigMap(ctx, r.Client, instance, &needToRequeue)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	err = res.ReconcileServiceAccount(ctx, r.Client, instance, &needToRequeue)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	err = res.ReconcileRole(ctx, r.Client, instance, &needToRequeue)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	err = res.ReconcileRoleBinding(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -308,6 +324,9 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&netv1.Ingress{}).
 		Owns(&certmgr.Certificate{}).
 		Owns(&route.Route{}).
+		Owns(&corev1.ServiceAccount{}).
+		Owns(&rbacv1.Role{}).
+		Owns(&rbacv1.RoleBinding{}).
 		Watches(&source.Kind{Type: &corev1.ConfigMap{}},
 			handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
 				return []ctrl.Request{
