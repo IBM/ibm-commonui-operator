@@ -109,7 +109,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 					Annotations: DeploymentAnnotations,
 				},
 				Spec: corev1.PodSpec{
-					ServiceAccountName:            "ibm-commonui-operator",
+					ServiceAccountName:            "ibm-commonui-operand",
 					HostNetwork:                   false,
 					HostPID:                       false,
 					HostIPC:                       false,
