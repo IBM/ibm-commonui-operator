@@ -32,8 +32,8 @@ import (
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
-const CnRouteName = "common-web-ui"
-const CnRoutePath = "/common-nav"
+const CnRouteName = "cp-console"
+const CnRoutePath = "/"
 
 const CbRouteName = "common-web-ui-callback"
 const CbRoutePath = "/auth/liberty/callback"
@@ -79,16 +79,19 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 
 	routeHost = clusterInfoConfigMap.Data["cluster_address"]
 
-	cnAnnotations := map[string]string{"haproxy.router.openshift.io/rewrite-target": CnRoutePath,
-		"haproxy.router.openshift.io/timeout": "90s"}
+	cnAnnotations := map[string]string{
+		"haproxy.router.openshift.io/timeout": "90s"
+	}
 
 	err = ReconcileRoute(ctx, client, instance, CnRouteName, cnAnnotations, routeHost, CnRoutePath, destinationCAcert, needToRequeue)
 	if err != nil {
 		return err
 	}
 
-	cbAnnotations := map[string]string{"haproxy.router.openshift.io/rewrite-target": CbRoutePath,
-		"haproxy.router.openshift.io/timeout": "90s"}
+	cbAnnotations := map[string]string{
+		"haproxy.router.openshift.io/rewrite-target": CbRoutePath,
+		"haproxy.router.openshift.io/timeout": "90s"
+	}
 
 	err = ReconcileRoute(ctx, client, instance, CbRouteName, cbAnnotations, routeHost, CbRoutePath, destinationCAcert, needToRequeue)
 	if err != nil {
