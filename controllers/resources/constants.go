@@ -96,6 +96,7 @@ const ZenLeftNavExtensionsConfigMapName = "common-webui-ui-extensions"
 const Log4jsVolumeName = "log4js"
 const ClusterCaVolumeName = "cluster-ca"
 const InternalTLSVolumeName = "internal-tls"
+const IAMDataVolumeName = "iamdata"
 const UICertVolumeName = "common-web-ui-certs"
 const UICertSecretName = "common-web-ui-cert" + ""
 
@@ -164,6 +165,30 @@ var UICertVolume = corev1.Volume{
 	},
 }
 
+var IAMDataVolume = corev1.Volume{
+	Name: IAMDataVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		Secret: &corev1.SecretVolumeSource{
+			SecretName: "platform-oidc-credentials",
+			Items: []corev1.KeyToPath{
+				{
+					Key:  "WLP_CLIENT_SECRET",
+					Path: "wlpcs",
+				},
+				{
+					Key:  "WLP_CLIENT_ID",
+					Path: "wlpcid",
+				},
+				{
+					Key:  "OAUTH2_CLIENT_REGISTRATION_SECRET",
+					Path: "oa2crs",
+				},
+			},
+			Optional: &TrueVar,
+		},
+	},
+}
+
 var ArchitectureList = []string{
 	"amd64",
 	"ppc64le",
@@ -192,6 +217,10 @@ var CommonVolumeMounts = []corev1.VolumeMount{
 	{
 		Name:      InternalTLSVolumeName,
 		MountPath: "/etc/internal-tls",
+	},
+	{
+		Name:      IAMDataVolumeName,
+		MountPath: "/etc/iamdata",
 	},
 }
 
