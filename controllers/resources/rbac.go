@@ -127,6 +127,11 @@ func getDesiredRole(client client.Client, instance *operatorsv1alpha1.CommonWebU
 		},
 		Rules: []rbacv1.PolicyRule{
 			{
+				APIGroups: []string{""},
+				Resources: []string{"configmaps"},
+				Verbs:     []string{"get", "list"},
+			},
+			{
 				APIGroups: []string{"foundation.ibm.com"},
 				Resources: []string{"navconfigurations"},
 				Verbs:     []string{"get", "list"},
