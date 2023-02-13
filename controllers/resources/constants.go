@@ -99,6 +99,7 @@ const InternalTLSVolumeName = "internal-tls"
 const IAMDataVolumeName = "iamdata"
 const UICertVolumeName = "common-web-ui-certs"
 const UICertSecretName = "common-web-ui-cert" + ""
+const WebUIConfigVolumeName = "common-web-ui-config"
 
 var Log4jsVolume = corev1.Volume{
 	Name: Log4jsVolumeName,
@@ -117,6 +118,19 @@ var Log4jsVolume = corev1.Volume{
 		},
 	},
 }
+
+var WebUIConfigVolume = corev1.Volume{
+	Name: WebUIConfigVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "common-web-ui-config",
+			},
+			Optional: &TrueVar,
+		},
+	},
+}
+
 var ClusterCaVolume = corev1.Volume{
 	Name: ClusterCaVolumeName,
 	VolumeSource: corev1.VolumeSource{
@@ -221,6 +235,10 @@ var CommonVolumeMounts = []corev1.VolumeMount{
 	{
 		Name:      IAMDataVolumeName,
 		MountPath: "/etc/iamdata",
+	},
+	{
+		Name:      WebUIConfigVolumeName,
+		MountPath: "/etc/config/common-web-ui-config",
 	},
 }
 
