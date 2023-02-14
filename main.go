@@ -144,11 +144,11 @@ func main() {
 			"the manager will watch and manage resources in all namespaces")
 	}
 
-	newCache := getFilteredCache(strings.Split(watchNamespace, ","))
-
 	var ctrlOpt ctrl.Options
 	if strings.Contains(watchNamespace, ",") {
 		// Create MultiNamespacedCache with watched namespaces if the watch namespace string contains comma
+		newCache := getFilteredCache(strings.Split(watchNamespace, ","))
+
 		ctrlOpt = ctrl.Options{
 			Scheme:                 scheme,
 			MetricsBindAddress:     metricsAddr,
@@ -168,7 +168,6 @@ func main() {
 			LeaderElection:         enableLeaderElection,
 			LeaderElectionID:       "cf857902.ibm.com",
 			Namespace:              watchNamespace, // namespaced-scope when the value is not empty
-			NewCache:               newCache,
 		}
 	}
 
