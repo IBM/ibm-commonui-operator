@@ -93,8 +93,12 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		}
 	}
 
+	//If standalone mode is set to true in the ibm cpp config map, then do not deploy to zen regardless of whether
+	//zen is installed or not.
+	isStandaloneMode := res.IsStandaloneMode(ctx, r.Client, instance.Namespace)
+
 	// Check to see if Zen instance exists in common services namespace
-	isZen := res.IsAdminHubOnZen(ctx, r.Client, instance.Namespace)
+	isZen := res.IsAdminHubOnZen(ctx, r.Client, instance.Namespace) && !isStandaloneMode
 
 	// Check to see kubernetes cluster type is cncf
 	isCncf := res.GetKubernetesClusterType(ctx, r.Client, instance.Namespace)
@@ -112,7 +116,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	}
 
 	// Check if the deployment already exists. If not, create a new one.
-	err = res.ReconcileDeployment(ctx, r.Client, instance, isZen, isCncf, &needToRequeue)
+	err = res.ReconcileDeployment(ctx, r.Client, instance, isZen, isCncf, isStandaloneMode, &needToRequeue)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
