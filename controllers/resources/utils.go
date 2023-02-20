@@ -136,9 +136,9 @@ func DeleteConfigMap(ctx context.Context, client client.Client, configMapName st
 		if err != nil {
 			reqLogger.Error(err, "Failed to delete configmap ", "configMapName", configMapName, "namespace", namespace)
 			return err
-		} else {
-			reqLogger.Info("Deleted configmap", "configMapName", configMapName, "namespace", namespace)
 		}
+		reqLogger.Info("Deleted configmap", "configMapName", configMapName, "namespace", namespace)
+
 	} else if !errors.IsNotFound(getError) {
 		reqLogger.Error(getError, "Failed to get configmap", "configMapName", configMapName, "namespace", namespace)
 		return getError

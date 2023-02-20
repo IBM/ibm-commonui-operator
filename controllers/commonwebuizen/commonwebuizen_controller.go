@@ -463,8 +463,11 @@ func (r *CommonWebUIZenReconciler) deleteZenAdminHubRes(ctx context.Context, nam
 	reqLogger.Info("Getting ZEN admin hub resources")
 	reqLogger.Info("Checking to see if ZEN admin hub config maps are present")
 
+	//No need to check error return codes - best attempt
+	//nolint
 	res.DeleteConfigMap(ctx, r.Client, res.ZenCardExtensionsConfigMapName, namespace)
 
+	//nolint
 	res.DeleteConfigMap(ctx, r.Client, res.ZenQuickNavExtensionsConfigMapName, namespace)
 
 	reqLogger.Info("Checking to see if zen admin hub console link is present")
