@@ -20,6 +20,7 @@ import (
 	"context"
 	"encoding/json"
 	"os"
+	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -75,7 +76,11 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 	// if we need to create several resources, set a flag so we just requeue one time instead of after each create.
 	needToRequeue := false
 
-	if request.Name == "RECONCILE-ZEN-PRODUCT-CONFIGMAP" {
+	//If standalone mode is set to true in the ibm cpp config map, then do not deploy to zen regardless of whether
+	//zen is installed or not.
+	isStandaloneMode := res.IsStandaloneMode(ctx, r.Client, namespace)
+
+	if request.Name == "RECONCILE-ZEN-PRODUCT-CONFIGMAP" && !isStandaloneMode {
 		reqLogger.Info("Change to zen product configmap " + res.ZenProductConfigMapName + " detected - reconciling common webui updates")
 		// Check if the config maps already exist. If not, create a new one.
 		err := res.ReconcileZenProductConfigMap(ctx, r.Client, request, &needToRequeue)
@@ -85,8 +90,12 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 		return ctrl.Result{}, nil
 	}
 
+	if request.Name == "RECONCILE-IBM-CPP-CONFIGMAP" {
+		reqLogger.Info("Change to ibm cpp configmap detected - reconciling common webui updates")
+	}
+
 	// Check to see if Zen instance exists in common services namespace
-	isZen := res.IsAdminHubOnZen(ctx, r.Client, namespace)
+	isZen := res.IsAdminHubOnZen(ctx, r.Client, namespace) && !isStandaloneMode
 
 	// Check to see kubernetes cluster type is cncf
 	isCncf := res.GetKubernetesClusterType(ctx, r.Client, namespace)
@@ -145,7 +154,7 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 			}
 		}
 		// Set env var USE_ZEN to true and update CLUSTER_TYPE
-		updateErr = r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
+		updateErr = r.updateCommonUIDeployment(ctx, isZen, isCncf, isStandaloneMode, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
 			return ctrl.Result{}, updateErr
@@ -159,7 +168,7 @@ func (r *CommonWebUIZenReconciler) Reconcile(ctx context.Context, request ctrl.R
 			return ctrl.Result{}, deleteErr
 		}
 		// Set env var USE_ZEN to false and update CLUSTER_TYPE
-		updateErr := r.updateCommonUIDeployment(ctx, isZen, isCncf, namespace)
+		updateErr := r.updateCommonUIDeployment(ctx, isZen, isCncf, isStandaloneMode, namespace)
 		if updateErr != nil {
 			reqLogger.Error(updateErr, "Failed updating common ui deployment")
 			return ctrl.Result{}, updateErr
@@ -339,7 +348,7 @@ func (r *CommonWebUIZenReconciler) updateZenResources(ctx context.Context, names
 	return nil
 }
 
-func (r *CommonWebUIZenReconciler) updateCommonUIDeployment(ctx context.Context, isZen bool, isCncf bool, namespace string) error {
+func (r *CommonWebUIZenReconciler) updateCommonUIDeployment(ctx context.Context, isZen bool, isCncf bool, isStandaloneMode bool, namespace string) error {
 	reqLogger := log.WithValues("func", "updateCommonUIDeployment")
 	reqLogger.Info("Updating common ui deployment env variable")
 
@@ -409,6 +418,27 @@ func (r *CommonWebUIZenReconciler) updateCommonUIDeployment(ctx context.Context,
 			reqLogger.Info("Setting container env var CLUSTER_TYPE", "CLUSTER_TYPE", isZenStr)
 		}
 
+		//Check for STANDALONE_MODE env var
+		isStandaloneModeStr := strconv.FormatBool(isStandaloneMode)
+		standaloneIdx := -1
+		for i := range commonDeployment.Spec.Template.Spec.Containers[0].Env {
+			if commonDeployment.Spec.Template.Spec.Containers[0].Env[i].Name == "STANDALONE_MODE" {
+				standaloneIdx = i
+				break
+			}
+		}
+		if standaloneIdx < 0 {
+			commonDeployment.Spec.Template.Spec.Containers[0].Env = append(commonDeployment.Spec.Template.Spec.Containers[0].Env,
+				corev1.EnvVar{Name: "STANDALONE_MODE", Value: isStandaloneModeStr},
+			)
+			needUpdate = true
+			reqLogger.Info("Adding env vars to container def: STANDALONE_MODE", "STANDALONE_MODE", clusterTypeStr)
+		} else if commonDeployment.Spec.Template.Spec.Containers[0].Env[25].Value != isStandaloneModeStr {
+			commonDeployment.Spec.Template.Spec.Containers[0].Env[25].Value = isStandaloneModeStr
+			needUpdate = true
+			reqLogger.Info("Setting container env var STANDALONE_MODE", "STANDALONE_MODE", isStandaloneModeStr)
+		}
+
 		if needUpdate {
 			updateErr := r.Client.Update(ctx, commonDeployment)
 			if updateErr == nil {
@@ -433,26 +463,9 @@ func (r *CommonWebUIZenReconciler) deleteZenAdminHubRes(ctx context.Context, nam
 	reqLogger.Info("Getting ZEN admin hub resources")
 	reqLogger.Info("Checking to see if ZEN admin hub config maps are present")
 
-	//Get and delete zen admin hub left nav menu item
-	currentConfigMap := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.ZenCardExtensionsConfigMapName,
-			Namespace: namespace,
-		},
-	}
-	getError := r.Client.Get(ctx, types.NamespacedName{Name: res.ZenCardExtensionsConfigMapName, Namespace: namespace}, currentConfigMap)
+	res.DeleteConfigMap(ctx, r.Client, res.ZenCardExtensionsConfigMapName, namespace)
 
-	if getError == nil {
-		reqLogger.Info("Got ZEN admin hub config maps")
-		err := r.Client.Delete(ctx, currentConfigMap)
-		if err != nil {
-			reqLogger.Error(err, "Failed to delete ZEN admin hub config maps")
-		} else {
-			reqLogger.Info("Deleted ZEN admin hub config maps")
-		}
-	} else if !errors.IsNotFound(getError) {
-		reqLogger.Error(getError, "Failed to get ZEN admin hub config maps")
-	}
+	res.DeleteConfigMap(ctx, r.Client, res.ZenQuickNavExtensionsConfigMapName, namespace)
 
 	reqLogger.Info("Checking to see if zen admin hub console link is present")
 	var crTemplate map[string]interface{}
@@ -467,13 +480,13 @@ func (r *CommonWebUIZenReconciler) deleteZenAdminHubRes(ctx context.Context, nam
 	name := "admin-hub-zen"
 
 	//Get and delelte classic admin hub console link CR
-	getError2 := r.Client.Get(ctx, types.NamespacedName{
+	getError := r.Client.Get(ctx, types.NamespacedName{
 		Name:      name,
 		Namespace: namespace,
 	}, &unstruct)
 
-	if getError2 != nil && !errors.IsNotFound(getError2) {
-		reqLogger.Error(getError2, "Failed to get zen admin hub console link CR")
+	if getError != nil && !errors.IsNotFound(getError) {
+		reqLogger.Error(getError, "Failed to get zen admin hub console link CR")
 	} else if getError == nil {
 		reqLogger.Info("Got zen admin hub console link")
 		err := r.Client.Delete(ctx, &unstruct)
@@ -512,13 +525,13 @@ func zenProductCmPredicate() predicate.Predicate {
 	namespace := os.Getenv("WATCH_NAMESPACE")
 	return predicate.Funcs{
 		UpdateFunc: func(e event.UpdateEvent) bool {
-			if e.ObjectNew.GetName() == res.ZenProductConfigMapName && e.ObjectNew.GetNamespace() == namespace {
+			if (e.ObjectNew.GetName() == res.ZenProductConfigMapName || e.ObjectNew.GetName() == res.IbmCppConfigMapName) && e.ObjectNew.GetNamespace() == namespace {
 				return true
 			}
 			return false
 		},
 		CreateFunc: func(e event.CreateEvent) bool {
-			if e.Object.GetName() == res.ZenProductConfigMapName && e.Object.GetNamespace() == namespace {
+			if (e.Object.GetName() == res.ZenProductConfigMapName || e.Object.GetName() == res.IbmCppConfigMapName) && e.Object.GetNamespace() == namespace {
 				return true
 			}
 			return false
@@ -541,9 +554,13 @@ func (r *CommonWebUIZenReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
 	err = c.Watch(&source.Kind{Type: &corev1.ConfigMap{}},
 		handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
+			reqName := "RECONCILE-ZEN-PRODUCT-CONFIGMAP"
+			if a.GetName() == res.IbmCppConfigMapName {
+				reqName = "RECONCILE-IBM-CPP-CONFIGMAP"
+			}
 			return []ctrl.Request{
 				{NamespacedName: types.NamespacedName{
-					Name:      "RECONCILE-ZEN-PRODUCT-CONFIGMAP",
+					Name:      reqName,
 					Namespace: a.GetNamespace(),
 				}},
 			}
