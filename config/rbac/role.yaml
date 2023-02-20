@@ -39,6 +39,13 @@ rules:
   - update
   - watch
 - apiGroups:
+  - operators.coreos.com
+  resources:
+  - subscriptions
+  verbs:
+  - get
+  - list
+- apiGroups:
   - monitoring.coreos.com
   resources:
   - servicemonitors
@@ -165,7 +172,7 @@ rules:
   - nodes
   - events
   - services
-  verbs: 
+  verbs:
   - get
   - list
 - apiGroups:
