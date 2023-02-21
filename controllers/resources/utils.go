@@ -95,6 +95,57 @@ func IsAdminHubOnZen(ctx context.Context, client client.Client, namespace string
 	return false
 }
 
+// returns true if standalone mode is detected from the ibm-cpp-config cm
+func IsStandaloneMode(ctx context.Context, client client.Client, namespace string) bool {
+	reqLogger := log.WithValues("func", "utils.IsStandaloneMode")
+	reqLogger.Info("Checking if common web ui is in standalone mode")
+
+	standaloneMode := false
+	cppCM := &corev1.ConfigMap{}
+	err := client.Get(ctx, types.NamespacedName{Name: "ibm-cpp-config", Namespace: namespace}, cppCM)
+	if err == nil {
+		standaloneMode = cppCM.Data["commonwebui.standalone"] == "true"
+	} else {
+		if errors.IsNotFound(err) {
+			reqLogger.Info("ibm-cpp-config configmap not found in namespace " + namespace)
+		} else {
+			reqLogger.Error(err, "Error reading configmap, standalone assumed to be false", "configmap name", "ibm-cpp-config", "namespace", namespace)
+		}
+	}
+
+	return standaloneMode
+}
+
+// returns true if standalone mode is detected from the ibm-cpp-config cm
+func DeleteConfigMap(ctx context.Context, client client.Client, configMapName string, namespace string) error {
+	reqLogger := log.WithValues("func", "utils.DeleteConfigmap")
+	reqLogger.Info("Deleting configmap", "configMapName", configMapName, "namespace", namespace)
+
+	//Get and delete zen admin hub left nav menu item
+	configMap := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      configMapName,
+			Namespace: namespace,
+		},
+	}
+	getError := client.Get(ctx, types.NamespacedName{Name: configMapName, Namespace: namespace}, configMap)
+
+	if getError == nil {
+		reqLogger.Info("Got configmap ", "configMapName", configMapName, "namespace", namespace)
+		err := client.Delete(ctx, configMap)
+		if err != nil {
+			reqLogger.Error(err, "Failed to delete configmap ", "configMapName", configMapName, "namespace", namespace)
+			return err
+		}
+		reqLogger.Info("Deleted configmap", "configMapName", configMapName, "namespace", namespace)
+
+	} else if !errors.IsNotFound(getError) {
+		reqLogger.Error(getError, "Failed to get configmap", "configMapName", configMapName, "namespace", namespace)
+		return getError
+	}
+	return nil
+}
+
 // returns kubernetes cluster type
 func GetKubernetesClusterType(ctx context.Context, client client.Client, namespace string) bool {
 	reqLogger := log.WithValues("func", "isCncf")
