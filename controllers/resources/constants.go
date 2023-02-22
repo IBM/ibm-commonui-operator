@@ -100,6 +100,7 @@ const IAMDataVolumeName = "iamdata"
 const UICertVolumeName = "common-web-ui-certs"
 const UICertSecretName = "common-web-ui-cert" + ""
 const WebUIConfigVolumeName = "common-web-ui-config"
+const ClusterInfoConfigVolumeName = "ibmcloud-cluster-info"
 
 var Log4jsVolume = corev1.Volume{
 	Name: Log4jsVolumeName,
@@ -125,6 +126,18 @@ var WebUIConfigVolume = corev1.Volume{
 		ConfigMap: &corev1.ConfigMapVolumeSource{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "common-web-ui-config",
+			},
+			Optional: &TrueVar,
+		},
+	},
+}
+
+var ClusterInfoConfigVolume = corev1.Volume{
+	Name: ClusterInfoConfigVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "ibmcloud-cluster-info",
 			},
 			Optional: &TrueVar,
 		},
@@ -239,6 +252,10 @@ var CommonVolumeMounts = []corev1.VolumeMount{
 	{
 		Name:      WebUIConfigVolumeName,
 		MountPath: "/etc/config/common-web-ui-config",
+	},
+	{
+		Name:      ClusterInfoConfigVolumeName,
+		MountPath: "/etc/config/ibmcloud-cluster-info",
 	},
 }
 
