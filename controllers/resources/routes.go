@@ -35,6 +35,15 @@ import (
 const CnRouteName = "cp-console"
 const CnRoutePath = "/"
 
+var CnAnnotations = map[string]string{
+	"haproxy.router.openshift.io/timeout":                               "90s",
+	"haproxy.router.openshift.io/pod-concurrent-connections":            "100",
+	"haproxy.router.openshift.io/rate-limit-connections":                "true",
+	"haproxy.router.openshift.io/rate-limit-connections.concurrent-tcp": "100",
+	"haproxy.router.openshift.io/rate-limit-connections.rate-http":      "100",
+	"haproxy.router.openshift.io/rate-limit-connections.rate-tcp":       "100",
+}
+
 func ReconcileRoutes(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 
 	reqLogger := log.WithValues("func", "ReconcileRoutes", "namespace", instance.Namespace)
@@ -76,11 +85,7 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 
 	routeHost = clusterInfoConfigMap.Data["cluster_address"]
 
-	cnAnnotations := map[string]string{
-		"haproxy.router.openshift.io/timeout": "90s",
-	}
-
-	err = ReconcileRoute(ctx, client, instance, CnRouteName, cnAnnotations, routeHost, CnRoutePath, destinationCAcert, needToRequeue)
+	err = ReconcileRoute(ctx, client, instance, CnRouteName, CnAnnotations, routeHost, CnRoutePath, destinationCAcert, needToRequeue)
 	if err != nil {
 		return err
 	}
