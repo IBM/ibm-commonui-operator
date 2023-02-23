@@ -35,9 +35,6 @@ import (
 const CnRouteName = "cp-console"
 const CnRoutePath = "/"
 
-const CbRouteName = "common-web-ui-callback"
-const CbRoutePath = "/auth/liberty/callback"
-
 func ReconcileRoutes(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 
 	reqLogger := log.WithValues("func", "ReconcileRoutes", "namespace", instance.Namespace)
@@ -84,16 +81,6 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 	}
 
 	err = ReconcileRoute(ctx, client, instance, CnRouteName, cnAnnotations, routeHost, CnRoutePath, destinationCAcert, needToRequeue)
-	if err != nil {
-		return err
-	}
-
-	cbAnnotations := map[string]string{
-		"haproxy.router.openshift.io/rewrite-target": CbRoutePath,
-		"haproxy.router.openshift.io/timeout":        "90s",
-	}
-
-	err = ReconcileRoute(ctx, client, instance, CbRouteName, cbAnnotations, routeHost, CbRoutePath, destinationCAcert, needToRequeue)
 	if err != nil {
 		return err
 	}
