@@ -105,6 +105,16 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	reqLogger.Info("CommonWebUI instance version: " + instance.Spec.OperatorVersion)
 
+	//Setup status update before returning
+	defer func() {
+		reqLogger.Info("Gather current service status")
+		currentServiceStatus := res.GetCurrentServiceStatus(ctx, r.Client, instance)
+		err := res.SetStatus(ctx, currentServiceStatus, r.Client, instance)
+		if err != nil {
+			reqLogger.Error(err, "Error updating current CR status")
+		}
+	}()
+
 	// set a default Status value
 	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR

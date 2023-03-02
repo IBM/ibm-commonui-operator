@@ -81,6 +81,25 @@ type CommonWebUIStatus struct {
 	// PodNames will hold the names of the commonwebui's
 	Nodes []string `json:"nodes"`
 	// Versions Versions `json:"versions,omitempty"`
+	Service ServiceStatus `json:"service,omitempty"`
+}
+
+//ServiceStatus struct
+type ServiceStatus struct {
+	ObjectName       string                  `json:"objectName,omitempty"`
+	APIVersion       string                  `json:"apiVersion,omitempty"`
+	Namespace        string                  `json:"namespace,omitempty"`
+	Kind             string                  `json:"kind,omitempty"`
+	Status           string                  `json:"status,omitempty"`
+	ManagedResources []ManagedResourceStatus `json:"managedResources,omitempty"`
+}
+
+type ManagedResourceStatus struct {
+	ObjectName string `json:"objectName,omitempty"`
+	APIVersion string `json:"apiVersion,omitempty"`
+	Namespace  string `json:"namespace,omitempty"`
+	Kind       string `json:"kind,omitempty"`
+	Status     string `json:"status,omitempty"`
 }
 
 //+kubebuilder:object:root=true
