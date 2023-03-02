@@ -147,9 +147,7 @@ func getAllDeploymentStatus(ctx context.Context, k8sClient client.Client, names 
 func getAllRouteStatus(ctx context.Context, k8sClient client.Client, names []string, namespace string) (statuses []v1alpha1.ManagedResourceStatus) {
 	reqLogger := log.WithValues("func", "getAllRouteStatus", "namespace", namespace)
 	for _, name := range names {
-		r := &routev1.Route{}
 		nsn := types.NamespacedName{Name: name, Namespace: namespace}
-		_ = k8sClient.Get(ctx, nsn, r)
 		statuses = append(statuses, getRouteStatus(ctx, k8sClient, nsn))
 	}
 	reqLogger.Info("New statuses", "statuses", statuses)
