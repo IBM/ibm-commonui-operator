@@ -105,6 +105,14 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	reqLogger.Info("CommonWebUI instance version: " + instance.Spec.OperatorVersion)
 
+	//Setup status update before returning
+	defer func() {
+		err := r.updateStatus(ctx, instance)
+		if err != nil {
+			reqLogger.Error(err, "Error updating current CR status")
+		}
+	}()
+
 	// set a default Status value
 	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR
@@ -186,11 +194,6 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{Requeue: true}, nil
 	}
 
-	err = r.updateStatus(ctx, instance)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
 	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
 	return ctrl.Result{}, nil
 }
@@ -253,6 +256,18 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 	reqLogger := log.WithValues("func", "updateStatus", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Updating CommonWebUI status")
 
+	updateServiceStatus := false
+	updateNodeStatus := false
+
+	//Check for updates to service status
+	reqLogger.Info("Gather current service status")
+	currentServiceStatus := res.GetCurrentServiceStatus(ctx, r.Client, instance)
+	if !reflect.DeepEqual(currentServiceStatus, instance.Status.Service) {
+		instance.Status.Service = currentServiceStatus
+		updateServiceStatus = true
+	}
+
+	//Check for updates to node (pods) status
 	podList := &corev1.PodList{}
 	listOpts := []client.ListOption{
 		client.InNamespace(instance.Namespace),
@@ -260,24 +275,29 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 	}
 
 	err := r.Client.List(ctx, podList, listOpts...)
-	if err != nil {
-		reqLogger.Error(err, "Failed to list pods")
-		return err
+	if err == nil {
+		var podNames []string
+		for _, pod := range podList.Items {
+			podNames = append(podNames, pod.Name)
+		}
+
+		if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
+			instance.Status.Nodes = podNames
+			updateNodeStatus = true
+		}
+	} else {
+		reqLogger.Error(err, "Failed to list pods - CR status will not be updated")
 	}
 
-	var podNames []string
-	for _, pod := range podList.Items {
-		podNames = append(podNames, pod.Name)
-	}
-
-	if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
-		instance.Status.Nodes = podNames
-
+	//Update any serivce status updates
+	if updateServiceStatus || updateNodeStatus {
+		reqLogger.Info("Updating status", "updateServiceStatus", updateServiceStatus, "updateNodeStatus", updateNodeStatus)
 		err := r.Client.Status().Update(ctx, instance)
 		if err != nil {
-			reqLogger.Error(err, "Failed to updated CommonWebUI status")
 			return err
 		}
+	} else {
+		reqLogger.Info("NO STATUS UPDATE REQUIRED - RECONCILE COMPLETE")
 	}
 
 	return nil
