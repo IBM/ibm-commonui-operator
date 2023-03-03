@@ -49,8 +49,9 @@ func getDesiredService(client client.Client, instance *operatorsv1alpha1.CommonW
 		Spec: corev1.ServiceSpec{
 			Ports: []corev1.ServicePort{
 				{
-					Name: instance.Spec.CommonWebUIConfig.ServiceName,
-					Port: 3000,
+					Name:     instance.Spec.CommonWebUIConfig.ServiceName,
+					Port:     3000,
+					Protocol: corev1.ProtocolTCP,
 					TargetPort: intstr.IntOrString{
 						Type:   intstr.Int,
 						IntVal: 3000,

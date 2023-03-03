@@ -27,6 +27,7 @@ var log = logf.Log.WithName("controller_commonwebui")
 var TrueVar = true
 var FalseVar = false
 var Seconds60 int64 = 60
+var DefaultVolumeMode int32 = 420
 
 var cpu300 = resource.NewMilliQuantity(300, resource.DecimalSI)        // 300m
 var memory256 = resource.NewQuantity(256*1024*1024, resource.BinarySI) // 256Mi
@@ -115,7 +116,8 @@ var Log4jsVolume = corev1.Volume{
 					Path: "log4js.json",
 				},
 			},
-			Optional: &TrueVar,
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
 		},
 	},
 }
@@ -127,7 +129,8 @@ var WebUIConfigVolume = corev1.Volume{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "common-web-ui-config",
 			},
-			Optional: &TrueVar,
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
 		},
 	},
 }
@@ -139,7 +142,8 @@ var ClusterInfoConfigVolume = corev1.Volume{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "ibmcloud-cluster-info",
 			},
-			Optional: &TrueVar,
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
 		},
 	},
 }
@@ -159,7 +163,8 @@ var ClusterCaVolume = corev1.Volume{
 					Path: "ca.crt",
 				},
 			},
-			Optional: &TrueVar,
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
 		},
 	},
 }
@@ -178,7 +183,8 @@ var InternalTLSVolume = corev1.Volume{
 					Path: "ca.crt",
 				},
 			},
-			Optional: &TrueVar,
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
 		},
 	},
 }
@@ -186,8 +192,9 @@ var UICertVolume = corev1.Volume{
 	Name: UICertVolumeName,
 	VolumeSource: corev1.VolumeSource{
 		Secret: &corev1.SecretVolumeSource{
-			SecretName: UICertSecretName,
-			Optional:   &TrueVar,
+			SecretName:  UICertSecretName,
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
 		},
 	},
 }
@@ -211,7 +218,8 @@ var IAMDataVolume = corev1.Volume{
 					Path: "oa2crs",
 				},
 			},
-			Optional: &TrueVar,
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
 		},
 	},
 }
