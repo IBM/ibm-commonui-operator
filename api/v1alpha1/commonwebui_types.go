@@ -84,7 +84,7 @@ type CommonWebUIStatus struct {
 	Service ServiceStatus `json:"service,omitempty"`
 }
 
-//ServiceStatus struct
+// ServiceStatus struct
 type ServiceStatus struct {
 	ObjectName       string                  `json:"objectName,omitempty"`
 	APIVersion       string                  `json:"apiVersion,omitempty"`

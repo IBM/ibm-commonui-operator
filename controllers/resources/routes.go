@@ -144,16 +144,17 @@ func ReconcileRoute(ctx context.Context, client client.Client, instance *operato
 		}
 
 		//routeHost is immutable so it must be checked first and the route recreated if it has changed
-		if route.Spec.Host != desiredRoute.Spec.Host {
+		//We have discovered that the to:service is also immutable, so we will check that as well
+		if route.Spec.Host != desiredRoute.Spec.Host || route.Spec.To.Name != desiredRoute.Spec.To.Name {
 			err = client.Delete(ctx, route)
 			if err != nil {
-				reqLogger.Error(err, "Route host changed, unable to delete existing route for recreate")
+				reqLogger.Error(err, "Route host or service name changed, unable to delete existing route for recreate")
 				return err
 			}
 			//Recreate the route
 			err = client.Create(ctx, desiredRoute)
 			if err != nil {
-				reqLogger.Error(err, "Route host changed, unable to create new route")
+				reqLogger.Error(err, "Route host or service name changed, unable to create new route")
 				return err
 			}
 			*needToRequeue = true
