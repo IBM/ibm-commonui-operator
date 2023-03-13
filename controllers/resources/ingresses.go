@@ -30,6 +30,7 @@ import (
 )
 
 // type DesiredStateGetter func(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) (*netv1.Ingress, error)
+var bogusIngressClassName string = "ibm-management-ingress-do-not-modify"
 
 func getDesiredAPIIngress(client client.Client, instance *operatorsv1alpha1.CommonWebUI, isCncf bool) (*netv1.Ingress, error) {
 	reqLogger := log.WithValues("func", "getDesiredAPIIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
@@ -85,6 +86,7 @@ func getDesiredAPIIngress(client client.Client, instance *operatorsv1alpha1.Comm
 				Namespace:   instance.Namespace,
 			},
 			Spec: netv1.IngressSpec{
+				IngressClassName: &bogusIngressClassName,
 				Rules: []netv1.IngressRule{
 					{
 						IngressRuleValue: netv1.IngressRuleValue{
@@ -159,6 +161,7 @@ func getDesiredCallbackIngress(client client.Client, instance *operatorsv1alpha1
 			Namespace:   instance.Namespace,
 		},
 		Spec: netv1.IngressSpec{
+			IngressClassName: &bogusIngressClassName,
 			Rules: []netv1.IngressRule{
 				{
 					IngressRuleValue: netv1.IngressRuleValue{
@@ -219,6 +222,7 @@ func getDesiredNavIngress(client client.Client, instance *operatorsv1alpha1.Comm
 			Namespace:   instance.Namespace,
 		},
 		Spec: netv1.IngressSpec{
+			IngressClassName: &bogusIngressClassName,
 			Rules: []netv1.IngressRule{
 				{
 					IngressRuleValue: netv1.IngressRuleValue{
