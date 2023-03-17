@@ -141,26 +141,12 @@ var CommonContainer = corev1.Container{
 			Value: "300",
 		},
 		{
-			Name: "PREFERRED_LOGIN",
-			ValueFrom: &corev1.EnvVarSource{
-				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "platform-auth-idp",
-					},
-					Key: "PREFERRED_LOGIN",
-				},
-			},
+			Name:  "PREFERRED_LOGIN",
+			Value: "deprecated",
 		},
 		{
-			Name: "ROKS_ENABLED",
-			ValueFrom: &corev1.EnvVarSource{
-				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "platform-auth-idp",
-					},
-					Key: "ROKS_ENABLED",
-				},
-			},
+			Name:  "ROKS_ENABLED",
+			Value: "deprecated",
 		},
 		{
 			Name:  "USE_HTTPS",
@@ -207,15 +193,8 @@ var CommonContainer = corev1.Container{
 			Value: "unknown",
 		},
 		{
-			Name: "OSAUTH_ENABLED",
-			ValueFrom: &corev1.EnvVarSource{
-				ConfigMapKeyRef: &corev1.ConfigMapKeySelector{
-					LocalObjectReference: corev1.LocalObjectReference{
-						Name: "platform-auth-idp",
-					},
-					Key: "OSAUTH_ENABLED",
-				},
-			},
+			Name:  "OSAUTH_ENABLED",
+			Value: "deprecated",
 		},
 	},
 }

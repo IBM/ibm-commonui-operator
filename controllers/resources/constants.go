@@ -39,6 +39,7 @@ const CommonWebUICRType = "commonwebuiservice_cr"
 const ConsoleRouteName = "cp-console"
 
 const ClusterInfoConfigmapName = "ibmcloud-cluster-info"
+const PlatformAuthIdpConfigmapName = "platform-auth-idp"
 
 const DaemonSetName = "common-web-ui"
 
@@ -102,6 +103,7 @@ const UICertVolumeName = "common-web-ui-certs"
 const UICertSecretName = "common-web-ui-cert" + ""
 const WebUIConfigVolumeName = "common-web-ui-config"
 const ClusterInfoConfigVolumeName = "ibmcloud-cluster-info"
+const PlatformAuthIdpConfigVolumeName = "platform-auth-idp"
 
 var Log4jsVolume = corev1.Volume{
 	Name: Log4jsVolumeName,
@@ -141,6 +143,19 @@ var ClusterInfoConfigVolume = corev1.Volume{
 		ConfigMap: &corev1.ConfigMapVolumeSource{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "ibmcloud-cluster-info",
+			},
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
+		},
+	},
+}
+
+var PlatformAuthIdpConfigVolume = corev1.Volume{
+	Name: PlatformAuthIdpConfigVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "platform-auth-idp",
 			},
 			Optional:    &TrueVar,
 			DefaultMode: &DefaultVolumeMode,
@@ -264,6 +279,10 @@ var CommonVolumeMounts = []corev1.VolumeMount{
 	{
 		Name:      ClusterInfoConfigVolumeName,
 		MountPath: "/etc/config/ibmcloud-cluster-info",
+	},
+	{
+		Name:      PlatformAuthIdpConfigVolumeName,
+		MountPath: "/etc/config/platform-auth-idp",
 	},
 }
 
