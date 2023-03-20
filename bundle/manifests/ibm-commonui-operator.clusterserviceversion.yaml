@@ -688,6 +688,14 @@ spec:
           - jobs
           verbs:
           - get
+        - apiGroups:
+          - operator.ibm.com
+          resources:
+          - operandrequests
+          verbs:
+          - delete
+          - get
+          - list
         serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:

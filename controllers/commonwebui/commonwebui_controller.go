@@ -188,6 +188,10 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Cleanup any remaining zen artifacts after removal of adminhub
 	r.removeLegacyZenResources(ctx, instance)
 
+	//Delete the operand request that may have been created by common ui prior to upgrade to cp 3.0
+	//nolint
+	res.DeleteGenericResource(ctx, "ibm-commonui-request", instance.Namespace, "operator.ibm.com", "v1alpha1", "operandrequests")
+
 	if needToRequeue {
 		// One or more resources were created, so requeue the request
 		reqLogger.Info("Requeuing the request")
@@ -199,7 +203,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 }
 
 func (r *CommonWebUIReconciler) removeLegacyZenResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
-	reqLogger := log.WithValues("func", "removeZenResources", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+	reqLogger := log.WithValues("func", "removeLegacyZenResources", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Removing legacy classic admin hub resources for zen")
 
 	//Delete common ui bind info config map
