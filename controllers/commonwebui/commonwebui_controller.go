@@ -54,6 +54,9 @@ type CommonWebUIReconciler struct {
 	Scheme *runtime.Scheme
 }
 
+const finalizerName = "commonui.operators.ibm.com"
+const finalizerName1 = "commonui1.operators.ibm.com"
+
 //+kubebuilder:rbac:groups=operators.ibm.com,resources=commonwebuis,verbs=get;list;watch;create;update;patch;delete
 //+kubebuilder:rbac:groups=operators.ibm.com,resources=commonwebuis/status,verbs=get;update;patch
 //+kubebuilder:rbac:groups=operators.ibm.com,resources=commonwebuis/finalizers,verbs=update
@@ -192,6 +195,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	//nolint
 	res.DeleteGenericResource(ctx, "ibm-commonui-request", instance.Namespace, "operator.ibm.com", "v1alpha1", "operandrequests")
 
+	r.removeLegacyFinalizers(ctx, instance)
+
 	if needToRequeue {
 		// One or more resources were created, so requeue the request
 		reqLogger.Info("Requeuing the request")
@@ -222,6 +227,33 @@ func (r *CommonWebUIReconciler) removeLegacyZenResources(ctx context.Context, in
 	//nolint
 	res.DeleteConfigMap(ctx, r.Client, res.ZenQuickNavExtensionsConfigMapName, instance.Namespace)
 
+}
+
+// Common UI 3.x added finalizers to the UI CR to manage OCP console links (and maybe redis)
+// These are causing issues on 4.x upgrade because the finalizers still exist, however the code
+// that would process them is long removed (this is because console links require cluster permissions
+// and were essentially abandoned as objects in 4.x - customer must remove them if one exists)
+func (r *CommonWebUIReconciler) removeLegacyFinalizers(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
+	reqLogger := log.WithValues("func", "removeLegacyFinalizers", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
+	reqLogger.Info("Checking for legacy finalizers for removal")
+
+	hasFinalizer := res.ContainsString(instance.ObjectMeta.Finalizers, "commonui.operators.ibm.com")
+	hasFinalizer1 := res.ContainsString(instance.ObjectMeta.Finalizers, "commonui1.operators.ibm.com")
+
+	if hasFinalizer || hasFinalizer1 {
+		if hasFinalizer {
+			instance.ObjectMeta.Finalizers = res.RemoveString(instance.ObjectMeta.Finalizers, finalizerName)
+			reqLogger.Info("Removing finalizer " + finalizerName)
+		}
+		if hasFinalizer1 {
+			instance.ObjectMeta.Finalizers = res.RemoveString(instance.ObjectMeta.Finalizers, finalizerName1)
+			reqLogger.Info("Removing finalizer " + finalizerName1)
+		}
+
+		if err := r.Client.Update(ctx, instance); err != nil {
+			reqLogger.Error(err, "Failed to update after removing finalizer")
+		}
+	}
 }
 
 func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
