@@ -58,7 +58,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: COMMON_WEB_UI_IMAGE
-              value: "icr.io/cpopen/cpfs/common-web-ui:1.21.2"
+              value: icr.io/cpopen/cpfs/common-web-ui:1.21.2
           livenessProbe:
             failureThreshold: 10
             httpGet:

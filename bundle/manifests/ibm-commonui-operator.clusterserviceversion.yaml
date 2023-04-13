@@ -64,7 +64,7 @@ metadata:
               "osAuth": "",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "1.17.0",
+            "operatorVersion": "1.21.3",
             "replicas": 1,
             "resources": {
               "limits": {
