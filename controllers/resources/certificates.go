@@ -39,8 +39,6 @@ type CertificateData struct {
 	Component string
 }
 
-const Days398 = ""
-
 //nolint
 func getDesiredCertificate(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, data CertificateData) (*certmgr.Certificate, error) {
 	reqLogger := log.WithValues("func", "getDesiredCertificate", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
