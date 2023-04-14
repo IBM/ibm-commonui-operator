@@ -99,6 +99,7 @@ const Log4jsVolumeName = "log4js"
 const ClusterCaVolumeName = "cluster-ca"
 const InternalTLSVolumeName = "internal-tls"
 const IAMDataVolumeName = "iamdata"
+const IAMAuthDataVolumeName = "iamadata"
 const UICertVolumeName = "common-web-ui-certs"
 const UICertSecretName = "common-web-ui-cert" + ""
 const WebUIConfigVolumeName = "common-web-ui-config"
@@ -239,6 +240,23 @@ var IAMDataVolume = corev1.Volume{
 	},
 }
 
+var IAMAuthDataVolume = corev1.Volume{
+	Name: IAMAuthDataVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		Secret: &corev1.SecretVolumeSource{
+			SecretName: "platform-auth-idp-credentials",
+			Items: []corev1.KeyToPath{
+				{
+					Key:  "admin_username",
+					Path: "aun",
+				},
+			},
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
+		},
+	},
+}
+
 var ArchitectureList = []string{
 	"amd64",
 	"ppc64le",
@@ -271,6 +289,10 @@ var CommonVolumeMounts = []corev1.VolumeMount{
 	{
 		Name:      IAMDataVolumeName,
 		MountPath: "/etc/iamdata",
+	},
+	{
+		Name:      IAMAuthDataVolumeName,
+		MountPath: "/etc/iamadata",
 	},
 	{
 		Name:      WebUIConfigVolumeName,
