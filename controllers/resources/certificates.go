@@ -18,6 +18,7 @@ package resources
 
 import (
 	"context"
+	"time"
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	// certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
@@ -70,6 +71,12 @@ func getDesiredCertificate(ctx context.Context, client client.Client, instance *
 			IssuerRef: cmmeta.ObjectReference{
 				Name: DefaultClusterIssuer,
 				Kind: certmgr.IssuerKind,
+			},
+			Duration: &metav1.Duration{
+				Duration: 9552 * time.Hour, /* 398 days */
+			},
+			RenewBefore: &metav1.Duration{
+				Duration: 2880 * time.Hour, /* 120 days (3 months) */
 			},
 		},
 	}
