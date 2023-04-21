@@ -52,6 +52,7 @@ var log = logf.Log.WithName("controller_commonwebui")
 type CommonWebUIReconciler struct {
 	Client client.Client
 	Scheme *runtime.Scheme
+	IsCncf bool
 }
 
 const finalizerName = "commonui.operators.ibm.com"
@@ -130,7 +131,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	isZen := false //ZEN DISABLED res.IsAdminHubOnZen(ctx, r.Client, instance.Namespace)
 
 	// Check to see kubernetes cluster type is cncf
-	isCncf := res.GetKubernetesClusterType(ctx, r.Client, instance.Namespace)
+	isCncf := r.IsCncf
 
 	// Check if the log4js configmap already exists. If not, create a new one.
 	err = res.ReconcileLog4jsConfigMap(ctx, r.Client, instance, &needToRequeue)
@@ -297,7 +298,7 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 
 	//Check for updates to service status
 	reqLogger.Info("Gather current service status")
-	currentServiceStatus := res.GetCurrentServiceStatus(ctx, r.Client, instance)
+	currentServiceStatus := res.GetCurrentServiceStatus(ctx, r.Client, instance, r.IsCncf)
 	if !reflect.DeepEqual(currentServiceStatus, instance.Status.Service) {
 		instance.Status.Service = currentServiceStatus
 		updateServiceStatus = true
@@ -360,6 +361,31 @@ func clusterInfoCmPredicate() predicate.Predicate {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
+
+	//Skip routes when it is cncf
+	if r.IsCncf {
+		return ctrl.NewControllerManagedBy(mgr).
+			For(&operatorsv1alpha1.CommonWebUI{}).
+			Owns(&corev1.ConfigMap{}).
+			Owns(&appsv1.Deployment{}).
+			Owns(&corev1.Service{}).
+			Owns(&corev1.Secret{}).
+			Owns(&netv1.Ingress{}).
+			Owns(&certmgr.Certificate{}).
+			Owns(&corev1.ServiceAccount{}).
+			Owns(&rbacv1.Role{}).
+			Owns(&rbacv1.RoleBinding{}).
+			Watches(&source.Kind{Type: &corev1.ConfigMap{}},
+				handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
+					return []ctrl.Request{
+						{NamespacedName: types.NamespacedName{
+							Name:      "NON_OWNED_OBJECT_RECONCILE",
+							Namespace: a.GetNamespace(),
+						}},
+					}
+				}), builder.WithPredicates(clusterInfoCmPredicate())).
+			Complete(r)
+	}
 
 	return ctrl.NewControllerManagedBy(mgr).
 		For(&operatorsv1alpha1.CommonWebUI{}).

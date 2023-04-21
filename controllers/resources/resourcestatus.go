@@ -154,8 +154,8 @@ func getAllRouteStatus(ctx context.Context, k8sClient client.Client, names []str
 	return
 }
 
-func GetCurrentServiceStatus(ctx context.Context, k8sClient client.Client, instance *v1alpha1.CommonWebUI) (status v1alpha1.ServiceStatus) {
-	reqLogger := log.WithValues("func", "getCurrentServiceStatus", "namespace", instance.Namespace)
+func GetCurrentServiceStatus(ctx context.Context, k8sClient client.Client, instance *v1alpha1.CommonWebUI, isCncf bool) (status v1alpha1.ServiceStatus) {
+	reqLogger := log.WithValues("func", "getCurrentServiceStatus", "namespace", instance.Namespace, "isCncf", isCncf)
 	type statusRetrieval struct {
 		names []string
 		f     statusRetrievalFunc
@@ -175,12 +175,17 @@ func GetCurrentServiceStatus(ctx context.Context, k8sClient client.Client, insta
 			},
 			f: getAllDeploymentStatus,
 		},
-		{
-			names: []string{
-				"cp-console",
-			},
-			f: getAllRouteStatus,
+	}
+
+	routeStatusRetrieval := statusRetrieval{
+		names: []string{
+			"cp-console",
 		},
+		f: getAllRouteStatus,
+	}
+
+	if !isCncf {
+		statusRetrievals = append(statusRetrievals, routeStatusRetrieval)
 	}
 
 	status = v1alpha1.ServiceStatus{

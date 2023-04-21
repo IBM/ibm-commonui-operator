@@ -17,14 +17,8 @@
 package resources
 
 import (
-	"context"
 	"os"
 	"strconv"
-
-	corev1 "k8s.io/api/core/v1"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/types"
-	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Returns the labels associated with the resource being created
@@ -66,33 +60,6 @@ func GetImageID(imageRegistry, imageName, defaultImageVersion, imagePostfix, env
 	}
 
 	return imageID
-}
-
-// returns kubernetes cluster type
-func GetKubernetesClusterType(ctx context.Context, client client.Client, namespace string) bool {
-	reqLogger := log.WithValues("func", "isCncf")
-	reqLogger.Info("Checking kubernetes cluster type")
-
-	ibmProjectK := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "ibm-cpp-config",
-			Namespace: namespace,
-		},
-	}
-	getError := client.Get(ctx, types.NamespacedName{Name: "ibm-cpp-config", Namespace: namespace}, ibmProjectK)
-
-	if getError == nil {
-		reqLogger.Info("Got ibm-cpp-config configmap")
-		clusterType := ibmProjectK.Data["kubernetes_cluster_type"]
-		reqLogger.Info("Kubernetes cluster type is " + clusterType)
-		if clusterType == "cncf" {
-			return true
-		}
-	} else {
-		reqLogger.Error(getError, "error getting ibm-cpp-config configmap in cs namepace")
-	}
-
-	return false
 }
 
 // Returns the int64 representation of a resource string if properly formatted. Otherwise, returns the given default value.

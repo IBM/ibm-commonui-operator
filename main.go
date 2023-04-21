@@ -17,6 +17,7 @@ limitations under the License.
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"os"
@@ -31,9 +32,12 @@ import (
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/apis/meta/v1/unstructured"
 	"k8s.io/apimachinery/pkg/labels"
 	runtimescheme "k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/runtime/schema"
+	"k8s.io/apimachinery/pkg/types"
 	utilruntime "k8s.io/apimachinery/pkg/util/runtime"
 	clientgoscheme "k8s.io/client-go/kubernetes/scheme"
 	ctrl "sigs.k8s.io/controller-runtime"
@@ -41,6 +45,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	logf "sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
+	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
 	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
@@ -55,7 +60,9 @@ import (
 	//+kubebuilder:scaffold:imports
 )
 
-var log = logf.Log.WithName("cmd")
+const CommonServiceName string = "common-service"
+
+var log = logf.Log.WithName("main")
 
 var (
 	scheme   = runtimescheme.NewScheme()
@@ -177,6 +184,14 @@ func main() {
 		os.Exit(1)
 	}
 
+	//Determine if this is a cncf cluster, if it is, do not watch routes
+	isCncf, err := isCncf(mgr)
+	if err != nil {
+		log.Error(err, "Unable to determine CNCF cluster, assuming NOT CNCF - routes will be managed")
+	} else {
+		log.Info("Cluster type determined", "isCncf", isCncf)
+	}
+
 	// Setup Scheme for all resources
 	if err := clientgoscheme.AddToScheme(mgr.GetScheme()); err != nil {
 		log.Error(err, "")
@@ -199,10 +214,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	//routes Scheme
-	if err := routesv1.AddToScheme(mgr.GetScheme()); err != nil {
-		log.Error(err, "")
-		os.Exit(1)
+	if !isCncf {
+		//routes Scheme
+		if err := routesv1.AddToScheme(mgr.GetScheme()); err != nil {
+			log.Error(err, "")
+			os.Exit(1)
+		}
 	}
 
 	//rbac Scheme
@@ -214,6 +231,7 @@ func main() {
 	if err = (&commonwebuicontrollers.CommonWebUIReconciler{
 		Client: mgr.GetClient(),
 		Scheme: mgr.GetScheme(),
+		IsCncf: isCncf,
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "CommonWebUI")
 		os.Exit(1)
@@ -248,4 +266,81 @@ func getWatchNamespace() (string, error) {
 		return "", fmt.Errorf("%s must be set", watchNamespaceEnvVar)
 	}
 	return ns, nil
+}
+
+func isCncf(mgr manager.Manager) (iscncf bool, err error) {
+	//We need to determine the cluster type during startup
+	//so we will use direct API calls since they are only done once
+
+	csNamespace, err := getSharedServicesNamespaceFromCommonService(mgr)
+	if err != nil {
+		return
+	}
+
+	iscncf = false
+	reqLogger := log.WithValues("func", "isCncf")
+	reqLogger.Info("Checking kubernetes cluster type in ibm-cpp-config", "namespace", csNamespace)
+
+	ibmCppConfig := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      "ibm-cpp-config",
+			Namespace: csNamespace,
+		},
+	}
+
+	err = mgr.GetAPIReader().Get(context.TODO(), types.NamespacedName{Name: "ibm-cpp-config", Namespace: csNamespace}, ibmCppConfig)
+	if err != nil {
+		return
+	}
+
+	clusterType := ibmCppConfig.Data["kubernetes_cluster_type"]
+	reqLogger.Info("Got ibm-cpp-config configmap - Kubernetes cluster type is " + clusterType)
+	if clusterType == "cncf" {
+		iscncf = true
+	}
+
+	return
+}
+
+func getSharedServicesNamespaceFromCommonService(mgr manager.Manager) (namespace string, err error) {
+	reqLogger := log.WithValues("func", "getSharedServicesNamespaceFromCommonService")
+	reqLogger.Info("Getting shared services namespace from common service CR")
+
+	var operatorNamespaceEnvVar = "OPERATOR_NAMESPACE"
+	operatorNamespace, found := os.LookupEnv(operatorNamespaceEnvVar)
+	if !found {
+		return "", fmt.Errorf("failed to get operator namespace from %s ENV var", operatorNamespaceEnvVar)
+	}
+
+	key := types.NamespacedName{Name: CommonServiceName, Namespace: operatorNamespace}
+
+	log.Info("key", "key", key)
+
+	gvk := schema.GroupVersionKind{
+		Group:   "operator.ibm.com",
+		Version: "v3",
+		Kind:    "CommonService",
+	}
+
+	unstrCS := &unstructured.Unstructured{}
+	unstrCS.SetGroupVersionKind(gvk)
+
+	err = mgr.GetAPIReader().Get(context.TODO(), key, unstrCS)
+	if err != nil {
+		log.Error(err, "Failed to get CommonService as unstructured object")
+		return
+	}
+
+	spec, ok := unstrCS.Object["spec"].(map[string]interface{})
+	if !ok {
+		log.Error(nil, "Failed to convert CommonService spec into map[string]interface{}")
+		err = fmt.Errorf(".spec of CommonService %s in namespace %s is not a map[string]interface{}", CommonServiceName, operatorNamespace)
+		return
+	}
+	namespace, ok = spec["servicesNamespace"].(string)
+	if !ok {
+		log.Error(nil, "Failed to get string servicesNamespace from CommonService spec")
+		err = fmt.Errorf(".spec.servicesNamespace of CommonService %s in namespace %s is not a string", CommonServiceName, operatorNamespace)
+	}
+	return
 }
