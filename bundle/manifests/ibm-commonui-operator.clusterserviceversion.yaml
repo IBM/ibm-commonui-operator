@@ -424,14 +424,6 @@ spec:
   displayName: Ibm Common UI
   install:
     spec:
-      clusterPermissions:
-      - rules:
-        - nonResourceURLs:
-          - /products
-          - /health
-          verbs:
-          - get
-        serviceAccountName: ibm-commonui-operator
       deployments:
       - name: ibm-commonui-operator
         spec:
@@ -615,7 +607,6 @@ spec:
         - apiGroups:
           - networking.k8s.io
           resources:
-          - '*'
           - ingresses
           verbs:
           - create
@@ -659,7 +650,6 @@ spec:
         - apiGroups:
           - certmanager.k8s.io
           resources:
-          - '*'
           - certificates
           verbs:
           - create
@@ -672,7 +662,6 @@ spec:
         - apiGroups:
           - cert-manager.io
           resources:
-          - '*'
           - certificates
           verbs:
           - create
