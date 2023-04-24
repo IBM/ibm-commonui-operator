@@ -79,7 +79,6 @@ rules:
 - apiGroups:
   - networking.k8s.io
   resources:
-  - '*'
   - ingresses
   verbs:
   - create
@@ -126,7 +125,6 @@ rules:
 - apiGroups:
   - certmanager.k8s.io
   resources:
-  - '*'
   - certificates
   verbs:
   - create
@@ -139,7 +137,6 @@ rules:
 - apiGroups:
   - cert-manager.io
   resources:
-  - '*'
   - certificates
   verbs:
   - create
@@ -155,18 +152,3 @@ rules:
   - jobs
   verbs:
   - get
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: ibm-commonui-operator
-  labels:
-    app.kubernetes.io/instance: ibm-commonui-operator
-    app.kubernetes.io/managed-by: ibm-commonui-operator
-    app.kubernetes.io/name: ibm-commonui-operator
-rules:
-- nonResourceURLs:
-    - /products
-    - /health
-  verbs:
-    - get
