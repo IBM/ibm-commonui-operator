@@ -775,7 +775,6 @@ spec:
         - apiGroups:
           - networking.k8s.io
           resources:
-          - '*'
           - ingresses
           verbs:
           - create
@@ -819,7 +818,6 @@ spec:
         - apiGroups:
           - certmanager.k8s.io
           resources:
-          - '*'
           - certificates
           verbs:
           - create
@@ -832,7 +830,6 @@ spec:
         - apiGroups:
           - cert-manager.io
           resources:
-          - '*'
           - certificates
           verbs:
           - create
