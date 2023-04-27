@@ -2,6 +2,10 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   name: navconfigurations.foundation.ibm.com
+  labels:
+    app.kubernetes.io/instance: ibm-commonui-operator
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: navconfigurations.foundation.ibm.com
 spec:
   group: foundation.ibm.com
   names:
