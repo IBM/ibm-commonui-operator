@@ -233,6 +233,7 @@ build: generate fmt vet build-amd64 build-ppc64le build-s390x ## Build manager b
 
 build-amd64:
 	@echo "Building the ${IMG} amd64 binary..."
+	uname -a
 	@GOARCH=amd64 common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
 
 build-ppc64le:
