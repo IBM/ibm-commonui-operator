@@ -14,10 +14,6 @@
 
 
 
-
-
-
-
 # This repo is build locally for dev/test by default;
 # Override this variable in CI env.
 BUILD_LOCALLY ?= 1
@@ -81,7 +77,7 @@ ifeq ($(USE_IMAGE_DIGESTS), true)
 	BUNDLE_GEN_FLAGS += --use-image-digests
 endif
 
-# Image URL to use all building/pushing image targets
+# Image URL to use all /pushing image targets
 IMG ?= ibm-commonui-operator
 REGISTRY_DEV ?= quay.io/sgrube
 CSV_VERSION ?= $(VERSION)
@@ -238,6 +234,8 @@ build: generate fmt vet build-amd64 build-ppc64le build-s390x ## Build manager b
 
 build-amd64:
 	@echo "Building the ${IMG} amd64 binary..."
+	echo "Injecting command"
+	uname -a
 	@GOARCH=amd64 common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
 
 build-ppc64le:
