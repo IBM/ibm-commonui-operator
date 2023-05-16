@@ -51,7 +51,7 @@ spec:
           image: icr.io/cpopen/ibm-commonui-operator:1.21.4
           command:
           - ibm-commonui-operator
-          imagePullPolicy: Always
+          imagePullPolicy: IfNotPresent
           env:
             - name: WATCH_NAMESPACE
               valueFrom:
