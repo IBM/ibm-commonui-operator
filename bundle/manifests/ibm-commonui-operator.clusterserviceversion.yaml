@@ -473,7 +473,7 @@ spec:
                 - name: COMMON_WEB_UI_IMAGE
                   value: icr.io/cpopen/cpfs/common-web-ui:4.0.0
                 image: icr.io/cpopen/ibm-commonui-operator:4.0.0
-                imagePullPolicy: Always
+                imagePullPolicy: IfNotPresent
                 name: manager
                 livenessProbe:
                   failureThreshold: 10

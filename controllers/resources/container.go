@@ -37,7 +37,7 @@ var commonSecurityContext = corev1.SecurityContext{
 var CommonContainer = corev1.Container{
 	Image:           "common-web-ui",
 	Name:            "common-web-ui",
-	ImagePullPolicy: corev1.PullAlways,
+	ImagePullPolicy: corev1.PullIfNotPresent,
 
 	Resources: corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{
