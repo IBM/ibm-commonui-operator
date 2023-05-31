@@ -143,7 +143,7 @@ func DeleteConfigMap(ctx context.Context, client client.Client, name string, nam
 			Namespace: namespace,
 		},
 	}
-	err := client.Get(ctx, types.NamespacedName{Name: "ibm-commonui-bindinfo-common-webui-ui-extensions", Namespace: namespace}, configMap)
+	err := client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, configMap)
 	if err != nil {
 		if errors.IsNotFound(err) {
 			reqLogger.Info("Configmap not found")
