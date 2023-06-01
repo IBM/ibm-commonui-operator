@@ -143,6 +143,15 @@ func ReconcileRoute(ctx context.Context, client client.Client, instance *operato
 			desiredRoute.Annotations[name] = annotation
 		}
 
+		// Update the desired route if it contains a TLS certificate, caCertificate and key
+		// This will preserve the certificate that has been placed into the route
+		if route.Spec.TLS.Key != "" && route.Spec.TLS.Certificate != "" && route.Spec.TLS.CACertificate != "" {
+			reqLogger.Info("Updating route with TLS key, certificate and caCertificate")
+			desiredRoute.Spec.TLS.Key = route.Spec.TLS.Key
+			desiredRoute.Spec.TLS.Certificate = route.Spec.TLS.Certificate
+			desiredRoute.Spec.TLS.CACertificate = route.Spec.TLS.CACertificate
+		}
+
 		//routeHost is immutable so it must be checked first and the route recreated if it has changed
 		//We have discovered that the to:service is also immutable, so we will check that as well
 		if route.Spec.Host != desiredRoute.Spec.Host || route.Spec.To.Name != desiredRoute.Spec.To.Name {
