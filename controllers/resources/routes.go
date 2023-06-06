@@ -145,7 +145,7 @@ func ReconcileRoute(ctx context.Context, client client.Client, instance *operato
 
 		// Update the desired route if it contains a TLS certificate, caCertificate and key
 		// This will preserve the certificate that has been placed into the route
-		if route.Spec.TLS.Key != "" && route.Spec.TLS.Certificate != "" && route.Spec.TLS.CACertificate != "" {
+		if route.Spec.TLS != nil && route.Spec.TLS.Key != "" && route.Spec.TLS.Certificate != "" && route.Spec.TLS.CACertificate != "" {
 			reqLogger.Info("Updating route with TLS key, certificate and caCertificate")
 			desiredRoute.Spec.TLS.Key = route.Spec.TLS.Key
 			desiredRoute.Spec.TLS.Certificate = route.Spec.TLS.Certificate
