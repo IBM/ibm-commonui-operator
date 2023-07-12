@@ -71,6 +71,8 @@ type CommonWebUISpec struct {
 	Version           string            `json:"version,omitempty"`
 	Replicas          int32             `json:"replicas,omitempty"`
 	Resources         Resources         `json:"resources,omitempty"`
+	PodLabels         map[string]string `json:"podLabels,omitempty"`
+	PodAnnotations    map[string]string `json:"podAnnotations,omitempty"`
 	// License           License           `json:"license,omitempty"`
 }
 

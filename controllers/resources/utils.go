@@ -140,3 +140,11 @@ func CopyMap(m map[string]interface{}) map[string]interface{} {
 
 	return cp
 }
+
+func CopyStringMap(in map[string]string) map[string]string {
+	out := make(map[string]string)
+	for k, v := range in {
+		out[k] = v
+	}
+	return out
+}

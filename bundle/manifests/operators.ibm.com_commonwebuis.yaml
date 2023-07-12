@@ -84,6 +84,14 @@ spec:
                 type: object
               operatorVersion:
                 type: string
+              podAnnotations:
+                additionalProperties:
+                  type: string
+                type: object
+              podLabels:
+                additionalProperties:
+                  type: string
+                type: object
               replicas:
                 format: int32
                 type: integer
