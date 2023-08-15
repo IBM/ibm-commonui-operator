@@ -20,7 +20,7 @@ spec:
     storage: true
     schema:
       openAPIV3Schema:
-        description: Navconfiguration is the Schema for the navconfigurations API
+        description: The Navconfiguration custom resource is deprecated and is only used internally by the operator
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
