@@ -21,7 +21,7 @@ spec:
   - name: v1alpha1
     schema:
       openAPIV3Schema:
-        description: CommonWebUI is the Schema for the commonwebuis API
+        description: The CommonWebUI custom resource is used to create an instance of the service that serves a user interface to manage identity provider configurations
         properties:
           apiVersion:
             description: 'APIVersion defines the versioned schema of this representation
