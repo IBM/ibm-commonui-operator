@@ -42,10 +42,13 @@ var CommonContainer = corev1.Container{
 	Resources: corev1.ResourceRequirements{
 		Limits: map[corev1.ResourceName]resource.Quantity{
 			corev1.ResourceCPU:    *cpu300,
-			corev1.ResourceMemory: *memory256},
+			corev1.ResourceMemory: *memory256,
+		},
 		Requests: map[corev1.ResourceName]resource.Quantity{
-			corev1.ResourceCPU:    *cpu300,
-			corev1.ResourceMemory: *memory256},
+			corev1.ResourceCPU:              *cpu300,
+			corev1.ResourceMemory:           *memory256,
+			corev1.ResourceEphemeralStorage: *memory251,
+		},
 	},
 
 	SecurityContext: &commonSecurityContext,
@@ -176,7 +179,8 @@ var CommonContainer = corev1.Container{
 			Name: "POD_NAMESPACE",
 			ValueFrom: &corev1.EnvVarSource{
 				FieldRef: &corev1.ObjectFieldSelector{
-					FieldPath: "metadata.namespace",
+					APIVersion: "v1",
+					FieldPath:  "metadata.namespace",
 				},
 			},
 		},

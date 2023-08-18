@@ -166,10 +166,11 @@ func isContainerEqual(oldContainers, newContainers []corev1.Container, isInitCon
 						"old", oldContainer.ImagePullPolicy, "new", newContainer.ImagePullPolicy)
 					return false
 				}
-
-				if !reflect.DeepEqual(oldContainer.Resources.Limits["cpu"], newContainer.Resources.Limits["cpu"]) {
+				//For some reason deep equals would not work on CPU values so went to a straight value comparison
+				//for all types
+				if !oldContainer.Resources.Limits.Cpu().Equal(*newContainer.Resources.Limits.Cpu()) {
 					logger.Info(containerType+" resource cpu limits not equal", "container num", i,
-						"old", oldContainer.Resources.Limits["cpu"], "new", newContainer.Resources.Limits["cpu"])
+						"old", oldContainer.Resources.Limits.Cpu(), "new", newContainer.Resources.Limits.Cpu())
 					return false
 				}
 
@@ -179,7 +180,14 @@ func isContainerEqual(oldContainers, newContainers []corev1.Container, isInitCon
 					return false
 				}
 
-				if !reflect.DeepEqual(oldContainer.Resources.Requests["cpu"], newContainer.Resources.Requests["cpu"]) {
+				if !oldContainer.Resources.Limits.StorageEphemeral().Equal(*newContainer.Resources.Limits.StorageEphemeral()) {
+					logger.Info(containerType+" resource ephemoral-storage limits not equal", "container num", i,
+						"old", oldContainer.Resources.Limits["ephemeral-storage"], "new", newContainer.Resources.Limits["ephemeral-storage"])
+					return false
+				}
+
+				//For some reason deep equals would not work on CPU values so went to a straight value comparison
+				if !oldContainer.Resources.Requests.Cpu().Equal(*newContainer.Resources.Requests.Cpu()) {
 					logger.Info(containerType+" resource cpu requests not equal", "container num", i,
 						"old", oldContainer.Resources.Requests["cpu"], "new", newContainer.Resources.Requests["cpu"])
 					return false
@@ -191,6 +199,11 @@ func isContainerEqual(oldContainers, newContainers []corev1.Container, isInitCon
 					return false
 				}
 
+				if !oldContainer.Resources.Requests.StorageEphemeral().Equal(*newContainer.Resources.Requests.StorageEphemeral()) {
+					logger.Info(containerType+" resource ephemoral-storage requests not equal", "container num", i,
+						"old", oldContainer.Resources.Requests["ephemeral-storage"], "new", newContainer.Resources.Requests["ephemeral-storage"])
+					return false
+				}
 				oldEnvVars := oldContainer.Env
 				newEnvVars := newContainer.Env
 				if len(oldEnvVars) != len(newEnvVars) {
