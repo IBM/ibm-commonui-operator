@@ -31,6 +31,7 @@ var DefaultVolumeMode int32 = 420
 
 var cpu300 = resource.NewMilliQuantity(300, resource.DecimalSI)        // 300m
 var memory256 = resource.NewQuantity(256*1024*1024, resource.BinarySI) // 256Mi
+var memory251 = resource.NewQuantity(251*1024*1024, resource.BinarySI) // 251Mi
 
 const ReleaseName = "common-web-ui"
 const DeploymentName = "common-web-ui"
@@ -362,7 +363,7 @@ var UICertificateData = CertificateData{
 
 const AdminHubNavConfigName = "common-web-ui-config"
 
-//nolint
+// nolint
 var AdminHubNavConfig = `
 {
 	"apiVersion": "foundation.ibm.com/v1",

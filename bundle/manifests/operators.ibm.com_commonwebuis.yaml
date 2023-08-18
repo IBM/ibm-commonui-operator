@@ -95,10 +95,14 @@ spec:
                         type: string
                       memory:
                         type: string
+                      ephemeral-storage:
+                        type: string
                     type: object
                   requests:
                     properties:
                       cpu:
+                        type: string
+                      ephemeral-storage:
                         type: string
                       memory:
                         type: string

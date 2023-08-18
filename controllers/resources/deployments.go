@@ -33,7 +33,7 @@ import (
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
-//nolint
+// nolint
 func getDesiredDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool) (*appsv1.Deployment, error) {
 	reqLogger := log.WithValues("func", "getDesiredDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
@@ -52,8 +52,10 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 
 	cpuLimits := GetResourceLimitsWithDefault(instance.Spec.Resources.Limits.CPULimits, 1000)
 	cpuMemory := GetResourceMemoryWithDefault(instance.Spec.Resources.Limits.CPUMemory, 512)
+	limEphemeral := GetResourceMemoryWithDefault(instance.Spec.Resources.Limits.EphemeralStorage, -1)
 	reqLimits := GetResourceLimitsWithDefault(instance.Spec.Resources.Requests.RequestLimits, 300)
 	reqMemory := GetResourceMemoryWithDefault(instance.Spec.Resources.Requests.RequestMemory, 512)
+	reqEphemeral := GetResourceMemoryWithDefault(instance.Spec.Resources.Requests.EphemeralStorage, 251)
 
 	imageRegistry := GetStringWithDefault(instance.Spec.CommonWebUIConfig.ImageRegistry, DefaultImageRegistry)
 	imageTag := GetStringWithDefault(instance.Spec.CommonWebUIConfig.ImageTag, DefaultImageTag)
@@ -64,7 +66,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 	volumes = append(volumes, Log4jsVolume, ClusterCaVolume, UICertVolume, InternalTLSVolume, IAMDataVolume, IAMAuthDataVolume,
 		WebUIConfigVolume, ClusterInfoConfigVolume, PlatformAuthIdpConfigVolume)
 
-	container := CommonContainer
+	container := *CommonContainer.DeepCopy()
 	container.Image = image
 	container.Name = DeploymentName
 	container.Env[6].Value = instance.Spec.GlobalUIConfig.CloudPakVersion
@@ -78,6 +80,11 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 	container.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
 	container.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)
 	container.Resources.Requests["memory"] = *resource.NewQuantity(reqMemory*1024*1024, resource.BinarySI)
+	container.Resources.Requests["ephemeral-storage"] = *resource.NewQuantity(reqEphemeral*1024*1024, resource.BinarySI)
+	//ephemeral-storage limit has no default, so only set it when it appears in the CR
+	if limEphemeral > 0 {
+		container.Resources.Limits["ephemeral-storage"] = *resource.NewQuantity(limEphemeral*1024*1024, resource.BinarySI)
+	}
 	container.VolumeMounts = CommonVolumeMounts
 
 	if isZen {
@@ -202,7 +209,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 	return deployment, nil
 }
 
-//nolint
+// nolint
 func ReconcileDeployment(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, isZen bool, isCncf bool, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileDeployment", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Reconciling deployment")

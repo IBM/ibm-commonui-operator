@@ -52,13 +52,15 @@ type Resources struct {
 }
 
 type Requests struct {
-	RequestLimits string `json:"cpu,omitempty"`
-	RequestMemory string `json:"memory,omitempty"`
+	RequestLimits    string `json:"cpu,omitempty"`
+	RequestMemory    string `json:"memory,omitempty"`
+	EphemeralStorage string `json:"ephemeral-storage,omitempty"`
 }
 
 type Limits struct {
-	CPULimits string `json:"cpu,omitempty"`
-	CPUMemory string `json:"memory,omitempty"`
+	CPULimits        string `json:"cpu,omitempty"`
+	CPUMemory        string `json:"memory,omitempty"`
+	EphemeralStorage string `json:"ephemeral-storage,omitempty"`
 }
 
 // CommonWebUISpec defines the desired state of CommonWebUI
