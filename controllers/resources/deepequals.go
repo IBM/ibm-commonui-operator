@@ -131,6 +131,42 @@ func isPodTemplateEqual(oldPodTemplate, newPodTemplate corev1.PodTemplateSpec) b
 	return true
 }
 
+func isContainerEnvEqual(oldContainer, newContainer corev1.Container, i int) bool {
+	logger := log.WithValues("func", "isContainerEnvEqual")
+
+	oldEnvVars := oldContainer.Env
+	newEnvVars := newContainer.Env
+	if len(oldEnvVars) != len(newEnvVars) {
+		logger.Info("Env var length not equal", "container num", i)
+		return false
+	} else if len(oldEnvVars) > 0 {
+		for j := range oldEnvVars {
+			oldEnvVar := oldEnvVars[j]
+			newEnvVar := newEnvVars[j]
+			if !reflect.DeepEqual(oldEnvVar.Name, newEnvVar.Name) {
+				logger.Info("Env var names not equal", "container num", i, "old", oldEnvVar.Name, "new", newEnvVar.Name)
+				return false
+			}
+			if !reflect.DeepEqual(oldEnvVar.Value, newEnvVar.Value) {
+				logger.Info("Env var values not equal", "container num", i, "var", oldEnvVar.Name,
+					"old", oldEnvVar.Value, "new", newEnvVar.Value)
+				return false
+			}
+			if oldEnvVar.ValueFrom != nil && newEnvVar.ValueFrom != nil {
+				if !reflect.DeepEqual(oldEnvVar.ValueFrom, newEnvVar.ValueFrom) {
+					logger.Info("Env var ValueFrom not equal", "container num", i, "var", oldEnvVar.Name,
+						"old", fmt.Sprintf("%+v", oldEnvVar.ValueFrom), "new", fmt.Sprintf("%+v", newEnvVar.ValueFrom))
+					return false
+				}
+			} else if !(oldEnvVar.ValueFrom == nil && newEnvVar.ValueFrom == nil) {
+				logger.Info("One of the env var's ValueFrom is nil", "container num", i, "var", oldEnvVar.Name)
+				return false
+			}
+		}
+	}
+	return true
+}
+
 // Use DeepEqual to determine if 2 container lists are equal.
 // Check count, name, image name, image pull policy, env vars, volume mounts.
 // If there are any differences, return false. Otherwise, return true.
@@ -204,35 +240,9 @@ func isContainerEqual(oldContainers, newContainers []corev1.Container, isInitCon
 						"old", oldContainer.Resources.Requests["ephemeral-storage"], "new", newContainer.Resources.Requests["ephemeral-storage"])
 					return false
 				}
-				oldEnvVars := oldContainer.Env
-				newEnvVars := newContainer.Env
-				if len(oldEnvVars) != len(newEnvVars) {
-					logger.Info("Env var length not equal", "container num", i)
+
+				if !isContainerEnvEqual(oldContainer, newContainer, i) {
 					return false
-				} else if len(oldEnvVars) > 0 {
-					for j := range oldEnvVars {
-						oldEnvVar := oldEnvVars[j]
-						newEnvVar := newEnvVars[j]
-						if !reflect.DeepEqual(oldEnvVar.Name, newEnvVar.Name) {
-							logger.Info("Env var names not equal", "container num", i, "old", oldEnvVar.Name, "new", newEnvVar.Name)
-							return false
-						}
-						if !reflect.DeepEqual(oldEnvVar.Value, newEnvVar.Value) {
-							logger.Info("Env var values not equal", "container num", i, "var", oldEnvVar.Name,
-								"old", oldEnvVar.Value, "new", newEnvVar.Value)
-							return false
-						}
-						if oldEnvVar.ValueFrom != nil && newEnvVar.ValueFrom != nil {
-							if !reflect.DeepEqual(oldEnvVar.ValueFrom, newEnvVar.ValueFrom) {
-								logger.Info("Env var ValueFrom not equal", "container num", i, "var", oldEnvVar.Name,
-									"old", fmt.Sprintf("%+v", oldEnvVar.ValueFrom), "new", fmt.Sprintf("%+v", newEnvVar.ValueFrom))
-								return false
-							}
-						} else if !(oldEnvVar.ValueFrom == nil && newEnvVar.ValueFrom == nil) {
-							logger.Info("One of the env var's ValueFrom is nil", "container num", i, "var", oldEnvVar.Name)
-							return false
-						}
-					}
 				}
 
 				oldVolumeMounts := oldContainer.VolumeMounts
