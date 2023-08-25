@@ -121,6 +121,10 @@ spec:
                 items:
                   type: string
                 type: array
+              operandVersion:
+                type: string
+              operatorVersion:
+                type: string
               service:
                 description: Versions Versions `json:"versions,omitempty"`
                 properties:

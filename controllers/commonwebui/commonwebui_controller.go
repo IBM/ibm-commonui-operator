@@ -44,6 +44,7 @@ import (
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
+	"github.com/IBM/ibm-commonui-operator/version"
 )
 
 var log = logf.Log.WithName("controller_commonwebui")
@@ -120,6 +121,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// set a default Status value
 	if len(instance.Status.Nodes) == 0 {
 		instance.Status.Nodes = res.DefaultStatusForCR
+		instance.Status.OperatorVersion = version.Version
+		instance.Status.OperandVersion = version.Version
 		err = r.Client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set CommonWebUI default status")
@@ -318,8 +321,11 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 			podNames = append(podNames, pod.Name)
 		}
 
-		if !reflect.DeepEqual(podNames, instance.Status.Nodes) {
+		if !reflect.DeepEqual(podNames, instance.Status.Nodes) || instance.Status.OperatorVersion != version.Version ||
+			instance.Status.OperandVersion != version.Version {
 			instance.Status.Nodes = podNames
+			instance.Status.OperatorVersion = version.Version
+			instance.Status.OperandVersion = version.Version
 			updateNodeStatus = true
 		}
 	} else {
