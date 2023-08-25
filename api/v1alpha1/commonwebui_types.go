@@ -83,7 +83,9 @@ type CommonWebUIStatus struct {
 	// PodNames will hold the names of the commonwebui's
 	Nodes []string `json:"nodes"`
 	// Versions Versions `json:"versions,omitempty"`
-	Service ServiceStatus `json:"service,omitempty"`
+	Service         ServiceStatus `json:"service,omitempty"`
+	OperatorVersion string        `json:"operatorVersion,omitempty"`
+	OperandVersion  string        `json:"operandVersion,omitempty"`
 }
 
 // ServiceStatus struct
