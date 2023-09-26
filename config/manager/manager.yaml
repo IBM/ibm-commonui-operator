@@ -48,7 +48,7 @@ spec:
       containers:
         - name: manager
           # Replace this with the built image name
-          image: icr.io/cpopen/ibm-commonui-operator:4.2.0
+          image: icr.io/cpopen/ibm-commonui-operator:4.3.0
           command:
           - ibm-commonui-operator
           imagePullPolicy: IfNotPresent
@@ -58,7 +58,7 @@ spec:
                 fieldRef:
                   fieldPath: metadata.namespace
             - name: COMMON_WEB_UI_IMAGE
-              value: icr.io/cpopen/cpfs/common-web-ui:4.2.0
+              value: icr.io/cpopen/cpfs/common-web-ui:4.3.0
           livenessProbe:
             failureThreshold: 10
             httpGet:
