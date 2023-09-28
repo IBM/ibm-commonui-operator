@@ -449,6 +449,7 @@ spec:
                 app.kubernetes.io/instance: ibm-commonui-operator
                 app.kubernetes.io/managed-by: ibm-commonui-operator
                 app.kubernetes.io/name: ibm-commonui-operator
+                productName: IBM Cloud Platform Common Services
                 intent: projected
                 name: ibm-commonui-operator
             spec:
