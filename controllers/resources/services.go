@@ -38,6 +38,11 @@ func getDesiredService(client client.Client, instance *operatorsv1alpha1.CommonW
 	metaLabels["kubernetes.io/name"] = instance.Spec.CommonWebUIConfig.ServiceName
 	metaLabels["app"] = instance.Spec.CommonWebUIConfig.ServiceName
 
+	//Update any CR specified labels on the route
+	if instance.Spec.Labels != nil {
+		metaLabels = MergeMap(metaLabels, instance.Spec.Labels)
+	}
+
 	selectorLabels := LabelsForSelector(ServiceName, CommonWebUICRType, instance.Name)
 
 	service := &corev1.Service{

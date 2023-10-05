@@ -420,6 +420,13 @@ func IsRouteEqual(oldRoute, newRoute *route.Route) bool {
 		return false
 	}
 
+	if !reflect.DeepEqual(oldRoute.ObjectMeta.Labels, newRoute.ObjectMeta.Labels) {
+		logger.Info("Labels not equal",
+			"old", fmt.Sprintf("%v", oldRoute.ObjectMeta.Labels),
+			"new", fmt.Sprintf("%v", newRoute.ObjectMeta.Labels))
+		return false
+	}
+
 	if !reflect.DeepEqual(oldRoute.Spec, newRoute.Spec) {
 		//ugly, but don't print the CA to the log
 		logger.Info("Specs not equal", "oldHost", oldRoute.Spec.Host, "newHost", newRoute.Spec.Host,

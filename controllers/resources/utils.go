@@ -140,3 +140,13 @@ func CopyMap(m map[string]interface{}) map[string]interface{} {
 
 	return cp
 }
+
+func MergeMap(in map[string]string, mergeMap map[string]string) map[string]string {
+	if in == nil {
+		in = make(map[string]string)
+	}
+	for k, v := range mergeMap {
+		in[k] = v
+	}
+	return in
+}

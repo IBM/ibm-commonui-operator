@@ -73,6 +73,7 @@ type CommonWebUISpec struct {
 	Version           string            `json:"version,omitempty"`
 	Replicas          int32             `json:"replicas,omitempty"`
 	Resources         Resources         `json:"resources,omitempty"`
+	Labels            map[string]string `json:"labels,omitempty"`
 	// License           License           `json:"license,omitempty"`
 }
 

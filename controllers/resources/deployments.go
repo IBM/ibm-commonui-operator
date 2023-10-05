@@ -39,9 +39,10 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 
 	volumes := []corev1.Volume{}
 
-	metaLabels := LabelsForMetadata(DeploymentName)
+	//Update any CR specified labels on deployment and container
+	metaLabels := MergeMap(LabelsForMetadata(DeploymentName), instance.Spec.Labels)
 	selectorLabels := LabelsForSelector(DeploymentName, CommonWebUICRType, instance.Name)
-	podLabels := LabelsForPodMetadata(DeploymentName, CommonWebUICRType, instance.Name)
+	podLabels := MergeMap(LabelsForPodMetadata(DeploymentName, CommonWebUICRType, instance.Name), instance.Spec.Labels)
 
 	var err error
 
