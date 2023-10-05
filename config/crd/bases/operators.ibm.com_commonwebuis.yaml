@@ -6,6 +6,10 @@ metadata:
     controller-gen.kubebuilder.io/version: v0.11.3
   creationTimestamp: null
   name: commonwebuis.operators.ibm.com
+  labels:
+    app.kubernetes.io/instance: ibm-commonui-operator
+    app.kubernetes.io/managed-by: ibm-commonui-operator
+    app.kubernetes.io/name: commonwebuis.operators.ibm.com
 spec:
   group: operators.ibm.com
   names:
@@ -78,6 +82,10 @@ spec:
                   sessionPollingInterval:
                     format: int32
                     type: integer
+                type: object
+              labels:
+                additionalProperties:
+                  type: string
                 type: object
               operatorVersion:
                 type: string

@@ -175,6 +175,7 @@ func ReconcileRoute(ctx context.Context, client client.Client, instance *operato
 
 			route.ObjectMeta.Name = desiredRoute.ObjectMeta.Name
 			route.ObjectMeta.Annotations = desiredRoute.ObjectMeta.Annotations
+			route.ObjectMeta.Labels = desiredRoute.ObjectMeta.Labels
 			route.Spec = desiredRoute.Spec
 
 			err = client.Update(ctx, route)
@@ -194,6 +195,9 @@ func GetDesiredRoute(client client.Client, instance *operatorsv1alpha1.CommonWeb
 
 	weight := int32(100)
 
+	//Update any CR specified labels on the route
+	routeLabels := MergeMap(LabelsForMetadata(name), instance.Spec.Labels)
+
 	r := &route.Route{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "Route",
@@ -203,7 +207,7 @@ func GetDesiredRoute(client client.Client, instance *operatorsv1alpha1.CommonWeb
 			Name:        name,
 			Namespace:   namespace,
 			Annotations: annotations,
-			Labels:      LabelsForMetadata(name),
+			Labels:      routeLabels,
 		},
 		Spec: route.RouteSpec{
 			Host: routeHost,

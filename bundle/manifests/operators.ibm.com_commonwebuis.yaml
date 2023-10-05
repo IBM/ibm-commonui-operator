@@ -82,6 +82,10 @@ spec:
                     format: int32
                     type: integer
                 type: object
+              labels:
+                additionalProperties:
+                  type: string
+                type: object
               operatorVersion:
                 type: string
               replicas:
@@ -93,9 +97,9 @@ spec:
                     properties:
                       cpu:
                         type: string
-                      memory:
-                        type: string
                       ephemeral-storage:
+                        type: string
+                      memory:
                         type: string
                     type: object
                   requests:
