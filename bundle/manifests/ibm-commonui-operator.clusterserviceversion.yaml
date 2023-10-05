@@ -312,6 +312,7 @@ metadata:
     operators.operatorframework.io/builder: operator-sdk-v1.18.0+git
     operators.operatorframework.io/project_layout: go.kubebuilder.io/v3
     operators.operatorframework.io/operator-type: 'non-standalone'
+    nss.operator.ibm.com/managed-operators: ibm-commonui-operator
   labels:
     operatorframework.io/arch.amd64: supported
     operatorframework.io/arch.ppc64le: supported

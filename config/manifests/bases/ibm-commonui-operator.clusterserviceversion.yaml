@@ -5,6 +5,7 @@ metadata:
     alm-examples: '[]'
     capabilities: Basic Install
     operators.operatorframework.io/operator-type: 'non-standalone'
+    nss.operator.ibm.com/managed-operators: ibm-commonui-operator
   labels:
     operatorframework.io/arch.amd64: supported
     operatorframework.io/arch.ppc64le: supported
