@@ -456,7 +456,9 @@ var AdminHubNavConfig = `
 		  "checker-qual, version 2.0.0, GPLv2",
 		  "ocrad-bower, v1.0.0, GPL v3",
 		  "Grafana, v7.5.12, AGPL",
-		  "IBM Semeru Runtime Open Edition binaries, GPL v2"
+		  "IBM Semeru Runtime Open Edition binaries, GPL v2",
+		  "checker-compat-qual 2.5.5, GPL-2.0",
+          "javax.annotation-api 1.3.1, GPL-2.0"
 		],
 		"logoUrl": "Administration",
 		"logoAltText": "Administration"
