@@ -22,7 +22,7 @@ spec:
       name: commonwebuis.operators.ibm.com
       specDescriptors:
       - description: 'Configuration parameters for common web ui specific to the service.Documentation For additional details regarding install parameters
-        check: https://ibm.biz/icpfs39install. License By installing this product
+        check: https://ibm.biz/cpfs_4-3_install. License By installing this product
         you accept the license terms https://ibm.biz/icpfs39license.'
         displayName: Common Web UI Configuration
         path: commonWebUIConfig
@@ -39,7 +39,7 @@ spec:
         path: nodes
       version: v1alpha1
     - description: 'Documentation For additional details regarding install parameters
-        check: https://ibm.biz/icpfs39install. License By installing this product
+        check: https://ibm.biz/cpfs_4-3_install. License By installing this product
         you accept the license terms https://ibm.biz/icpfs39license.'
       kind: NavConfiguration
       name: navconfigurations.foundation.ibm.com
@@ -69,34 +69,34 @@ spec:
       version: v1alpha1
   description: "**Important:** Do not install this operator directly. Only install
     this operator using the IBM Common Services Operator. For more information about
-    installing this operator and other Common Services operators, see [Installer documentation](http://ibm.biz/cpcs_opinstall).
+    installing this operator and other Common Services operators, see [Installer documentation](https://ibm.biz/cpfs_4-3_install).
     Additionally, you can exit this panel and navigate to the IBM Common Services
     tile in OperatorHub to learn more about the operator.\n\n If you are using this
     operator as part of an IBM Cloud Pak, see the documentation for that IBM Cloud
     Pak to learn more about how to install and use the operator service. For more
-    information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](http://ibm.biz/cpcs_cloudpaks).\n\n
+    information about IBM Cloud Paks, see [IBM Cloud Paks that use Common Services](https://ibm.biz/cp_welcome).\n\n
     You can use the ibm-commonui-operator to install the Common Web UI service for
     the IBM Cloud Platform Common Services and access the Common Web UI console. You
     can use the Common Web UI console to access information and features from other
     IBM Cloud Platform Common Services or IBM Cloud Paks that you install. \n\nFor
     more information about the available IBM Cloud Platform Common Services, see the
-    [IBM Knowledge Center](http://ibm.biz/cpcsdocs). \n## Supported platforms \n\n
+    [IBM Knowledge Center](https://ibm.biz/cpfs_welcome). \n## Supported platforms \n\n
     Red Hat OpenShift Container Platform 4.2 or newer installed on one of the following
     platforms: \n\n- Linux x86_64 \n- Linux on Power (ppc64le) \n- Linux on IBM Z
     and LinuxONE \n## Prerequisites\n\n The Common Web UI service has dependencies
     on other IBM Cloud Platform Common Services. Before you install this operator,
     you need to first install the operator dependencies and prerequisites: \n For
-    the list of operator dependencies, see the IBM Knowledge Center [Common Services
-    dependencies documentation](http://ibm.biz/cpcs_opdependencies). \n For the list
+    the list of operator dependencies, see the IBM Knowledge Center [foundational services
+    dependencies documentation](https://ibm.biz/cpfs_4-3_dependencies). \n For the list
     of prerequisites for installing the operator, see the IBM Knowledge Center [Preparing
-    to install services documentation](http://ibm.biz/cpcs_opinstprereq). \n## Documentation
+    to install services documentation](https://ibm.biz/cpfs_4-3_prep). \n## Documentation
     \n\n To install the operator with the IBM Common Services Operator follow the
     the installation and configuration instructions within the IBM Knowledge Center.
     \n- If you are using the operator as part of an IBM Cloud Pak, see the documentation
     for that IBM Cloud Pak, for a list of IBM Cloud Paks, see [IBM Cloud Paks that
-    use Common Services](http://ibm.biz/cpcs_cloudpaks). \n- If you are using the
+    use Common Services](http://ibm.biz/cpfs_welcome). \n- If you are using the
     operator with an IBM Containerized Software, see the IBM Cloud Platform Common
-    Services Knowledge Center [Installer documentation](http://ibm.biz/cpcs_opinstall)."
+    Services Knowledge Center [Installer documentation](https://ibm.biz/cpfs_4-3_install)."
   displayName: ibm-commonui-operator
   icon:
   - base64data: ""
