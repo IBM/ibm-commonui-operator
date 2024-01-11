@@ -178,6 +178,21 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 										TopologyKey: "topology.kubernetes.io/zone",
 									},
 								},
+								{
+									Weight: 100,
+									PodAffinityTerm: corev1.PodAffinityTerm{
+										LabelSelector: &metav1.LabelSelector{
+											MatchExpressions: []metav1.LabelSelectorRequirement{
+												{
+													Key:      "app.kubernetes.io/name",
+													Operator: metav1.LabelSelectorOpIn,
+													Values:   []string{DeploymentName},
+												},
+											},
+										},
+										TopologyKey: "topology.kubernetes.io/hostname",
+									},
+								},
 							},
 						},
 					},
