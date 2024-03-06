@@ -190,7 +190,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 												},
 											},
 										},
-										TopologyKey: "topology.kubernetes.io/hostname",
+										TopologyKey: "kubernetes.io/hostname",
 									},
 								},
 							},
