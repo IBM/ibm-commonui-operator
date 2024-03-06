@@ -18,8 +18,22 @@
 BUILD_LOCALLY ?= 1
 
 OPERATOR_SDK ?= $(shell which operator-sdk)
-CONTROLLER_GEN ?= $(shell which controller-gen)
+#CONTROLLER_GEN ?= $(shell which controller-gen)
 KUSTOMIZE ?= $(shell which kustomize)
+
+#
+# Had to pin go and the controller-gen at 1.21.x go versions because of a change introduced
+# with go 1.22 which was causing controller-gen to fail.
+# See https://github.com/golang/go/issues/65637 and https://github.com/kubernetes-sigs/controller-tools/issues/880
+## Location to install dependencies to
+LOCALBIN ?= $(shell pwd)/bin
+$(LOCALBIN):
+	mkdir -p $(LOCALBIN)
+GO_VERSION ?= 1.21.7
+# This pinned version of go has its version pinned to its name, so order of operations is inverted here.
+GO ?= $(LOCALBIN)/go$(GO_VERSION)
+CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
+CONTROLLER_TOOLS_VERSION ?= v0.11.4
 
 ifeq ($(BUILD_LOCALLY),0)
     export CONFIG_DOCKER_TARGET = config-docker
@@ -334,11 +348,13 @@ help: ## Display this help.
 ##@ Development
 
 .PHONY: manifests
-manifests: controller-gen ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+manifests: $(CONTROLLER_GEN) ## Generate WebhookConfiguration, ClusterRole and CustomResourceDefinition objects.
+	$(CONTROLLER_GEN) --version
 	$(CONTROLLER_GEN) rbac:roleName=manager-role crd webhook paths="./..." output:crd:artifacts:config=config/crd/bases
 
 .PHONY: generate
-generate: controller-gen ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+generate: $(CONTROLLER_GEN) ## Generate code containing DeepCopy, DeepCopyInto, and DeepCopyObject method implementations.
+	$(CONTROLLER_GEN) --version
 	$(CONTROLLER_GEN) object:headerFile="hack/boilerplate.go.txt" paths="./..."
 
 .PHONY: fmt
@@ -389,23 +405,23 @@ deploy: manifests kustomize ## Deploy controller to the K8s cluster specified in
 undeploy: ## Undeploy controller from the K8s cluster specified in ~/.kube/config. Call with ignore-not-found=true to ignore resource not found errors during deletion.
 	$(KUSTOMIZE) build config/default | kubectl delete --ignore-not-found=$(ignore-not-found) -f -
 
-# CONTROLLER_GEN = $(shell pwd)/bin/controller-gen
-.PHONY: controller-gen
-controller-gen: ## Download controller-gen locally if necessary.
-# $(call go-get-tool,$(CONTROLLER_GEN),sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0)
-ifeq (, $(shell which controller-gen))
+.PHONY: go
+go: $(GO) ## Install pinned version of go for controller-gen.
+$(GO): $(LOCALBIN) # https://go.dev/doc/manage-install#installing-multiple
+ifeq (,$(shell which go 2>/dev/null))
 	@{ \
-	set -e ;\
-	CONTROLLER_GEN_TMP_DIR=$$(mktemp -d) ;\
-	cd $$CONTROLLER_GEN_TMP_DIR ;\
-	go mod init tmp ;\
-	go get sigs.k8s.io/controller-tools/cmd/controller-gen@v0.8.0 ;\
-	rm -rf $$CONTROLLER_GEN_TMP_DIR ;\
+		echo '"go" not found in PATH; install go before attempting again'; \
+		exit 1; \
 	}
-CONTROLLER_GEN=$(GOBIN)/controller-gen
-else
-CONTROLLER_GEN=$(shell which controller-gen)
 endif
+	test -s $(LOCALBIN)/go$(GO_VERSION) && $(LOCALBIN)/go$(GO_VERSION) version | grep -q $(GO_VERSION) || \
+	GOSUMDB=sum.golang.org GOBIN=$(LOCALBIN) go install golang.org/dl/go$(GO_VERSION)@latest && $(LOCALBIN)/go$(GO_VERSION) download
+
+.PHONY: controller-gen
+controller-gen: $(CONTROLLER_GEN) ## Download controller-gen locally if necessary. If wrong version is installed, it will be overwritten.
+$(CONTROLLER_GEN): $(LOCALBIN) go
+	test -s $(LOCALBIN)/controller-gen && $(LOCALBIN)/controller-gen --version | grep -q $(CONTROLLER_TOOLS_VERSION) || \
+	GOSUMDB=sum.golang.org GOBIN=$(LOCALBIN) $(GO) install sigs.k8s.io/controller-tools/cmd/controller-gen@$(CONTROLLER_TOOLS_VERSION)
 
 # KUSTOMIZE = $(shell pwd)/bin/kustomize
 .PHONY: kustomize
