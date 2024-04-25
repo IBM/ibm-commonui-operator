@@ -143,6 +143,14 @@ func ReconcileRoute(ctx context.Context, client client.Client, instance *operato
 			desiredRoute.Annotations[name] = annotation
 		}
 
+		//Overlay any additional labels the customer may have added to the route, while preserving those we own
+		for name, label := range route.Labels {
+			_, exists := desiredRoute.Labels[name]
+			if !exists {
+				desiredRoute.Labels[name] = label
+			}
+		}
+
 		// Update the desired route if it contains a TLS certificate, caCertificate and key
 		// This will preserve the certificate that has been placed into the route
 		if route.Spec.TLS != nil && route.Spec.TLS.Key != "" && route.Spec.TLS.Certificate != "" && route.Spec.TLS.CACertificate != "" {
