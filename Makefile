@@ -169,37 +169,6 @@ endif
 include common/Makefile.common.mk
 
 ############################################################
-# SHA section
-############################################################
-
-.PHONY: get-all-operand-image-sha
-get-all-operand-image-sha: get-commonui-operator-image-sha get-common-web-ui-image-sha
-	@echo Got SHAs for all operand images
-
-.PHONY: get-commonui-operator-image-sha
-get-commonui-operator-image-sha:
-	@echo Get SHA for ibm-commonui-operator:$(COMMONUI_OPERATOR_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator $(COMMONUI_OPERATOR_TAG) COMMONUI_OPERATOR_TAG_OR_SHA
-	@echo Get SHA for ibm-commonui-operator:$(COMMONUI_OPERATOR_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator-amd64 $(COMMONUI_OPERATOR_TAG) COMMONUI_OPERATOR_TAG_OR_SHA
-	@echo Get SHA for ibm-commonui-operator:$(COMMONUI_OPERATOR_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator-ppc64le $(COMMONUI_OPERATOR_TAG) COMMONUI_OPERATOR_TAG_OR_SHA
-	@echo Get SHA for ibm-commonui-operator:$(COMMONUI_OPERATOR_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) ibm-commonui-operator-s390x $(COMMONUI_OPERATOR_TAG) COMMONUI_OPERATOR_TAG_OR_SHA
-
-
-.PHONY: get-common-web-ui-image-sha
-get-common-web-ui-image-sha:
-	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG_AMD)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG_AMD) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG_PPC)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG_PPC) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-	@echo Get SHA for common-web-ui:$(COMMON_WEB_UI_OPERAND_TAG_Z)
-	@common/scripts/get_image_sha_digest.sh $(OPERAND_REGISTRY) common-web-ui $(COMMON_WEB_UI_OPERAND_TAG_Z) COMMON_WEB_UI_IMAGE_TAG_OR_SHA
-
-############################################################
 # format section
 ############################################################
 
