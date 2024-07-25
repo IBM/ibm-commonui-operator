@@ -22,7 +22,7 @@ import (
 	"reflect"
 	"strings"
 
-	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
+	certmgr "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	route "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
