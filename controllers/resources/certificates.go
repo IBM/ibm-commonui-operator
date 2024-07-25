@@ -22,8 +22,8 @@ import (
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 	// certmgr "github.com/jetstack/cert-manager/pkg/apis/certmanager/v1alpha1"
-	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
+	certmgr "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
@@ -39,7 +39,7 @@ type CertificateData struct {
 	Component string
 }
 
-//nolint
+// nolint
 func getDesiredCertificate(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, data CertificateData) (*certmgr.Certificate, error) {
 	reqLogger := log.WithValues("func", "getDesiredCertificate", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 

@@ -47,9 +47,9 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
-	certmgr "github.com/cert-manager/cert-manager/pkg/apis/certmanager/v1"
-	cmmeta "github.com/cert-manager/cert-manager/pkg/apis/meta/v1"
+	certmgr "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
+	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
 	routesv1 "github.com/openshift/api/route/v1"
 
 	"github.com/IBM/controller-filtered-cache/filteredcache"
