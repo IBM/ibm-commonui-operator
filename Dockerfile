@@ -1,4 +1,4 @@
-FROM docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-edge-docker-local/build-images/ubi8-minimal:latest-amd64
+FROM docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-edge-docker-local/build-images/ubi9-minimal:latest-amd64
 
 ARG IMAGE_NAME
 ARG IMAGE_DISPLAY_NAME
