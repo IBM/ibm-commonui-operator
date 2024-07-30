@@ -240,7 +240,7 @@ build-image-amd64: build-amd64
 	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-amd64" -f Dockerfile .
 
 build-image-ppc64le: build-ppc64le
-	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
+	@docker run --rm --privileged multiarch/qemu-user-static:register --reset -cpu power9
 	@docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-ppc64le" -f Dockerfile.ppc64le .
 
 build-image-s390x: build-s390x
