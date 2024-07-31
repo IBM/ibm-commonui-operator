@@ -21,11 +21,11 @@
 
 ALL_PLATFORMS="amd64 ppc64le s390x"
 
-REL_VERSION=$(cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
+REL_VERSION=$(grep "Version =" ./version/version.go | awk '{ print $$3}' | tr -d '"')
 
 IMAGE_REPO=${1}
 IMAGE_NAME=${2}
-VERSION=${3-"$(git describe --exact-match 2> /dev/null || git describe --match=$(git rev-parse --short=8 HEAD) --always --dirty --abbrev=8)"}
+VERSION=${3-"$(git describe --exact-match 2> /dev/null || git describe --match="$(git rev-parse --short=8 HEAD)" --always --dirty --abbrev=8)"}
 RELEASE_VERSION=${4:-$REL_VERSION}
 CONTAINER_CLI=${CONTAINER_CLI:-docker}
 
