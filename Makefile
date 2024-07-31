@@ -49,7 +49,7 @@ endif
 # - use environment variables to overwrite this value (e.g export RELEASE_VERSION=0.0.2)
 #RELEASE_VERSION ?= $(shell cat version/version.go | grep = | cut -d '"' -f2)
 RELEASE_VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
-VERSION ?= $(shell date +v%Y%m%d)-$(shell git describe --match=$(git rev-parse --short=8 HEAD) --tags --always --dirty)
+VERSION ?= $(shell date +v%Y%m%d)-$(shell git describe --match=$(git rev-parse --short=8 HEAD) --tags --always )
 
 # CHANNELS define the bundle channels used in the bundle.
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "candidate,fast,stable")
@@ -234,6 +234,8 @@ build-image: $(CONFIG_DOCKER_TARGET) build
 push-image: $(CONFIG_DOCKER_TARGET) build-image
 	@echo "Pushing the $(IMG) docker image for $(LOCAL_ARCH)..."
 	@docker push $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION)
+	@docker tag $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(RELEASE_VERSION)
+	@docker push $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(RELEASE_VERSION)
 
 build-image-dev: build-binary
 	@echo "Building the $(IMG) docker image for $(LOCAL_ARCH)..."
