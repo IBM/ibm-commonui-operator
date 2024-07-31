@@ -42,12 +42,14 @@ else
 	REGISTRY ?= "docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-scratch-docker-local/ibmcom"
 endif
 
-# VERSION defines the project version for the bundle.
+# RELEASE_VERSION defines the project version for the bundle.
 # Update this value when you upgrade the version of your project.
 # To re-generate a bundle for another specific version without changing the standard setup, you can:
-# - use the VERSION as arg of the bundle target (e.g make bundle VERSION=0.0.2)
-# - use environment variables to overwrite this value (e.g export VERSION=0.0.2)
-VERSION ?= $(shell cat version/version.go | grep = | cut -d '"' -f2)
+# - use the RELEASE_VERSION as arg of the bundle target (e.g make bundle RELEASE_VERSION=0.0.2)
+# - use environment variables to overwrite this value (e.g export RELEASE_VERSION=0.0.2)
+#RELEASE_VERSION ?= $(shell cat version/version.go | grep = | cut -d '"' -f2)
+RELEASE_VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
+VERSION ?= $(shell date +v%Y%m%d)-$(shell git describe --match=$(git rev-parse --short=8 HEAD) --tags --always )
 
 # CHANNELS define the bundle channels used in the bundle.
 # Add a new line here if you would like to change its default config. (E.g CHANNELS = "candidate,fast,stable")
@@ -72,15 +74,15 @@ BUNDLE_METADATA_OPTS ?= $(BUNDLE_CHANNELS) $(BUNDLE_DEFAULT_CHANNEL)
 # This variable is used to construct full image tags for bundle and catalog images.
 #
 # For example, running 'make bundle-build bundle-push catalog-build catalog-push' will build and push both
-# ibm.com/ibm-commonui-operator-bundle:$VERSION and ibm.com/ibm-commonui-operator-catalog:$VERSION.
+# ibm.com/ibm-commonui-operator-bundle:$RELEASE_VERSION and ibm.com/ibm-commonui-operator-catalog:$RELEASE_VERSION.
 IMAGE_TAG_BASE ?= $(REGISTRY)/ibm-commonui-operator
 
 # BUNDLE_IMG defines the image:tag used for the bundle.
 # You can use it as an arg. (E.g make bundle-build BUNDLE_IMG=<some-registry>/<project-name-bundle>:<tag>)
-BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(VERSION)
+BUNDLE_IMG ?= $(IMAGE_TAG_BASE)-bundle:v$(RELEASE_VERSION)
 
 # BUNDLE_GEN_FLAGS are the flags passed to the operator-sdk generate bundle command
-BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+BUNDLE_GEN_FLAGS ?= -q --overwrite --version $(RELEASE_VERSION) $(BUNDLE_METADATA_OPTS)
 
 # USE_IMAGE_DIGESTS defines if images are resolved via tags or digests
 # You can enable this value if you would like to use SHA Based Digests
@@ -93,10 +95,10 @@ endif
 # Image URL to use all building/pushing image targets
 IMG ?= ibm-commonui-operator
 REGISTRY_DEV ?= quay.io/sgrube
-CSV_VERSION ?= $(VERSION)
+CSV_VERSION ?= $(RELEASE_VERSION)
 NAMESPACE=ibm-common-services
-VERSION ?= $(shell cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
-COMMON_TAG ?= $(VERSION)
+
+COMMON_TAG ?= $(RELEASE_VERSION)
 # ENVTEST_K8S_VERSION refers to the version of kubebuilder assets to be downloaded by envtest binary.
 ENVTEST_K8S_VERSION = 1.23
 
@@ -106,7 +108,7 @@ COMMON_WEB_UI_OPERAND_TAG ?= $(COMMON_TAG)
 COMMON_WEB_UI_OPERAND_TAG_AMD ?= $(COMMON_TAG)-amd64
 COMMON_WEB_UI_OPERAND_TAG_PPC ?= $(COMMON_TAG)-ppc64le
 COMMON_WEB_UI_OPERAND_TAG_Z ?= $(COMMON_TAG)-s390x
-COMMONUI_OPERATOR_TAG ?= $(VERSION)
+COMMONUI_OPERATOR_TAG ?= $(RELEASE_VERSION)
 
 # Github host to use for checking the source tree;
 # Override this variable ue with your own value if you're working on forked repo.
@@ -150,7 +152,7 @@ IMAGE_NAME=$(IMG)
 IMAGE_DISPLAY_NAME=IBM CommonUI Operator
 IMAGE_MAINTAINER=sgrube@us.ibm.com
 IMAGE_VENDOR=IBM
-IMAGE_VERSION=$(VERSION)
+IMAGE_VERSION=$(RELEASE_VERSION)
 IMAGE_DESCRIPTION=Operator used to install a service to display a common header and IAM pages in a kubernetes cluster
 IMAGE_SUMMARY=$(IMAGE_DESCRIPTION)
 IMAGE_OPENSHIFT_TAGS=ibm-common-ui
@@ -212,61 +214,40 @@ endif
 # build section
 ############################################################
 
-build: generate fmt vet build-amd64 build-ppc64le build-s390x ## Build manager binary.
+build: generate fmt vet build-binary ## Build manager binary.
 
-build-amd64:
-	@echo "Building the ${IMG} amd64 binary..."
-	@GOARCH=amd64 common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
-
-build-ppc64le:
-	@echo "Building the ${IMG} ppc64le binary..."
-	@GOARCH=ppc64le common/scripts/gobuild.sh build/_output/bin/$(IMG)-ppc64le main.go
-
-build-s390x:
-	@echo "Building the ${IMG} s390x binary..."
-	@GOARCH=s390x common/scripts/gobuild.sh build/_output/bin/$(IMG)-s390x main.go
+build-binary:
+	@echo "Building the ${IMG} ${LOCAL_ARCH} binary..."
+	@GOARCH=$(LOCAL_ARCH) common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
 
 build-local:
 	@GOOS=darwin common/scripts/gobuild.sh build/_output/bin/$(IMG) main.go
 ############################################################
 # images section
 ############################################################
+build-push-image: build-image push-image
 
-build-image-dev: build-image-amd64
+build-image: $(CONFIG_DOCKER_TARGET) build
+	@echo "Building the $(IMG) docker image for $(LOCAL_ARCH)..."
+	@docker build -t $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-$(LOCAL_ARCH)" -f Dockerfile .
+
+push-image: $(CONFIG_DOCKER_TARGET) build-image
+	@echo "Pushing the $(IMG) docker image for $(LOCAL_ARCH)..."
+	@docker push $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION)
+	@docker tag $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(RELEASE_VERSION)
+	@docker push $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(RELEASE_VERSION)
+
+build-image-dev: build-binary
+	@echo "Building the $(IMG) docker image for $(LOCAL_ARCH)..."
+	@docker build -t $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-$(LOCAL_ARCH)" -f Dockerfile .
 	docker tag $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(REGISTRY_DEV)/$(IMG):$(VERSION)
 	docker push $(REGISTRY_DEV)/$(IMG):$(VERSION)
 
-build-image-amd64: build-amd64
-	@docker build -t $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-amd64" -f Dockerfile .
-
-build-image-ppc64le: build-ppc64le
-	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	@docker build -t $(REGISTRY)/$(IMG)-ppc64le:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-ppc64le" -f Dockerfile.ppc64le .
-
-build-image-s390x: build-s390x
-	@docker run --rm --privileged multiarch/qemu-user-static:register --reset
-	@docker build -t $(REGISTRY)/$(IMG)-s390x:$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-s390x" -f Dockerfile.s390x .
-
-push-image-amd64: $(CONFIG_DOCKER_TARGET) build-image-amd64
-	@docker push $(REGISTRY)/$(IMG)-amd64:$(VERSION)
-
-push-image-ppc64le: $(CONFIG_DOCKER_TARGET) build-image-ppc64le
-	@docker push $(REGISTRY)/$(IMG)-ppc64le:$(VERSION)
-
-push-image-s390x: $(CONFIG_DOCKER_TARGET) build-image-s390x
-	@docker push $(REGISTRY)/$(IMG)-s390x:$(VERSION)
-
-############################################################
-# multiarch-image section
-############################################################
-
-images: push-image-amd64 push-image-ppc64le push-image-s390x multiarch-image
-
-multiarch-image:
-	@curl -L -o /tmp/manifest-tool https://github.com/estesp/manifest-tool/releases/download/v1.0.3/manifest-tool-linux-amd64
-	@chmod +x /tmp/manifest-tool
-	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG) --ignore-missing
-	/tmp/manifest-tool push from-args --platforms linux/amd64,linux/ppc64le,linux/s390x --template $(REGISTRY)/$(IMG)-ARCH:$(VERSION) --target $(REGISTRY)/$(IMG):$(VERSION) --ignore-missing
+#############################################################################
+# multiarch-image section - multi arch waits on images tagged with git commit
+#############################################################################
+multiarch-image: $(CONFIG_DOCKER_TARGET)
+	@MAX_PULLING_RETRY=20 RETRY_INTERVAL=30 common/scripts/multiarch_image.sh $(REGISTRY) $(IMG) $(VERSION) $(RELEASE_VERSION)
 
 ############################################################
 # clean section
@@ -434,7 +415,7 @@ endef
 bundle: manifests kustomize ## Generate bundle manifests and metadata, then validate generated files.
 	operator-sdk generate kustomize manifests -q
 	cd config/manager && $(KUSTOMIZE) edit set image controller=$(IMG)
-	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(VERSION) $(BUNDLE_METADATA_OPTS)
+	$(KUSTOMIZE) build config/manifests | operator-sdk generate bundle -q --overwrite --version $(RELEASE_VERSION) $(BUNDLE_METADATA_OPTS)
 	operator-sdk bundle validate ./bundle
 
 .PHONY: bundle-build
@@ -467,7 +448,7 @@ endif
 BUNDLE_IMGS ?= $(BUNDLE_IMG)
 
 # The image tag given to the resulting catalog image (e.g. make catalog-build CATALOG_IMG=example.com/operator-catalog:v0.2.0).
-CATALOG_IMG ?= $(IMAGE_TAG_BASE)-catalog:v$(VERSION)
+CATALOG_IMG ?= $(IMAGE_TAG_BASE)-catalog:v$(RELEASE_VERSION)
 
 # Set CATALOG_BASE_IMG to an existing catalog image tag to add $BUNDLE_IMGS to that image.
 ifneq ($(origin CATALOG_BASE_IMG), undefined)
