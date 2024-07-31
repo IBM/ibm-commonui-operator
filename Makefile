@@ -241,9 +241,9 @@ build-image-dev: build-binary
 	docker tag $(REGISTRY)/$(IMG)-amd64:$(VERSION) $(REGISTRY_DEV)/$(IMG):$(VERSION)
 	docker push $(REGISTRY_DEV)/$(IMG):$(VERSION)
 
-############################################################
-# multiarch-image section
-############################################################
+#############################################################################
+# multiarch-image section - multi arch waits on images tagged with git commit
+#############################################################################
 multiarch-image: $(CONFIG_DOCKER_TARGET)
 	@MAX_PULLING_RETRY=20 RETRY_INTERVAL=30 common/scripts/multiarch_image.sh $(REGISTRY) $(IMG) $(VERSION) $(RELEASE_VERSION)
 
