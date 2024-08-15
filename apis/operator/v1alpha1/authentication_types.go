@@ -50,7 +50,7 @@ type AuditServiceSpec struct {
 	ImageRegistry string                       `json:"imageRegistry"`
 	ImageName     string                       `json:"imageName"`
 	ImageTag      string                       `json:"imageTag"`
-	SyslogTlsPath string                       `json:"syslogTlsPath,omitempty"`
+	SyslogTlsPath string                       `json:"syslogTlsPath,omitempty"` //nolint
 	Resources     *corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
@@ -131,14 +131,14 @@ type ConfigSpec struct {
 	ROKSEnabled                 bool   `json:"roksEnabled"`
 	IBMCloudSaas                bool   `json:"ibmCloudSaas,omitempty"`
 	OnPremMultipleDeploy        bool   `json:"onPremMultipleDeploy,omitempty"`
-	SaasClientRedirectUrl       string `json:"saasClientRedirectUrl,omitempty"`
+	SaasClientRedirectUrl       string `json:"saasClientRedirectUrl,omitempty"` //nolint
 	NONCEEnabled                bool   `json:"nonceEnabled"`
 	XFrameDomain                string `json:"xframeDomain,omitempty"`
 	PreferredLogin              string `json:"preferredLogin,omitempty"`
 	ROKSURL                     string `json:"roksURL"`
 	ROKSUserPrefix              string `json:"roksUserPrefix"`
 	EnableImpersonation         bool   `json:"enableImpersonation"`
-	BootstrapUserId             string `json:"bootstrapUserId,omitempty"`
+	BootstrapUserId             string `json:"bootstrapUserId,omitempty"` //nolint
 	ProviderIssuerURL           string `json:"providerIssuerURL,omitempty"`
 	ClaimsSupported             string `json:"claimsSupported,omitempty"`
 	ClaimsMap                   string `json:"claimsMap,omitempty"`
