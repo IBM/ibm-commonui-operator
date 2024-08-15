@@ -43,6 +43,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/source"
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	im "github.com/IBM/ibm-commonui-operator/apis/operator/v1alpha1"
 	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
 	"github.com/IBM/ibm-commonui-operator/version"
 )
@@ -414,5 +415,14 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					}},
 				}
 			}), builder.WithPredicates(clusterInfoCmPredicate())).
+		Watches(&source.Kind{Type: &im.Authentication{}},
+			handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
+				return []ctrl.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      "NON_OWNED_OBJECT_RECONCILE",
+						Namespace: a.GetNamespace(),
+					}},
+				}
+			})).
 		Complete(r)
 }
