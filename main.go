@@ -54,6 +54,7 @@ import (
 
 	"github.com/IBM/controller-filtered-cache/filteredcache"
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	im "github.com/IBM/ibm-commonui-operator/apis/operator/v1alpha1"
 	commonwebuicontrollers "github.com/IBM/ibm-commonui-operator/controllers/commonwebui"
 	res "github.com/IBM/ibm-commonui-operator/controllers/resources"
 	"github.com/IBM/ibm-commonui-operator/version"
@@ -91,6 +92,8 @@ func init() {
 
 	// add common web ui scheme to controller
 	utilruntime.Must(operatorsv1alpha1.AddToScheme(scheme))
+
+	utilruntime.Must(im.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

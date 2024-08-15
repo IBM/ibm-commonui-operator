@@ -30,6 +30,7 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
+	im "github.com/IBM/ibm-commonui-operator/apis/operator/v1alpha1"
 )
 
 const CnRouteName = "cp-console"
@@ -47,6 +48,30 @@ var CnAnnotations = map[string]string{
 func ReconcileRoutes(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 
 	reqLogger := log.WithValues("func", "ReconcileRoutes", "namespace", instance.Namespace)
+
+	//If zenFrontDoor is enabled in the IM authentication CR, then we will skip route creation and
+	//delete the route if it already exists
+	if zenFrontDoorEnabled(ctx, client, instance.Namespace) {
+		reqLogger.Info("Zen front door support is enabled - delete route if it exists", "routeName", CnRouteName)
+
+		route := &route.Route{}
+		err := client.Get(ctx, types.NamespacedName{Name: CnRouteName, Namespace: instance.Namespace}, route)
+		if err != nil {
+			if errors.IsNotFound(err) {
+				reqLogger.Info("Route not found - deletion is skipped for zen front door support")
+			} else {
+				reqLogger.Error(err, "Unable to read the route for deletion with zen front door support enabled - route deletion skipped, but reconciliation will proceed")
+			}
+			return nil //Do not stop reconciliation if there was an error
+		}
+		err = client.Delete(ctx, route)
+		if err != nil {
+			reqLogger.Error(err, "Error deleting route for zen front door support - reconciliation will proceed")
+		} else {
+			reqLogger.Info("Route deleted for zen front door support")
+		}
+		return nil //Do not stop reconciliation if there was an error
+	}
 
 	//Get the destination cert for the route
 	secret := &corev1.Secret{}
@@ -247,4 +272,27 @@ func GetDesiredRoute(client client.Client, instance *operatorsv1alpha1.CommonWeb
 	}
 
 	return r, nil
+}
+
+func zenFrontDoorEnabled(ctx context.Context, crclient client.Client, namespace string) bool {
+	reqLogger := log.WithValues("func", "zenFrontDoorEnabled", "namespace", namespace)
+
+	crList := &im.AuthenticationList{}
+	err := crclient.List(ctx, crList, client.InNamespace(namespace))
+	if err != nil {
+		reqLogger.Error(err, "Error listing authentication CRs - zenFrontDoor is assumed to be false")
+		return false
+	}
+	if len(crList.Items) == 0 {
+		reqLogger.Info("No authentication CRs were found in namespace - zenFrontDoor is assumed to be false")
+		return false
+	}
+	authentication := &crList.Items[0]
+
+	// Set front door from CR
+	zenFrontDoor := authentication.Spec.Config.ZenFrontDoor
+
+	reqLogger.Info("example-authentication loaded", "zenFrontDoor", zenFrontDoor)
+
+	return zenFrontDoor
 }

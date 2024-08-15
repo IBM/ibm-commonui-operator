@@ -706,6 +706,14 @@ spec:
           - delete
           - get
           - list
+        - apiGroups:
+          - operator.ibm.com
+          resources:
+          - authentications
+          verbs:
+          - get
+          - list
+          - watch
         serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:
