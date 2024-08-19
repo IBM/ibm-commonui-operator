@@ -90,4 +90,5 @@ spec:
             privileged: false
             readOnlyRootFilesystem: true
             runAsNonRoot: true
-
+            seccompProfile:
+              type: RuntimeDefault
