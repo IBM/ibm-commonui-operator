@@ -32,6 +32,9 @@ var commonSecurityContext = corev1.SecurityContext{
 			"ALL",
 		},
 	},
+	SeccompProfile: &corev1.SeccompProfile{
+		Type: corev1.SeccompProfileTypeRuntimeDefault,
+	},
 }
 
 var CommonContainer = corev1.Container{

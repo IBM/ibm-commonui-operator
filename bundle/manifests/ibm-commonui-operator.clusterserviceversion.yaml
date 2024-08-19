@@ -516,6 +516,8 @@ spec:
                   privileged: false
                   readOnlyRootFilesystem: true
                   runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault
               serviceAccountName: ibm-commonui-operator
       permissions:
       - rules:

@@ -202,6 +202,13 @@ func isContainerEqual(oldContainers, newContainers []corev1.Container, isInitCon
 						"old", oldContainer.ImagePullPolicy, "new", newContainer.ImagePullPolicy)
 					return false
 				}
+
+				if !reflect.DeepEqual(oldContainer.SecurityContext, newContainer.SecurityContext) {
+					logger.Info(containerType+" security context is not equal",
+						"old", oldContainer.SecurityContext, "new", newContainer.SecurityContext)
+					return false
+				}
+
 				//For some reason deep equals would not work on CPU values so went to a straight value comparison
 				//for all types
 				if !oldContainer.Resources.Limits.Cpu().Equal(*newContainer.Resources.Limits.Cpu()) {
