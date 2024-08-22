@@ -40,7 +40,7 @@ ENV BINARY=/usr/local/bin/ibm-commonui-operator \
 COPY build/_output/bin/ibm-commonui-operator ${BINARY}
 
 # copy licenses
-RUN mkdir /licenses
+RUN mkdir /licenses && microdnf update -y && microdnf clean all
 COPY LICENSE /licenses
 
 ENTRYPOINT ["ibm-commonui-operator"]
