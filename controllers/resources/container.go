@@ -203,5 +203,18 @@ var CommonContainer = corev1.Container{
 			Name:  "OSAUTH_ENABLED",
 			Value: "deprecated",
 		},
+		{
+			Name: "INSTANA_AGENT_HOST",
+			ValueFrom: &corev1.EnvVarSource{
+				FieldRef: &corev1.ObjectFieldSelector{
+					APIVersion: "v1",
+					FieldPath:  "status.hostIP",
+				},
+			},
+		},
+		{
+			Name:  "INSTANA_AGENT_ENABLED",
+			Value: "false",
+		},
 	},
 }

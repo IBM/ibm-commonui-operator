@@ -20,6 +20,7 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"strconv"
 
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -77,6 +78,8 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 	container.Env[11].Value = instance.Spec.GlobalUIConfig.OSAuth
 	container.Env[19].Value = instance.Spec.CommonWebUIConfig.LandingPage
 	container.Env[20].Value = os.Getenv("WATCH_NAMESPACE")
+	container.Env[27].Value = strconv.FormatBool(instance.Spec.EnableInstanaMetricCollection)
+
 	container.Resources.Limits["cpu"] = *resource.NewMilliQuantity(cpuLimits, resource.DecimalSI)
 	container.Resources.Limits["memory"] = *resource.NewQuantity(cpuMemory*1024*1024, resource.BinarySI)
 	container.Resources.Requests["cpu"] = *resource.NewMilliQuantity(reqLimits, resource.DecimalSI)

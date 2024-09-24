@@ -2,7 +2,7 @@ apiVersion: apiextensions.k8s.io/v1
 kind: CustomResourceDefinition
 metadata:
   annotations:
-    controller-gen.kubebuilder.io/version: v0.11.3
+    controller-gen.kubebuilder.io/version: v0.11.4
   creationTimestamp: null
   name: commonwebuis.operators.ibm.com
   labels:
@@ -62,6 +62,8 @@ spec:
                   serviceName:
                     type: string
                 type: object
+              enableInstanaMetricCollection:
+                type: boolean
               globalUIConfig:
                 properties:
                   cloudPakVersion:

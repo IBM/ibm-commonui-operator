@@ -67,13 +67,14 @@ type Limits struct {
 type CommonWebUISpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
 	// Important: Run "make" to regenerate code after modifying this file
-	CommonWebUIConfig CommonWebUIConfig `json:"commonWebUIConfig,omitempty"`
-	GlobalUIConfig    GlobalUIConfig    `json:"globalUIConfig,omitempty"`
-	OperatorVersion   string            `json:"operatorVersion,omitempty"`
-	Version           string            `json:"version,omitempty"`
-	Replicas          int32             `json:"replicas,omitempty"`
-	Resources         Resources         `json:"resources,omitempty"`
-	Labels            map[string]string `json:"labels,omitempty"`
+	CommonWebUIConfig             CommonWebUIConfig `json:"commonWebUIConfig,omitempty"`
+	GlobalUIConfig                GlobalUIConfig    `json:"globalUIConfig,omitempty"`
+	OperatorVersion               string            `json:"operatorVersion,omitempty"`
+	Version                       string            `json:"version,omitempty"`
+	Replicas                      int32             `json:"replicas,omitempty"`
+	Resources                     Resources         `json:"resources,omitempty"`
+	Labels                        map[string]string `json:"labels,omitempty"`
+	EnableInstanaMetricCollection bool              `json:"enableInstanaMetricCollection,omitempty"`
 	// License           License           `json:"license,omitempty"`
 }
 
