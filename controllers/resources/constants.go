@@ -106,6 +106,7 @@ const UICertSecretName = "common-web-ui-cert" + ""
 const WebUIConfigVolumeName = "common-web-ui-config"
 const ClusterInfoConfigVolumeName = "ibmcloud-cluster-info"
 const PlatformAuthIdpConfigVolumeName = "platform-auth-idp"
+const ZenProductInfoConfigVolumeName = "product-configmap"
 
 var Log4jsVolume = corev1.Volume{
 	Name: Log4jsVolumeName,
@@ -158,6 +159,19 @@ var PlatformAuthIdpConfigVolume = corev1.Volume{
 		ConfigMap: &corev1.ConfigMapVolumeSource{
 			LocalObjectReference: corev1.LocalObjectReference{
 				Name: "platform-auth-idp",
+			},
+			Optional:    &TrueVar,
+			DefaultMode: &DefaultVolumeMode,
+		},
+	},
+}
+
+var ZenProductInfoConfigVolume = corev1.Volume{
+	Name: ZenProductInfoConfigVolumeName,
+	VolumeSource: corev1.VolumeSource{
+		ConfigMap: &corev1.ConfigMapVolumeSource{
+			LocalObjectReference: corev1.LocalObjectReference{
+				Name: "product-configmap",
 			},
 			Optional:    &TrueVar,
 			DefaultMode: &DefaultVolumeMode,
@@ -306,6 +320,10 @@ var CommonVolumeMounts = []corev1.VolumeMount{
 	{
 		Name:      PlatformAuthIdpConfigVolumeName,
 		MountPath: "/etc/config/platform-auth-idp",
+	},
+	{
+		Name:      ZenProductInfoConfigVolumeName,
+		MountPath: "/etc/config/product-configmap",
 	},
 }
 
