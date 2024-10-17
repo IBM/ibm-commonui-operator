@@ -4,18 +4,17 @@
 
 version: '1'
 setup:
-  skip: true
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running setup stage"
+    echo "Running non-skippable setup stage"
 
 detect-secrets:
   skip: true
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running detect-secrets stage"
+    echo "Running non-skippable detect-secrets stage"
 
 test:
   skip: true
@@ -24,6 +23,14 @@ test:
   script: |
     #!/usr/bin/env bash
     echo "Running test stage"
+
+peer-review:
+  skip: true
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running peer-review stage"
 
 static-scan:
   skip: true
@@ -42,28 +49,33 @@ compliance-checks:
     echo "Running compliance-checks stage"
 
 containerize:
-  skip: true
   abort_on_failure: false
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running containerize stage"
+    echo "Running non-skippable containerize stage"
 
 sign-artifact:
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running non-skippable sign-artifact stage"
+
+scan-artifact:
   skip: true
   abort_on_failure: false
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running sign-artifact stage"
+    echo "Running scan-artifact stage"
 
 deploy:
-  skip: true
   abort_on_failure: false
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running deploy stage"
+    echo "Running non-skippable deploy stage"
 
 dynamic-scan:
   skip: true
@@ -73,13 +85,13 @@ dynamic-scan:
     #!/usr/bin/env bash
     echo "Running dynamic-scan stage"
 
-scan-artifact:
+acceptance-test:
   skip: true
   abort_on_failure: false
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running scan-artifact stage"
+    echo "Running acceptance-test stage"
 
 release:
   skip: true
@@ -95,4 +107,4 @@ finish:
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running test stage"
+    echo "Running finish stage"
