@@ -4,26 +4,37 @@
 
 version: '1'
 setup:
+  skip: true
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running a setup stage"
+    echo "Running setup stage"
+
+detect-secrets:
+  skip: true
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running detect-secrets  stage"
 
 test:
+  skip: true
   abort_on_failure: false
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
     echo "Running test stage"
 
-extra:
+compliance-checks:
+  skip: true
   abort_on_failure: false
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running extra stage"
+    echo "Running compliance-checks stage"
 
-pr-finish:
+finish:
+  skip: true
   abort_on_failure: false
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
