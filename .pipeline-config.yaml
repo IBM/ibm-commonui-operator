@@ -3,15 +3,29 @@
 # https://cloud.ibm.com/docs/devsecops?topic=devsecops-custom-scripts
 
 version: '1'
-ashank-test:
+setup:
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    if [[ "$PIPELINE_DEBUG" == 1 ]]; then
-      trap env EXIT
-      env
-      set -x
-    fi
-    if [[ "$(get_env pipeline_namespace)" == *"pr"* ||  "$(get_env pipeline_namespace)" == *"ci"* ]]; then
-      echo "Dummy test"
-    fi
+    echo "Running a setup stage"
+
+test:
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running test stage"
+
+extra:
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running extra stage"
+
+pr-finish:
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running test stage"
