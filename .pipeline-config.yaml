@@ -15,7 +15,7 @@ detect-secrets:
   image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
   script: |
     #!/usr/bin/env bash
-    echo "Running detect-secrets  stage"
+    echo "Running detect-secrets stage"
 
 test:
   skip: true
@@ -25,6 +25,14 @@ test:
     #!/usr/bin/env bash
     echo "Running test stage"
 
+static-scan:
+  skip: true
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running static-scan stage"
+
 compliance-checks:
   skip: true
   abort_on_failure: false
@@ -32,6 +40,54 @@ compliance-checks:
   script: |
     #!/usr/bin/env bash
     echo "Running compliance-checks stage"
+
+containerize:
+  skip: true
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running containerize stage"
+
+sign-artifact:
+  skip: true
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running sign-artifact stage"
+
+deploy:
+  skip: true
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running deploy stage"
+
+dynamic-scan:
+  skip: true
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running dynamic-scan stage"
+
+scan-artifact:
+  skip: true
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running scan-artifact stage"
+
+release:
+  skip: true
+  abort_on_failure: false
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    echo "Running release stage"
 
 finish:
   skip: true
