@@ -1,0 +1,17 @@
+# Documentation on available configuration
+# https://cloud.ibm.com/docs/devsecops?topic=devsecops-cd-devsecops-apps-byoa
+# https://cloud.ibm.com/docs/devsecops?topic=devsecops-custom-scripts
+
+version: '1'
+ashank-test:
+  image: icr.io/continuous-delivery/pipeline/pipeline-base-ubi:3.46
+  script: |
+    #!/usr/bin/env bash
+    if [[ "$PIPELINE_DEBUG" == 1 ]]; then
+      trap env EXIT
+      env
+      set -x
+    fi
+    if [[ "$(get_env pipeline_namespace)" == *"pr"* ||  "$(get_env pipeline_namespace)" == *"ci"* ]]; then
+      echo "Dummy test"
+    fi
