@@ -66,7 +66,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 	reqLogger.Info(fmt.Sprintf("Current image ID: %s", image))
 
 	volumes = append(volumes, Log4jsVolume, ClusterCaVolume, UICertVolume, InternalTLSVolume, IAMDataVolume, IAMAuthDataVolume,
-		WebUIConfigVolume, ClusterInfoConfigVolume, PlatformAuthIdpConfigVolume)
+		WebUIConfigVolume, ClusterInfoConfigVolume, PlatformAuthIdpConfigVolume, ZenProductInfoConfigVolume)
 
 	container := *CommonContainer.DeepCopy()
 	container.Image = image
