@@ -184,7 +184,7 @@ func GetCurrentServiceStatus(ctx context.Context, k8sClient client.Client, insta
 		f: getAllRouteStatus,
 	}
 
-	if !isCncf {
+	if !isCncf && !ZenFrontDoorEnabled(ctx, k8sClient, instance.Namespace) {
 		statusRetrievals = append(statusRetrievals, routeStatusRetrieval)
 	}
 

@@ -51,7 +51,7 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 
 	//If zenFrontDoor is enabled in the IM authentication CR, then we will skip route creation and
 	//delete the route if it already exists
-	if zenFrontDoorEnabled(ctx, client, instance.Namespace) {
+	if ZenFrontDoorEnabled(ctx, client, instance.Namespace) {
 		reqLogger.Info("Zen front door support is enabled - delete route if it exists", "routeName", CnRouteName)
 
 		route := &route.Route{}
@@ -274,7 +274,7 @@ func GetDesiredRoute(client client.Client, instance *operatorsv1alpha1.CommonWeb
 	return r, nil
 }
 
-func zenFrontDoorEnabled(ctx context.Context, crclient client.Client, namespace string) bool {
+func ZenFrontDoorEnabled(ctx context.Context, crclient client.Client, namespace string) bool {
 	reqLogger := log.WithValues("func", "zenFrontDoorEnabled", "namespace", namespace)
 
 	crList := &im.AuthenticationList{}
