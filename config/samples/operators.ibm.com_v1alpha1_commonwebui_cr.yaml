@@ -11,10 +11,11 @@ spec:
   resources:
     requests:
       memory: 256Mi
-      cpu: 300m
+      cpu: 130m
+      ephemeral-storage: 256Mi
     limits:
-      memory: 256Mi
-      cpu: 300m
+      memory: 440Mi
+      cpu: 1000m
   globalUIConfig:
     cloudPakVersion: 3.5.3
     defaultAdminUser: admin
