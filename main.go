@@ -275,32 +275,39 @@ func isCncf(mgr manager.Manager) (iscncf bool, err error) {
 	//We need to determine the cluster type during startup
 	//so we will use direct API calls since they are only done once
 
-	csNamespace, err := getSharedServicesNamespaceFromCommonService(mgr)
-	if err != nil {
-		return
-	}
-
 	iscncf = false
 	reqLogger := log.WithValues("func", "isCncf")
-	reqLogger.Info("Checking kubernetes cluster type in ibm-cpp-config", "namespace", csNamespace)
+	reqLogger.Info("Checking kubernetes cluster type in ibm-cpp-config")
 
-	ibmCppConfig := &corev1.ConfigMap{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      "ibm-cpp-config",
-			Namespace: csNamespace,
-		},
-	}
-
-	err = mgr.GetAPIReader().Get(context.TODO(), types.NamespacedName{Name: "ibm-cpp-config", Namespace: csNamespace}, ibmCppConfig)
+	//Try and locate the ibm-cpp-config configmap in any of the watched namespaces
+	watchNamespace, err := getWatchNamespace()
 	if err != nil {
 		return
 	}
+	nsa := strings.Split(watchNamespace, ",")
+	for _, ns := range nsa {
+		ibmCppConfig := &corev1.ConfigMap{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "ibm-cpp-config",
+				Namespace: ns,
+			},
+		}
 
-	clusterType := ibmCppConfig.Data["kubernetes_cluster_type"]
-	reqLogger.Info("Got ibm-cpp-config configmap - Kubernetes cluster type is " + clusterType)
-	if clusterType == "cncf" {
-		iscncf = true
+		err = mgr.GetAPIReader().Get(context.TODO(), types.NamespacedName{Name: "ibm-cpp-config", Namespace: ns}, ibmCppConfig)
+		if err != nil {
+			log.Error(err, "Unable to load ibm-cpp-config configmap", "watched namespace", ns)
+		} else {
+			clusterType := ibmCppConfig.Data["kubernetes_cluster_type"]
+			reqLogger.Info("Got ibm-cpp-config configmap - Kubernetes cluster type is "+clusterType, "ibm-cpp-config namespace", ns)
+			if clusterType == "cncf" {
+				iscncf = true
+			}
+			return
+		}
 	}
+
+	//If we get this far, then ibm-cpp-config was not found
+	err = fmt.Errorf("Unable to load the ibm-cpp-config configmap from any of the watched namespaces")
 
 	return
 }
