@@ -470,8 +470,14 @@ func IsCertificateEqual(oldCertificate, newCertificate *certmgr.Certificate) boo
 		return false
 	}
 
-	if !reflect.DeepEqual(oldCertificate.Spec, newCertificate.Spec) {
-		logger.Info("Specs not equal",
+	//compare the specs, but allow renewBefore to be modified
+	if !reflect.DeepEqual(oldCertificate.Spec.CommonName, newCertificate.Spec.CommonName) ||
+		!reflect.DeepEqual(oldCertificate.Spec.DNSNames, newCertificate.Spec.DNSNames) ||
+		!reflect.DeepEqual(oldCertificate.Spec.Duration, newCertificate.Spec.Duration) ||
+		!reflect.DeepEqual(oldCertificate.Spec.IssuerRef, newCertificate.Spec.IssuerRef) ||
+		!reflect.DeepEqual(oldCertificate.Spec.SecretName, newCertificate.Spec.SecretName) {
+		// if !reflect.DeepEqual(oldCertificate.Spec, newCertificate.Spec) {
+		logger.Info("Specs not equal (renewBefore is not checked)",
 			"old", fmt.Sprintf("%v", oldCertificate.Spec),
 			"new", fmt.Sprintf("%v", newCertificate.Spec))
 		return false
