@@ -1,0 +1,14 @@
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: ibm-commonui-operator
+  labels:
+    app.kubernetes.io/instance: ibm-commonui-operator
+    app.kubernetes.io/name: ibm-commonui-operator
+subjects:
+- kind: ServiceAccount
+  name: ibm-commonui-operator
+roleRef:
+  kind: Role
+  name: ibm-commonui-operator
+  apiGroup: rbac.authorization.k8s.io
