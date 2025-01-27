@@ -89,6 +89,13 @@ func isPodTemplateEqual(oldPodTemplate, newPodTemplate corev1.PodTemplateSpec) b
 		return false
 	}
 
+	if !reflect.DeepEqual(oldPodTemplate.Spec.ImagePullSecrets, newPodTemplate.Spec.ImagePullSecrets) {
+		logger.Info("Image pull secrets are not equal",
+			"old", oldPodTemplate.Spec.ImagePullSecrets,
+			"new", newPodTemplate.Spec.ImagePullSecrets)
+		return false
+	}
+
 	oldVolumes := oldPodTemplate.Spec.Volumes
 	newVolumes := newPodTemplate.Spec.Volumes
 	if len(oldVolumes) == len(newVolumes) {
