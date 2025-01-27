@@ -219,6 +219,15 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 		},
 	}
 
+	//If an image pull secret is set in the ENV, then set it into the pod spec
+	ips, ipsExists := os.LookupEnv("IMAGE_PULL_SECRET")
+	if ipsExists {
+		reqLogger.Info(fmt.Sprintf("Setting image pull secret: %s", ips))
+		deployment.Spec.Template.Spec.ImagePullSecrets = []corev1.LocalObjectReference{
+			{Name: ips},
+		}
+	}
+
 	err = controllerutil.SetControllerReference(instance, deployment, client.Scheme())
 	if err != nil {
 		reqLogger.Error(err, "Failed to set owner for deployment")
