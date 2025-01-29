@@ -1,4 +1,4 @@
-apiVersion: v1
+apiVersion: v2
 name: ibm-commonui-operator-app
 description: A Helm chart for ibm-commonui-operator-app
 type: application
