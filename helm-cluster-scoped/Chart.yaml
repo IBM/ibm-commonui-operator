@@ -1,0 +1,6 @@
+apiVersion: v2
+name: ibm-commonui-operator-app-cs
+description: A Helm chart for ibm-commonui-operator-app cluster scoped resources
+type: application
+version: "4.7.0"
+appVersion: "4.7.0"
