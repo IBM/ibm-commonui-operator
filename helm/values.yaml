@@ -1,4 +1,8 @@
-imagePullPrefix: icr.io
-imagePullSecret: ibm-entitlement-key
 imageRegistryNamespaceOperator: cpopen
 imageRegistryNamespaceOperand: cpopen/cpfs
+
+#The following values are expected from global scope
+#imagePullPrefix: icr.io
+#imagePullSecret: ibm-entitlement-key
+#operatorNamespace:
+
