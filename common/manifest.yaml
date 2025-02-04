@@ -1,3 +1,4 @@
+---
 image: __IMAGE_REPO__/__IMAGE_NAME__:__RELEASE_TAG__
 manifests:
   - image: __IMAGE_REPO__/__IMAGE_NAME__-amd64:__RELEASE_TAG__

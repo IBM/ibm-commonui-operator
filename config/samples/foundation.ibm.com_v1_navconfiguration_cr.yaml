@@ -1,3 +1,4 @@
+---
 apiVersion: foundation.ibm.com/v1
 kind: NavConfiguration
 metadata:
