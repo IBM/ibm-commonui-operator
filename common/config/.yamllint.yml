@@ -1,3 +1,4 @@
+---
 rules:
   braces: disable
   brackets: disable
@@ -20,4 +21,3 @@ rules:
   quoted-strings: disable
   trailing-spaces: disable
   truthy: disable
-  
