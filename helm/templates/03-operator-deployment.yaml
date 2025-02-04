@@ -24,7 +24,7 @@ metadata:
             "commonWebUIConfig": {
               "cpuLimits": "300",
               "cpuMemory": "256",
-              "imageRegistry": "{{ .Values.imagePullPrefix }}/{{ .Values.imageRegistryNamespaceOperand }}",
+              "imageRegistry": "{{ .Values.global.imagePullPrefix }}/{{ .Values.imageRegistryNamespaceOperand }}",
               "imageTag": "4.7.0",
               "ingressPath": "/common-nav",
               "landingPage": "",
@@ -341,11 +341,11 @@ spec:
                 - s390x
       containers:
         - name: manager
-          image: {{ .Values.imagePullPrefix }}/{{ .Values.imageRegistryNamespaceOperator }}/ibm-commonui-operator:4.7.0
+          image: {{ .Values.global.imagePullPrefix }}/{{ .Values.imageRegistryNamespaceOperator }}/ibm-commonui-operator:4.7.0
           command:
           - ibm-commonui-operator
           imagePullPolicy: IfNotPresent
-          imagePullSecret: {{ .Values.imagePullSecret }}
+          imagePullSecret: {{ .Values.global.imagePullSecret }}
           env:
             - name: OPERATOR_NAMESPACE
               valueFrom:
@@ -357,9 +357,9 @@ spec:
                   name: namespace-scope
                   key: namespaces
             - name: COMMON_WEB_UI_IMAGE
-              value: {{ .Values.imagePullPrefix }}/{{ .Values.imageRegistryNamespaceOperand }}/common-web-ui:4.7.0
+              value: {{ .Values.global.imagePullPrefix }}/{{ .Values.imageRegistryNamespaceOperand }}/common-web-ui:4.7.0
             - name: IMAGE_PULL_SECRET
-              value: {{ .Values.imagePullSecret }}
+              value: {{ .Values.global.imagePullSecret }}
           livenessProbe:
             failureThreshold: 10
             httpGet:
