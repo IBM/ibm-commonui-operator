@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
   name: ibm-commonui-operator
+  namespace: {{.Values.global.operatorNamespace}}
 rules:
 - apiGroups:
   - route.openshift.io

@@ -3,6 +3,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: ibm-commonui-operator
+  namespace: {{.Values.global.operatorNamespace}}
   labels:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
@@ -346,7 +347,6 @@ spec:
           command:
           - ibm-commonui-operator
           imagePullPolicy: IfNotPresent
-          imagePullSecret: {{ .Values.global.imagePullSecret }}
           env:
             - name: OPERATOR_NAMESPACE
               valueFrom:
@@ -395,3 +395,5 @@ spec:
             runAsNonRoot: true
             seccompProfile:
               type: RuntimeDefault
+      imagePullSecrets:
+      - {{.Values.global.imagePullSecret}}
