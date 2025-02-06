@@ -396,4 +396,4 @@ spec:
             seccompProfile:
               type: RuntimeDefault
       imagePullSecrets:
-      - {{.Values.global.imagePullSecret}}
+      - name: {{.Values.global.imagePullSecret}}
