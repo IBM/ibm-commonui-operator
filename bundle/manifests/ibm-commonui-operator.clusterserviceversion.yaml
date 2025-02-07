@@ -497,6 +497,8 @@ spec:
                       key: namespaces
                 - name: COMMON_WEB_UI_IMAGE
                   value: icr.io/cpopen/cpfs/common-web-ui@sha256:e1146955de7de533eead3b3e9d22be34b2f9b7b2cc33a9c102a5b804adcf8b83
+                - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
+                  value: icr.io/cpopen/cpfs/common-web-ui@sha256:e1146955de7de533eead3b3e9d22be34b2f9b7b2cc33a9c102a5b804adcf8b83
                 image: icr.io/cpopen/ibm-commonui-operator@sha256:184a9750030644cd726273a7b205a07703b44b74f628350ad7f8d9eb34545ef3
                 imagePullPolicy: IfNotPresent
                 name: manager
