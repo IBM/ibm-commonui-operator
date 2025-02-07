@@ -308,7 +308,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: icr.io/cpopen/ibm-commonui-operator:4.7.0
+    containerImage: icr.io/cpopen/ibm-commonui-operator@sha256:184a9750030644cd726273a7b205a07703b44b74f628350ad7f8d9eb34545ef3
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
     olm.skipRange: '<4.7.0'
@@ -496,8 +496,8 @@ spec:
                       name: namespace-scope
                       key: namespaces
                 - name: COMMON_WEB_UI_IMAGE
-                  value: icr.io/cpopen/cpfs/common-web-ui:4.7.0
-                image: icr.io/cpopen/ibm-commonui-operator:4.7.0
+                  value: icr.io/cpopen/cpfs/common-web-ui@sha256:e1146955de7de533eead3b3e9d22be34b2f9b7b2cc33a9c102a5b804adcf8b83
+                image: icr.io/cpopen/ibm-commonui-operator@sha256:184a9750030644cd726273a7b205a07703b44b74f628350ad7f8d9eb34545ef3
                 imagePullPolicy: IfNotPresent
                 name: manager
                 livenessProbe:
@@ -767,8 +767,8 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: icr.io/cpopen/ibm-commonui-operator:4.7.0
+  - image: icr.io/cpopen/ibm-commonui-operator@sha256:184a9750030644cd726273a7b205a07703b44b74f628350ad7f8d9eb34545ef3
     name: COMMON_WEB_UI_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/common-web-ui:4.7.0
+  - image: icr.io/cpopen/cpfs/common-web-ui@sha256:e1146955de7de533eead3b3e9d22be34b2f9b7b2cc33a9c102a5b804adcf8b83
     name: COMMON_WEB_UI_IMAGE
   version: 4.7.0
