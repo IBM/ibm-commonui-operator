@@ -359,7 +359,7 @@ spec:
                 configMapKeyRef:
                   name: namespace-scope
                   key: namespaces
-            - name: COMMON_WEB_UI_IMAGE
+            - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
               value: {{.Values.global.imagePullPrefix}}/{{.Values.imageRegistryNamespaceOperand}}/common-web-ui:4.7.0
             - name: IMAGE_PULL_SECRET
               value: {{.Values.global.imagePullSecret}}

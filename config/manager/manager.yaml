@@ -62,7 +62,7 @@ spec:
                 configMapKeyRef:
                   name: namespace-scope
                   key: namespaces
-            - name: COMMON_WEB_UI_IMAGE
+            - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
               value: icr.io/cpopen/cpfs/common-web-ui:4.7.0
           livenessProbe:
             failureThreshold: 10
