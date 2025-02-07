@@ -140,5 +140,5 @@ spec:
   - image: icr.io/cpopen/ibm-commonui-operator:4.0.0
     name: COMMON_WEB_UI_OPERATOR_IMAGE
   - image: icr.io/cpopen/cpfs/common-web-ui:4.0.0
-    name: COMMON_WEB_UI_IMAGE
+    name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
   version: 4.0.0

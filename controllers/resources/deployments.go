@@ -61,7 +61,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 
 	imageRegistry := GetStringWithDefault(instance.Spec.CommonWebUIConfig.ImageRegistry, DefaultImageRegistry)
 	imageTag := GetStringWithDefault(instance.Spec.CommonWebUIConfig.ImageTag, DefaultImageTag)
-	image := GetImageID(imageRegistry, DefaultImageName, imageTag, "", "COMMON_WEB_UI_IMAGE")
+	image := GetImageID(imageRegistry, DefaultImageName, imageTag, "", "RELATED_IMAGE_COMMON_WEB_UI_IMAGE")
 
 	reqLogger.Info(fmt.Sprintf("Current image ID: %s", image))
 
