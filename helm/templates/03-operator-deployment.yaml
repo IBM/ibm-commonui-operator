@@ -7,6 +7,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
+    component-id: {{.Chart.Name}}
   annotations:
     packageName: ibm-commonui-operator-app
     alm-examples: |-
@@ -345,7 +346,7 @@ spec:
                 - s390x
       containers:
         - name: manager
-          image: {{.Values.global.imagePullPrefix}}/{{.Values.imageRegistryNamespaceOperator}}/ibm-commonui-operator:4.7.0
+          image: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperator}}/ibm-commonui-operator:4.7.0
           command:
           - ibm-commonui-operator
           imagePullPolicy: IfNotPresent
@@ -360,7 +361,7 @@ spec:
                   name: namespace-scope
                   key: namespaces
             - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
-              value: {{.Values.global.imagePullPrefix}}/{{.Values.imageRegistryNamespaceOperand}}/common-web-ui:4.7.0
+              value: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperand}}/common-web-ui:4.7.0
             - name: IMAGE_PULL_SECRET
               value: {{.Values.global.imagePullSecret}}
           livenessProbe:
