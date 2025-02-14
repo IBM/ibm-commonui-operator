@@ -464,7 +464,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
-    component-id: {{.Chart.Name}}
+    component-id: {{$.Chart.Name}}
   name: ibm-commonui-operator
   namespace: {{ $i }}
 rules:
@@ -672,11 +672,11 @@ metadata:
   labels:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
-    component-id: {{.Chart.Name}}
+    component-id: {{$.Chart.Name}}
 subjects:
 - kind: ServiceAccount
   name: ibm-commonui-operator
-  namespace: {{.Values.global.operatorNamespace}}
+  namespace: {{$.Values.global.operatorNamespace}}
 roleRef:
   kind: Role
   name: ibm-commonui-operator
