@@ -1,6 +1,7 @@
 ---
-imageRegistryNamespaceOperator: cpopen
-imageRegistryNamespaceOperand: cpopen/cpfs
+cpfs:
+  imageRegistryNamespaceOperator: cpopen
+  imageRegistryNamespaceOperand: cpopen/cpfs
 
 #The following values are expected from global scope
 #imagePullPrefix: icr.io
