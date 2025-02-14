@@ -143,3 +143,4 @@ Use the URL from the HOST/PORT column for the route named cp-console.
 ### End-to-End testing
 
 For more instructions on how to run end-to-end testing with the Operand Deployment Lifecycle Manager, see [ODLM guide](https://github.com/IBM/operand-deployment-lifecycle-manager/blob/master/docs/dev/e2e.md#running-e2e-tests).
+
