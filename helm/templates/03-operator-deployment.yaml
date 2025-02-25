@@ -28,7 +28,7 @@ metadata:
               "cpuLimits": "300",
               "cpuMemory": "256",
               "imageRegistry": "{{ .Values.global.imagePullPrefix }}/{{ .Values.imageRegistryNamespaceOperand }}",
-              "imageTag": "4.7.0",
+              "imageTag": "4.8.0",
               "ingressPath": "/common-nav",
               "landingPage": "",
               "requestLimits": "300",
@@ -44,7 +44,7 @@ metadata:
               "osAuth": "",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "4.7.0",
+            "operatorVersion": "4.8.0",
             "replicas": 1,
             "resources": {
               "limits": {
@@ -57,7 +57,7 @@ metadata:
                 "ephemeral-storage": "251Mi"
               }
             },
-            "version": "4.7.0"
+            "version": "4.8.0"
           }
         },
         {
@@ -346,7 +346,7 @@ spec:
                 - s390x
       containers:
         - name: manager
-          image: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperator}}/ibm-commonui-operator:4.7.0
+          image: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperator}}/ibm-commonui-operator:4.8.0
           command:
           - ibm-commonui-operator
           imagePullPolicy: IfNotPresent
@@ -361,7 +361,7 @@ spec:
                   name: namespace-scope
                   key: namespaces
             - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
-              value: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperand}}/common-web-ui:4.7.0
+              value: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperand}}/common-web-ui:4.8.0
             - name: IMAGE_PULL_SECRET
               value: {{.Values.global.imagePullSecret}}
           livenessProbe:
