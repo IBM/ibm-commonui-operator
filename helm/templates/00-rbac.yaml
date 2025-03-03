@@ -8,7 +8,7 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     component-id: {{.Chart.Name}}
-{{- $watchNamespaces := .Values.global.tetheredNamespace | default list -}}
+{{- $watchNamespaces := .Values.global.tetheredNamespaces | default list -}}
 {{- if .Values.global.instanceNamespace -}}
 {{- $watchNamespaces = append $watchNamespaces .Values.global.instanceNamespace -}}
 {{- end -}}
