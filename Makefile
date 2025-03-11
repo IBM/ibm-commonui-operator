@@ -21,19 +21,15 @@ OPERATOR_SDK ?= $(shell which operator-sdk)
 #CONTROLLER_GEN ?= $(shell which controller-gen)
 KUSTOMIZE ?= $(shell which kustomize)
 
-#
-# Had to pin go and the controller-gen at 1.21.x go versions because of a change introduced
-# with go 1.22 which was causing controller-gen to fail.
-# See https://github.com/golang/go/issues/65637 and https://github.com/kubernetes-sigs/controller-tools/issues/880
 ## Location to install dependencies to
 LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
-GO_VERSION ?= 1.21.7
+GO_VERSION ?= 1.23.5
 # This pinned version of go has its version pinned to its name, so order of operations is inverted here.
 GO ?= $(LOCALBIN)/go$(GO_VERSION)
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
-CONTROLLER_TOOLS_VERSION ?= v0.11.4
+CONTROLLER_TOOLS_VERSION ?= v0.14.0
 
 ifeq ($(BUILD_LOCALLY),0)
     export CONFIG_DOCKER_TARGET = config-docker
