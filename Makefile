@@ -29,11 +29,11 @@ KUSTOMIZE ?= $(shell which kustomize)
 LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
-GO_VERSION ?= 1.21.7
+GO_VERSION ?= 1.23.5
 # This pinned version of go has its version pinned to its name, so order of operations is inverted here.
 GO ?= $(LOCALBIN)/go$(GO_VERSION)
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
-CONTROLLER_TOOLS_VERSION ?= v0.11.4
+CONTROLLER_TOOLS_VERSION ?= v0.14.0
 
 ifeq ($(BUILD_LOCALLY),0)
     export CONFIG_DOCKER_TARGET = config-docker

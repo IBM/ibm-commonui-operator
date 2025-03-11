@@ -189,7 +189,7 @@ func ReconcileAPIIngress(ctx context.Context, client client.Client, instance *op
 	return reconcileIngress(ctx, client, instance, APIIngressName, desiredIngress, needToRequeue)
 }
 
-//nolint
+// nolint
 func getDesiredCallbackIngress(client client.Client, instance *operatorsv1alpha1.CommonWebUI) (*netv1.Ingress, error) {
 	reqLogger := log.WithValues("func", "getDesiredCallbackIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
@@ -310,7 +310,7 @@ func ReconcileNavIngress(ctx context.Context, client client.Client, instance *op
 	return reconcileIngress(ctx, client, instance, NavIngressName, desiredIngress, needToRequeue)
 }
 
-//nolint
+// nolint
 func reconcileIngress(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, ingressName string, desiredIngress *netv1.Ingress, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "reconcileIngress", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
