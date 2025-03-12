@@ -30,6 +30,10 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
 )
 
+const LoginConfirmationText string = "login-confirmation-text"
+const LoginConfirmationButton string = "login-confirmation-button"
+const LoginConfirmationTitle string = "login-confirmation-title"
+
 func createConfigMap(ctx context.Context, client client.Client, cm *corev1.ConfigMap, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) error {
 	reqLogger := log.WithValues("func", "createConfigMap", "instance.Name", instance.Name, "configmap.Name", cm.Name)
 
@@ -95,15 +99,7 @@ func ReconcileCommonUIConfigConfigMap(ctx context.Context, client client.Client,
 	err := client.Get(ctx, types.NamespacedName{Name: CommonConfigMapName, Namespace: instance.Namespace}, cm)
 	if err != nil {
 		if errors.IsNotFound(err) {
-			cm = &corev1.ConfigMap{
-				ObjectMeta: metav1.ObjectMeta{
-					Name:      CommonConfigMapName,
-					Namespace: instance.Namespace,
-					Labels: map[string]string{"app.kubernetes.io/instance": "ibm-commonui-operator",
-						"app.kubernetes.io/name": CommonConfigMapName, "app.kubernetes.io/managed-by": "ibm-commonui-operator"},
-				},
-			}
-
+			cm := getDesiredCommonWebUIConfigmap(instance)
 			err = createConfigMap(ctx, client, cm, instance, needToRequeue)
 			if err != nil {
 				return err
@@ -112,9 +108,45 @@ func ReconcileCommonUIConfigConfigMap(ctx context.Context, client client.Client,
 			reqLogger.Error(err, "Failed to get common-web-ui-config configmap")
 			return err
 		}
+	} else {
+		//Reconcile the configmap ... today we are only reconciling the login confirmation fields
+		dcm := getDesiredCommonWebUIConfigmap(instance)
+		if cm.Data[LoginConfirmationText] != dcm.Data[LoginConfirmationText] ||
+			cm.Data[LoginConfirmationButton] != dcm.Data[LoginConfirmationButton] ||
+			cm.Data[LoginConfirmationTitle] != dcm.Data[LoginConfirmationTitle] {
+
+			reqLogger.Info("LoginConfirmation not equal", "old", cm.Data, "new", dcm.Data)
+
+			cm.Data[LoginConfirmationText] = dcm.Data[LoginConfirmationText]
+			cm.Data[LoginConfirmationButton] = dcm.Data[LoginConfirmationButton]
+			cm.Data[LoginConfirmationTitle] = dcm.Data[LoginConfirmationTitle]
+
+			err = client.Update(ctx, cm)
+			if err != nil {
+				reqLogger.Error(err, "Failed to update configmap", "Name", cm.Name)
+				return err
+			}
+		}
 	}
 
 	return nil
+}
+
+func getDesiredCommonWebUIConfigmap(instance *operatorsv1alpha1.CommonWebUI) *corev1.ConfigMap {
+	cm := &corev1.ConfigMap{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:      CommonConfigMapName,
+			Namespace: instance.Namespace,
+			Labels: map[string]string{"app.kubernetes.io/instance": "ibm-commonui-operator",
+				"app.kubernetes.io/name": CommonConfigMapName, "app.kubernetes.io/managed-by": "ibm-commonui-operator"},
+		},
+		Data: map[string]string{
+			LoginConfirmationText:   instance.Spec.LoginConfirmation.Text,
+			LoginConfirmationButton: instance.Spec.LoginConfirmation.ButtonText,
+			LoginConfirmationTitle:  instance.Spec.LoginConfirmation.TitleText,
+		},
+	}
+	return cm
 }
 
 func CommonWebUIConfigMap(namespace string) *corev1.ConfigMap {

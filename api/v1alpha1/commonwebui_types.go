@@ -63,6 +63,13 @@ type Limits struct {
 	EphemeralStorage string `json:"ephemeral-storage,omitempty"`
 }
 
+// LoginConfirmation defines the attributes used for a login confirmation dialog
+type LoginConfirmation struct {
+	Text       string `json:"text,omitempty"`
+	ButtonText string `json:"buttonText,omitempty"`
+	TitleText  string `json:"titleText,omitempty"`
+}
+
 // CommonWebUISpec defines the desired state of CommonWebUI
 type CommonWebUISpec struct {
 	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
@@ -75,6 +82,7 @@ type CommonWebUISpec struct {
 	Resources                     Resources         `json:"resources,omitempty"`
 	Labels                        map[string]string `json:"labels,omitempty"`
 	EnableInstanaMetricCollection bool              `json:"enableInstanaMetricCollection,omitempty"`
+	LoginConfirmation             LoginConfirmation `json:"loginConfirmation,omitempty"`
 	// License           License           `json:"license,omitempty"`
 }
 

@@ -29,7 +29,7 @@ KUSTOMIZE ?= $(shell which kustomize)
 LOCALBIN ?= $(shell pwd)/bin
 $(LOCALBIN):
 	mkdir -p $(LOCALBIN)
-GO_VERSION ?= 1.23.5
+GO_VERSION ?= 1.23.7
 # This pinned version of go has its version pinned to its name, so order of operations is inverted here.
 GO ?= $(LOCALBIN)/go$(GO_VERSION)
 CONTROLLER_GEN ?= $(LOCALBIN)/controller-gen
