@@ -8,6 +8,9 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     component-id: {{.Chart.Name}}
+    {{- with .Values.cpfs.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 {{- $watchNamespaces := .Values.global.tetheredNamespaces | default list -}}
 {{- if .Values.global.instanceNamespace -}}
 {{- $watchNamespaces = append $watchNamespaces .Values.global.instanceNamespace -}}
@@ -22,6 +25,9 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     component-id: {{$.Chart.Name}}
+    {{- with $labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
   name: ibm-commonui-operator
   namespace: {{$namespace}}
 rules:
@@ -230,6 +236,9 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     component-id: {{$.Chart.Name}}
+    {{- with $labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
 subjects:
 - kind: ServiceAccount
   name: ibm-commonui-operator
