@@ -349,7 +349,7 @@ spec:
                 - s390x
       containers:
         - name: manager
-          image: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperator}}/ibm-commonui-operator:4.8.0
+          image: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperator}}/ibm-commonui-operator:4.8.0
           command:
           - ibm-commonui-operator
           imagePullPolicy: IfNotPresent
@@ -374,7 +374,7 @@ spec:
               value: {{ uniq $watchNamespaces | join "," | quote }}
             {{- end }}
             - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
-              value: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperand}}/common-web-ui:4.8.0
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperator}}/common-web-ui:4.8.0
             - name: IMAGE_PULL_SECRET
               value: {{.Values.global.imagePullSecret}}
           livenessProbe:
