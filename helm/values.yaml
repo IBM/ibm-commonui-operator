@@ -2,6 +2,7 @@
 cpfs:
   imageRegistryNamespaceOperator: cpopen
   imageRegistryNamespaceOperand: cpopen/cpfs
+  labels:
 
 #The following values are expected from global scope
 # global:
