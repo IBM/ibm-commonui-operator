@@ -116,7 +116,9 @@ func ReconcileCommonUIConfigConfigMap(ctx context.Context, client client.Client,
 			cm.Data[LoginConfirmationTitle] != dcm.Data[LoginConfirmationTitle] {
 
 			reqLogger.Info("LoginConfirmation not equal", "old", cm.Data, "new", dcm.Data)
-
+			if cm.Data == nil {
+				cm.Data = map[string]string{}
+			}
 			cm.Data[LoginConfirmationText] = dcm.Data[LoginConfirmationText]
 			cm.Data[LoginConfirmationButton] = dcm.Data[LoginConfirmationButton]
 			cm.Data[LoginConfirmationTitle] = dcm.Data[LoginConfirmationTitle]
