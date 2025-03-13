@@ -17,6 +17,7 @@ metadata:
 {{- end -}}
 {{- $watchNamespaces = prepend $watchNamespaces .Values.global.operatorNamespace -}}
 {{- range $namespace := $watchNamespaces | uniq }}
+{{- $labels := .Values.cpfs.labels }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
