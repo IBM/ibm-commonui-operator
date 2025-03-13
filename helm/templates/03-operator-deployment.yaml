@@ -355,11 +355,21 @@ spec:
               valueFrom:
                 fieldRef:
                   fieldPath: metadata.namespace
+            {{- if .Values.nssEnabled }}
             - name: WATCH_NAMESPACE
               valueFrom:
                 configMapKeyRef:
                   name: namespace-scope
                   key: namespaces
+            {{- else }}
+              {{- $watchNamespaces := .Values.global.tetheredNamespaces | default list -}}
+              {{- if .Values.global.instanceNamespace -}}
+              {{- $watchNamespaces = append $watchNamespaces .Values.global.instanceNamespace -}}
+              {{- end -}}
+              {{- $watchNamespaces = prepend $watchNamespaces .Values.global.operatorNamespace }}
+            - name: WATCH_NAMESPACE
+              value: {{ uniq $watchNamespaces | join "," | quote }}
+            {{- end }}
             - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
               value: {{.Values.global.imagePullPrefix}}/{{.Values.cpfs.imageRegistryNamespaceOperand}}/common-web-ui:4.8.0
             - name: IMAGE_PULL_SECRET
