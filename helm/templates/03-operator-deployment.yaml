@@ -30,7 +30,7 @@ metadata:
             "commonWebUIConfig": {
               "cpuLimits": "300",
               "cpuMemory": "256",
-              "imageRegistry": "{{ .Values.global.imagePullPrefix }}/{{ .Values.imageRegistryNamespaceOperand }}",
+              "imageRegistry": "{{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}",
               "imageTag": "4.8.0",
               "ingressPath": "/common-nav",
               "landingPage": "",
@@ -374,7 +374,7 @@ spec:
               value: {{ uniq $watchNamespaces | join "," | quote }}
             {{- end }}
             - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
-              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperator}}/common-web-ui:4.8.0
+              value: {{ .Values.cpfs.imagePullPrefix | default .Values.global.imagePullPrefix }}/{{ .Values.cpfs.imageRegistryNamespaceOperand}}/common-web-ui:4.8.0
             - name: IMAGE_PULL_SECRET
               value: {{.Values.global.imagePullSecret}}
           livenessProbe:
