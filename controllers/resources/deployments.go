@@ -283,6 +283,12 @@ func ReconcileDeployment(ctx context.Context, client client.Client, instance *op
 		PreserveKeyValue(CertRestartLabel, deployment.ObjectMeta.Labels, desiredDeployment.ObjectMeta.Labels)
 		PreserveKeyValue(CertRestartLabel, deployment.Spec.Template.ObjectMeta.Labels, desiredDeployment.Spec.Template.ObjectMeta.Labels)
 
+		//If autoscaling is enabled, do not reconcile replicas
+		if instance.Spec.AutoScaleConfig {
+			desiredDeployment.Spec.Replicas = deployment.Spec.Replicas
+			reqLogger.Info("HPA enabled, not reconciling replicas", "current replicas", deployment.Spec.Replicas)
+		}
+
 		if !IsDeploymentEqual(deployment, desiredDeployment) {
 			reqLogger.Info("Updating deployment", "Deployment.Namespace", desiredDeployment.Namespace, "Deployment.Name", desiredDeployment.Name)
 

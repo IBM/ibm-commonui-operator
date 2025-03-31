@@ -27,6 +27,7 @@ import (
 	// Import all Kubernetes client auth plugins (e.g. Azure, GCP, OIDC, etc.)
 	// to ensure that exec-entrypoint and run can make use of them.
 	"go.uber.org/zap/zapcore"
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	_ "k8s.io/client-go/plugin/pkg/client/auth"
 
 	appsv1 "k8s.io/api/apps/v1"
@@ -92,6 +93,10 @@ func init() {
 
 	// add common web ui scheme to controller
 	utilruntime.Must(operatorsv1alpha1.AddToScheme(scheme))
+
+	//Currently was having issues with reconciling autoscaling,
+	//getting too many updates
+	utilruntime.Must(autoscalingv2.AddToScheme(scheme))
 
 	utilruntime.Must(im.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme

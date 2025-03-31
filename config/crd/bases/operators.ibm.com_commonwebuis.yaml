@@ -44,6 +44,8 @@ spec:
             x-kubernetes-preserve-unknown-fields: true
             description: CommonWebUISpec defines the desired state of CommonWebUI
             properties:
+              autoScaleConfig:
+                type: boolean
               commonWebUIConfig:
                 description: |-
                   INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
