@@ -22,6 +22,8 @@ import (
 	"reflect"
 	"strings"
 
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
+
 	certmgr "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	route "github.com/openshift/api/route/v1"
@@ -189,6 +191,12 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	// Update admin hub nav config, if it exists.
 	err = res.ReconcileAdminHubNavConfig(ctx, r.Client, instance)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	// Check if the certificates already exists. If not, create new v1 certs.
+	err = res.ReconcileHorizontalPodAutoscaler(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		return ctrl.Result{}, err
 	}
@@ -382,6 +390,9 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			Owns(&corev1.ServiceAccount{}).
 			Owns(&rbacv1.Role{}).
 			Owns(&rbacv1.RoleBinding{}).
+			//Currently was having issues with reconciling autoscaling,
+			//getting too many updates
+			Owns(&autoscalingv2.HorizontalPodAutoscaler{}).
 			Watches(&source.Kind{Type: &corev1.ConfigMap{}},
 				handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
 					return []ctrl.Request{
@@ -406,6 +417,9 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
+		//Currently was having issues with reconciling autoscaling,
+		//getting too many updates
+		Owns(&autoscalingv2.HorizontalPodAutoscaler{}).
 		Watches(&source.Kind{Type: &corev1.ConfigMap{}},
 			handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
 				return []ctrl.Request{

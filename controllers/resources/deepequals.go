@@ -23,6 +23,7 @@ import (
 	certmgr "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	route "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
+	autoscalingv2 "k8s.io/api/autoscaling/v2"
 	corev1 "k8s.io/api/core/v1"
 	netv1 "k8s.io/api/networking/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -581,6 +582,36 @@ func IsRoleBindingEqual(oldRoleBinding, newRoleBinding *rbacv1.RoleBinding) bool
 	}
 
 	logger.Info("Role bindings are equal")
+
+	return true
+}
+
+// Use DeepEqual to determine if 2 services are equal.
+// Check ObjectMeta, Ports and Selector.
+// If there are any differences, return false. Otherwise, return true.
+func IsHorizontalPodscalerEqual(oldHPA, newHPA *autoscalingv2.HorizontalPodAutoscaler) bool {
+	logger := log.WithValues("func", "IsHorizontalPodscalerEqual")
+
+	if !reflect.DeepEqual(oldHPA.ObjectMeta.Name, newHPA.ObjectMeta.Name) {
+		logger.Info("Names not equal", "old", oldHPA.ObjectMeta.Name, "new", newHPA.ObjectMeta.Name)
+		return false
+	}
+
+	if !reflect.DeepEqual(oldHPA.ObjectMeta.Labels, newHPA.ObjectMeta.Labels) {
+		logger.Info("Labels not equal",
+			"old", fmt.Sprintf("%v", oldHPA.ObjectMeta.Labels),
+			"new", fmt.Sprintf("%v", newHPA.ObjectMeta.Labels))
+		return false
+	}
+
+	if !reflect.DeepEqual(oldHPA.Spec, newHPA.Spec) {
+		logger.Info("Specs not equal",
+			"old", fmt.Sprintf("%v", oldHPA.Spec),
+			"new", fmt.Sprintf("%v", newHPA.Spec))
+		return false
+	}
+
+	logger.Info("HPAs are equal", "Name", oldHPA.ObjectMeta.Name)
 
 	return true
 }

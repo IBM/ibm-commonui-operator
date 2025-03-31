@@ -83,6 +83,7 @@ type CommonWebUISpec struct {
 	Labels                        map[string]string `json:"labels,omitempty"`
 	EnableInstanaMetricCollection bool              `json:"enableInstanaMetricCollection,omitempty"`
 	LoginConfirmation             LoginConfirmation `json:"loginConfirmation,omitempty"`
+	AutoScaleConfig               bool              `json:"autoScaleConfig,omitempty"`
 	// License           License           `json:"license,omitempty"`
 }
 

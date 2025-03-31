@@ -732,6 +732,18 @@ spec:
           - get
           - list
           - watch
+        - apiGroups:
+          - autoscaling
+          resources:
+          - horizontalpodautoscalers
+          verbs:
+          - create
+          - delete
+          - get
+          - list
+          - patch
+          - update
+          - watch
         serviceAccountName: ibm-commonui-operator
     strategy: deployment
   installModes:
