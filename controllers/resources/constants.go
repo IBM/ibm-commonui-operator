@@ -56,6 +56,8 @@ var DefaultStatusForCR = []string{"none"}
 
 const Log4jsConfigMapName = "common-web-ui-log4js"
 
+const HPAName = "common-web-ui-hpa"
+
 var Log4jsConfigMapData = map[string]string{
 	"log4js.json": `   {
 		"appenders": {

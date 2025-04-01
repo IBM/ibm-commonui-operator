@@ -29,8 +29,6 @@ import (
 	operatorsv1alpha1 "github.com/IBM/ibm-commonui-operator/api/v1alpha1"
 )
 
-const HPAName = "common-web-ui-hpa"
-
 func getDesiredHorizontalPodAutoscaler(client client.Client, instance *operatorsv1alpha1.CommonWebUI) (*autoscalingv2.HorizontalPodAutoscaler, error) {
 	reqLogger := log.WithValues("func", "getDesiredHorizontalPodAutoscaler", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 

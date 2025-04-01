@@ -374,6 +374,32 @@ func clusterInfoCmPredicate() predicate.Predicate {
 	}
 }
 
+func hpaPredicate() predicate.Predicate {
+	namespaces := strings.Split(os.Getenv("WATCH_NAMESPACE"), ",")
+	reqLogger := log.WithName("HPAPredicate")
+
+	return predicate.Funcs{
+		UpdateFunc: func(e event.UpdateEvent) bool {
+			//reqLogger.Info("Update - ignored", "New", e.ObjectNew, "Old", e.ObjectOld)
+			return false
+		},
+		CreateFunc: func(e event.CreateEvent) bool {
+			if e.Object.GetName() == res.HPAName && res.ContainsString(namespaces, e.Object.GetNamespace()) {
+				reqLogger.Info("Create event received for common-web-ui HPA - reconcile")
+				return true
+			}
+			return false
+		},
+		DeleteFunc: func(e event.DeleteEvent) bool {
+			if e.Object.GetName() == res.HPAName && res.ContainsString(namespaces, e.Object.GetNamespace()) {
+				reqLogger.Info("Delete event received for common-web-ui HPA - reconcile")
+				return true
+			}
+			return false
+		},
+	}
+}
+
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 
@@ -391,8 +417,9 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 			Owns(&rbacv1.Role{}).
 			Owns(&rbacv1.RoleBinding{}).
 			//Currently was having issues with reconciling autoscaling,
-			//getting too many updates
-			Owns(&autoscalingv2.HorizontalPodAutoscaler{}).
+			//getting too many updates so we converted this to the predicate
+			//below
+			//Owns(&autoscalingv2.HorizontalPodAutoscaler{}).
 			Watches(&source.Kind{Type: &corev1.ConfigMap{}},
 				handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
 					return []ctrl.Request{
@@ -402,6 +429,15 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 						}},
 					}
 				}), builder.WithPredicates(clusterInfoCmPredicate())).
+			Watches(&source.Kind{Type: &autoscalingv2.HorizontalPodAutoscaler{}},
+				handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
+					return []ctrl.Request{
+						{NamespacedName: types.NamespacedName{
+							Name:      "NON_OWNED_OBJECT_RECONCILE",
+							Namespace: a.GetNamespace(),
+						}},
+					}
+				}), builder.WithPredicates(hpaPredicate())).
 			Complete(r)
 	}
 
@@ -418,8 +454,9 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
 		//Currently was having issues with reconciling autoscaling,
-		//getting too many updates
-		Owns(&autoscalingv2.HorizontalPodAutoscaler{}).
+		//getting too many updates so we converted this to the predicate
+		//below
+		//Owns(&autoscalingv2.HorizontalPodAutoscaler{}).
 		Watches(&source.Kind{Type: &corev1.ConfigMap{}},
 			handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
 				return []ctrl.Request{
@@ -438,5 +475,14 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 					}},
 				}
 			})).
+		Watches(&source.Kind{Type: &autoscalingv2.HorizontalPodAutoscaler{}},
+			handler.EnqueueRequestsFromMapFunc(func(a client.Object) []ctrl.Request {
+				return []ctrl.Request{
+					{NamespacedName: types.NamespacedName{
+						Name:      "NON_OWNED_OBJECT_RECONCILE",
+						Namespace: a.GetNamespace(),
+					}},
+				}
+			}), builder.WithPredicates(hpaPredicate())).
 		Complete(r)
 }
