@@ -50,7 +50,7 @@ func getDesiredCertificate(ctx context.Context, client client.Client, instance *
 		"app.kubernetes.io/instance":   "ibm-commonui-operator",
 		"app.kubernetes.io/managed-by": "ibm-commonui-operator",
 		"app.kubernetes.io/name":       UICertName,
-		"manage-cert-rotation":         "yes",
+		"manage-cert-rotation":         "true",
 	}
 
 	certificate := &certmgr.Certificate{
