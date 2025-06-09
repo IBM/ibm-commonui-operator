@@ -21,7 +21,7 @@ metadata:
               "cpuLimits": "300",
               "cpuMemory": "256",
               "imageRegistry": "icr.io/cpopen/cpfs",
-              "imageTag": "4.9.0",
+              "imageTag": "4.10.0",
               "ingressPath": "/common-nav",
               "landingPage": "",
               "requestLimits": "300",
@@ -37,7 +37,7 @@ metadata:
               "osAuth": "",
               "sessionPollingInterval": 5000
             },
-            "operatorVersion": "4.9.0",
+            "operatorVersion": "4.10.0",
             "replicas": 1,
             "resources": {
               "limits": {
@@ -50,7 +50,7 @@ metadata:
                 "ephemeral-storage": "251Mi"
               }
             },
-            "version": "4.9.0"
+            "version": "4.10.0"
           }
         },
         {
@@ -311,7 +311,7 @@ metadata:
     containerImage: icr.io/cpopen/ibm-commonui-operator@sha256:184a9750030644cd726273a7b205a07703b44b74f628350ad7f8d9eb34545ef3
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
-    olm.skipRange: '<4.9.0'
+    olm.skipRange: '<4.10.0'
     repository: https://github.com/IBM/ibm-commonui-operator
     support: IBM
     features.operators.openshift.io/disconnected: 'true'
@@ -329,7 +329,7 @@ metadata:
     operatorframework.io/arch.ppc64le: supported
     operatorframework.io/arch.s390x: supported
     operatorframework.io/os.linux: supported
-  name: ibm-commonui-operator.v4.9.0
+  name: ibm-commonui-operator.v4.10.0
   namespace: placeholder
 spec:
   apiservicedefinitions: {}
@@ -783,4 +783,4 @@ spec:
     name: COMMON_WEB_UI_OPERATOR_IMAGE
   - image: icr.io/cpopen/cpfs/common-web-ui@sha256:e1146955de7de533eead3b3e9d22be34b2f9b7b2cc33a9c102a5b804adcf8b83
     name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
-  version: 4.9.0
+  version: 4.10.0
