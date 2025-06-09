@@ -3,5 +3,5 @@ apiVersion: v2
 name: ibm-commonui-operator-app
 description: A Helm chart for ibm-commonui-operator-app
 type: application
-version: "4.9.0"
-appVersion: "4.9.0"
+version: "4.10.0"
+appVersion: "4.10.0"
