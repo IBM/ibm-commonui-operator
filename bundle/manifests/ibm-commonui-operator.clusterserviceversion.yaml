@@ -308,7 +308,7 @@ metadata:
     capabilities: Seamless Upgrades
     categories: Security
     certified: "false"
-    containerImage: icr.io/cpopen/ibm-commonui-operator@sha256:184a9750030644cd726273a7b205a07703b44b74f628350ad7f8d9eb34545ef3
+    containerImage: icr.io/cpopen/ibm-commonui-operator@sha256:556a7c9cfd0b6a9eb39be798760f361684d9f9276c6bee23dc5e8d14a559eaf4
     description: The IBM Common Web UI delivers the common header API and the identity
       and access pages for IBM Cloud Platform Common Services.
     olm.skipRange: '<4.8.0'
@@ -496,8 +496,8 @@ spec:
                       name: namespace-scope
                       key: namespaces
                 - name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
-                  value: icr.io/cpopen/cpfs/common-web-ui@sha256:e1146955de7de533eead3b3e9d22be34b2f9b7b2cc33a9c102a5b804adcf8b83
-                image: icr.io/cpopen/ibm-commonui-operator@sha256:184a9750030644cd726273a7b205a07703b44b74f628350ad7f8d9eb34545ef3
+                  value: icr.io/cpopen/cpfs/common-web-ui@sha256:e4eb6a75e0d207232e479693d9c99ba863f8e62830f3191ca4d1e7ceaf3586d1
+                image: icr.io/cpopen/ibm-commonui-operator@sha256:556a7c9cfd0b6a9eb39be798760f361684d9f9276c6bee23dc5e8d14a559eaf4
                 imagePullPolicy: IfNotPresent
                 name: manager
                 livenessProbe:
@@ -779,8 +779,8 @@ spec:
   provider:
     name: IBM
   relatedImages:
-  - image: icr.io/cpopen/ibm-commonui-operator@sha256:184a9750030644cd726273a7b205a07703b44b74f628350ad7f8d9eb34545ef3
+  - image: icr.io/cpopen/ibm-commonui-operator@sha256:556a7c9cfd0b6a9eb39be798760f361684d9f9276c6bee23dc5e8d14a559eaf4
     name: COMMON_WEB_UI_OPERATOR_IMAGE
-  - image: icr.io/cpopen/cpfs/common-web-ui@sha256:e1146955de7de533eead3b3e9d22be34b2f9b7b2cc33a9c102a5b804adcf8b83
+  - image: icr.io/cpopen/cpfs/common-web-ui@sha256:e4eb6a75e0d207232e479693d9c99ba863f8e62830f3191ca4d1e7ceaf3586d1
     name: RELATED_IMAGE_COMMON_WEB_UI_IMAGE
   version: 4.8.0
