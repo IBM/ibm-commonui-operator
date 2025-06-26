@@ -21,6 +21,7 @@ import (
 	"os"
 	"reflect"
 	"strings"
+	"time"
 
 	certmgr "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
 	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
@@ -153,6 +154,24 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		return ctrl.Result{}, err
 	}
 
+	// For 1.15.0 operator version, check if v1alpha1 certs exits on upgrade and delete if so
+	r.deleteCertsv1alpha1(ctx, instance)
+
+	// Check if the certificates already exists. If not, create new v1 certs.
+	err = res.ReconcileCertificates(ctx, r.Client, instance, &needToRequeue)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
+	//Reconciliation will wait until the certificate secret has been deployed.  If the
+	// wait is not inserted, then the deployment gets updated multiple times in rapid
+	// succession which can mess up zone spreading
+	// https://github.ibm.com/IBMPrivateCloud/roadmap/issues/63642
+	err = r.waitForCertSecret(ctx, r.Client, instance.Namespace)
+	if err != nil {
+		return ctrl.Result{}, err
+	}
+
 	// Check if the deployment already exists. If not, create a new one.
 	err = res.ReconcileDeployment(ctx, r.Client, instance, isZen, isCncf, &needToRequeue)
 	if err != nil {
@@ -177,15 +196,6 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// This was for cloudpak 3.0 work
 	res.ReconcileRemoveIngresses(ctx, r.Client, instance, &needToRequeue)
 
-	// For 1.15.0 operator version, check if v1alpha1 certs exits on upgrade and delete if so
-	r.deleteCertsv1alpha1(ctx, instance)
-
-	// Check if the certificates already exists. If not, create new v1 certs.
-	err = res.ReconcileCertificates(ctx, r.Client, instance, &needToRequeue)
-	if err != nil {
-		return ctrl.Result{}, err
-	}
-
 	// Update admin hub nav config, if it exists.
 	err = res.ReconcileAdminHubNavConfig(ctx, r.Client, instance)
 	if err != nil {
@@ -209,6 +219,49 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
 	return ctrl.Result{}, nil
+}
+
+func (r *CommonWebUIReconciler) waitForCertSecret(ctx context.Context, client client.Client, ns string) error {
+
+	//Check and see if the cert secret exists ... if not, go into a wait for it
+	certSecret := &corev1.Secret{}
+	if err := client.Get(ctx, types.NamespacedName{
+		Namespace: ns,
+		Name:      "common-web-ui-cert",
+	}, certSecret); err == nil {
+		log.Info("common-web-ui-cert secret exists - reconcile will continue")
+		return nil
+	}
+
+	log.Info("Reconcile will wait until common-web-ui cert secret common-web-ui-cert is created")
+	timeout := time.After(5 * time.Minute)
+	ticker := time.NewTicker(10 * time.Second)
+	defer ticker.Stop()
+
+	for {
+		select {
+		case <-timeout:
+			return errors.NewTimeoutError("Timeout waiting for common-web-ui certificate secret", 0)
+		case <-ticker.C:
+			// Check if the certificate secret exists
+			certSecret := &corev1.Secret{}
+			if err := client.Get(ctx, types.NamespacedName{
+				Namespace: ns,
+				Name:      "common-web-ui-cert",
+			}, certSecret); err != nil {
+				if errors.IsNotFound(err) {
+					log.Info("common-web-ui-cert secret not found yet, waiting...")
+					continue
+				}
+				log.Error(err, "Error getting common-web-ui-cert secret")
+				continue
+			}
+			log.Info("Common-web-ui-cert secret exists - reconcile will continue")
+			goto endWait
+		}
+	}
+endWait:
+	return nil
 }
 
 func (r *CommonWebUIReconciler) removeLegacyZenResources(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
