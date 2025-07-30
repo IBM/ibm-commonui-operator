@@ -10,7 +10,6 @@ export MANIFEST_TOOL_URL=https://github.com/estesp/manifest-tool/releases/downlo
 echo "Installing manifest-tool $MANIFEST_TOOL_VERSION ($MANIFEST_TOOL_OS-$MANIFEST_TOOL_ARCH) from $MANIFEST_TOOL_URL" && \
 curl '-#' -fL -o $MANIFEST_TOOL $MANIFEST_TOOL_URL && \
 chmod +x $MANIFEST_TOOL
-
 $MANIFEST_TOOL --version
 
 ## Push the manifest to a Docker registry

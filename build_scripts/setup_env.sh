@@ -21,6 +21,9 @@ echo "Current branch : $GIT_BRANCH"
 echo "Building commit $GIT_COMMIT"
 echo "Using build tag $BUILD_TAG"
 
+echo "CHECKING DOCKER LOGINS"
+cat ~/.docker/config.json
+
 # Login to root artifactory (to cover both base images and build image)
 make init
 make docker:login DOCKER_REGISTRY=docker-na-public.artifactory.swg-devops.com
