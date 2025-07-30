@@ -18,7 +18,7 @@ COPY controllers/ controllers/
 COPY version/ version/
 
 # Build
-RUN CGO_ENABLED=0 GOOS=linux GO111MODULE=on go build -a -o ibm-commonui-operator main.go
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$GOARCH GO111MODULE=on go build -a -o ibm-commonui-operator main.go
 
 FROM docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-edge-docker-local/build-images/ubi9-minimal:latest
 
