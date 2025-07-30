@@ -142,8 +142,8 @@ else ifeq ($(ARCH),ppc64le)
     LOCAL_ARCH="ppc64le"
 else ifeq ($(ARCH),s390x)
     LOCAL_ARCH="s390x"
-else
-    $(error "This system's ARCH $(ARCH) isn't recognized/supported")
+# else
+#     $(error "This system's ARCH $(ARCH) isn't recognized/supported")
 endif
 
 IMAGE_NAME=$(IMG)
