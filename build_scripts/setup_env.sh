@@ -8,7 +8,7 @@ export DOCKER_PASS="$(get_env DOCKER_PASS)"
 export GITHUB_TOKEN="$(get_env GITHUB_TOKEN)"
 export GITHUB_USER="$(get_env GITHUB_USER)"
 # Build Image Details
-export IMAGE_NAME="common-web-ui"
+export IMAGE_NAME="ibm-commonui-operator"
 export BUILD_IMAGE="$DOCKER_REGISTRY/$IMAGE_NAME:$BUILD_TAG"
 # Add build harness to path outside of Makefile
 export PATH="$PATH:$PWD/build-harness/vendor/"
