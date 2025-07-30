@@ -234,8 +234,8 @@ build-push-image: build-image push-image
 # 	@docker build -t $(ARCH_IMAGE) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(ARCH_IMAGE)" -f Dockerfile .
 
 build-image:
-	@echo "Building the $(IMG) docker image for $(LOCAL_ARCH)..."
-	@docker build -t $(ARCH_IMAGE) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(ARCH_IMAGE)" -f Dockerfile .
+	@echo "building image -> docker buildx build --platform linux/${ARCH} -f Dockerfile --load ${DOCKER_BUILD_OPTS} -t ${ARCH_IMAGE} ."
+	docker buildx build --platform linux/${ARCH} -f Dockerfile --load ${DOCKER_BUILD_OPTS} -t ${ARCH_IMAGE} .
 
 push-image: $(CONFIG_DOCKER_TARGET) build-image
 	@echo "Pushing the $(IMG) docker image for $(LOCAL_ARCH)..."
@@ -258,8 +258,8 @@ multiarch-image: $(CONFIG_DOCKER_TARGET)
 ############################################################
 # clean section
 ############################################################
-clean:
-	rm -rf bin
+#clean:
+#	rm -rf bin
 
 ############################################################
 # CSV section
