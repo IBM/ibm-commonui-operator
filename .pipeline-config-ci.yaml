@@ -45,7 +45,7 @@ tasks:
           export ARCH="amd64"
           export GIT_BRANCH="$(get_env git-branch)"
           export GIT_COMMIT="$(get_env git-commit)"
-          export BUILD_TAG=$(cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
+          export BUILD_TAG=$(cat ./version/version.go | grep "Version =" | awk '{ print $3}' | tr -d '"')
           source build_scripts/setup_env.sh
           source build_scripts/build_image.sh
       - name: sign-artifact
