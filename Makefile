@@ -135,7 +135,6 @@ else
     $(error "This system's OS $(LOCAL_OS) isn't recognized/supported")
 endif
 
-ARCH := $(shell uname -m)
 LOCAL_ARCH := "amd64"
 ifeq ($(ARCH),x86_64)
     LOCAL_ARCH="amd64"
