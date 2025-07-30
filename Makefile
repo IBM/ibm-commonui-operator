@@ -16,8 +16,6 @@
 # Override this variable in CI env.
 BUILD_LOCALLY ?= 0
 
--include $(shell curl -so .build-harness -H "Authorization: token $(GITHUB_TOKEN)" -H "Accept: application/vnd.github.v3.raw" "https://raw.github.ibm.com/ICP-DevOps/build-harness/master/templates/Makefile.build-harness"; echo .build-harness)
-
 OPERATOR_SDK ?= $(shell which operator-sdk)
 #CONTROLLER_GEN ?= $(shell which controller-gen)
 KUSTOMIZE ?= $(shell which kustomize)
