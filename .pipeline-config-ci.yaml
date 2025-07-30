@@ -45,7 +45,7 @@ tasks:
           export ARCH="amd64"
           export GIT_BRANCH="$(get_env git-branch)"
           export GIT_COMMIT="$(get_env git-commit)"
-          export BUILD_TAG="$(cat RELEASE_VERSION | tr -d '\n')"
+          export BUILD_TAG=$(cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
           source build_scripts/setup_env.sh
           source build_scripts/build_image.sh
       - name: sign-artifact
@@ -80,7 +80,7 @@ tasks:
           export ARCH="ppc64le"
           export GIT_BRANCH="$(get_env git-branch)"
           export GIT_COMMIT="$(get_env git-commit)"
-          export BUILD_TAG="$(cat RELEASE_VERSION | tr -d '\n')"
+          export BUILD_TAG=$(cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
           source build_scripts/setup_env.sh
           source build_scripts/build_image.sh
       - name: sign-artifact
@@ -115,7 +115,7 @@ tasks:
           export ARCH="s390x"
           export GIT_BRANCH="$(get_env git-branch)"
           export GIT_COMMIT="$(get_env git-commit)"
-          export BUILD_TAG="$(cat RELEASE_VERSION | tr -d '\n')"
+          export BUILD_TAG=$(cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
           source build_scripts/setup_env.sh
           source build_scripts/build_image.sh
       - name: sign-artifact
@@ -153,7 +153,7 @@ tasks:
           cd "$WORKSPACE/$(load_repo app-repo path)"
           export GIT_BRANCH="$(get_env git-branch)"
           export GIT_COMMIT="$(get_env git-commit)"
-          export BUILD_TAG="$(cat RELEASE_VERSION | tr -d '\n')"
+          export BUILD_TAG=$(cat ./version/version.go | grep "Version =" | awk '{ print $$3}' | tr -d '"')
           source build_scripts/setup_env.sh
           source build_scripts/build_multiarch.sh
       - name: sign-artifact
