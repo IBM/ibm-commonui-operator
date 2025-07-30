@@ -21,9 +21,8 @@ echo "Current branch : $GIT_BRANCH"
 echo "Building commit $GIT_COMMIT"
 echo "Using build tag $BUILD_TAG"
 
-echo "CHECKING DOCKER LOGINS"
-cat ~/.docker/config.json
-
+# Login is done via pipeline docker config env variable - also for operator
+# there is no build harness currently
 # Login to root artifactory (to cover both base images and build image)
-make init
-make docker:login DOCKER_REGISTRY=docker-na-public.artifactory.swg-devops.com
+# make init
+# make docker:login DOCKER_REGISTRY=docker-na-public.artifactory.swg-devops.com
