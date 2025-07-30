@@ -1,11 +1,11 @@
 echo "Pushing multi-arch image"
 
 #make docker:manifest-tool
-export MANIFEST_TOOL ?= ./manifest-tool
-export MANIFEST_TOOL_VERSION ?= v1.0.3
-export MANIFEST_TOOL_OS ?= linux
-export MANIFEST_TOOL_ARCH ?= amd64
-export MANIFEST_TOOL_URL ?= https://github.com/estesp/manifest-tool/releases/download/$MANIFEST_TOOL_VERSION/manifest-tool-$MANIFEST_TOOL_OS-$MANIFEST_TOOL_ARCH
+export MANIFEST_TOOL=./manifest-tool
+export MANIFEST_TOOL_VERSION=v1.0.3
+export MANIFEST_TOOL_OS=linux
+export MANIFEST_TOOL_ARCH=amd64
+export MANIFEST_TOOL_URL=https://github.com/estesp/manifest-tool/releases/download/$MANIFEST_TOOL_VERSION/manifest-tool-$MANIFEST_TOOL_OS-$MANIFEST_TOOL_ARCH
 
 echo "Installing manifest-tool $MANIFEST_TOOL_VERSION ($MANIFEST_TOOL_OS-$MANIFEST_TOOL_ARCH) from $MANIFEST_TOOL_URL" && \
 curl '-#' -fL -o $MANIFEST_TOOL $MANIFEST_TOOL_URL && \
