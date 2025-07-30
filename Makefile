@@ -227,9 +227,14 @@ build-local:
 ############################################################
 build-push-image: build-image push-image
 
-build-image: $(CONFIG_DOCKER_TARGET) build
+# build-image: $(CONFIG_DOCKER_TARGET) build
+# 	@echo "Building the $(IMG) docker image for $(LOCAL_ARCH)..."
+# 	#@docker build -t $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-$(LOCAL_ARCH)" -f Dockerfile .
+# 	@docker build -t $(ARCH_IMAGE) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(ARCH_IMAGE)" -f Dockerfile .
+
+build-image: build
 	@echo "Building the $(IMG) docker image for $(LOCAL_ARCH)..."
-	@docker build -t $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-$(LOCAL_ARCH)" -f Dockerfile .
+	@docker build -t $(ARCH_IMAGE) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(ARCH_IMAGE)" -f Dockerfile .
 
 push-image: $(CONFIG_DOCKER_TARGET) build-image
 	@echo "Pushing the $(IMG) docker image for $(LOCAL_ARCH)..."
