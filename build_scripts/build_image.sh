@@ -8,11 +8,11 @@ echo "================================================="
 echo "Installing Go                                    "
 echo "================================================="
 export GO_VERSION=1.23.11
-wget https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
+wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
 tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin
 go version
-go install goimports
+go install golang.org/x/tools/cmd/goimports@latest
 
 echo "================================================="
 echo "BUILDING IMAGE                                   "
