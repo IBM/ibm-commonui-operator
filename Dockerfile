@@ -1,3 +1,25 @@
+# Build the manager binary
+FROM docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-dockerhub-docker-remote/golang:latest AS builder
+ARG GOARCH
+
+WORKDIR /workspace
+# Copy the Go Modules manifests
+COPY go.mod go.mod
+COPY go.sum go.sum
+# cache deps before building and copying source so that we don't need to re-download as much
+# and so that source changes don't invalidate our downloaded layer
+RUN go mod download
+
+# Copy the go source
+COPY main.go main.go
+COPY api/ api/
+COPY apis/ apis/
+COPY controllers/ controllers/
+COPY version/ version/
+
+# Build
+RUN CGO_ENABLED=0 GOOS=linux GOARCH=$GOARCH GO111MODULE=on go build -a -o ibm-commonui-operator main.go
+
 FROM docker-na-public.artifactory.swg-devops.com/hyc-cloud-private-edge-docker-local/build-images/ubi9-minimal:latest
 
 ARG IMAGE_NAME
@@ -37,7 +59,7 @@ ENV BINARY=/usr/local/bin/ibm-commonui-operator \
   USER_NAME=ibm-commonui-operator
 
 # install the binary
-COPY build/_output/bin/ibm-commonui-operator ${BINARY}
+COPY --from=builder /workspace/ibm-commonui-operator ${BINARY}
 
 # copy licenses
 RUN mkdir /licenses
