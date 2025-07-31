@@ -5,6 +5,15 @@ export NODE_OPTIONS="--max_old_space_size=4096 --openssl-legacy-provider"
 env
 
 echo "================================================="
+echo "Installing Go                                    "
+echo "================================================="
+export GO_VERSION=1.23.11
+wget https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
+tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
+export PATH=$PATH:/usr/local/go/bin
+go version
+
+echo "================================================="
 echo "BUILDING IMAGE                                   "
 echo "================================================="
 # Turn lint off for now - make install lint image

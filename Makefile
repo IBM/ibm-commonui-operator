@@ -228,7 +228,7 @@ build-push-image: build-image push-image
 # 	#@docker build -t $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-$(LOCAL_ARCH)" -f Dockerfile .
 # 	@docker build -t $(ARCH_IMAGE) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(ARCH_IMAGE)" -f Dockerfile .
 
-build-image:
+build-image: fmt vet build-binary
 	@echo "building image -> docker buildx build --platform linux/${ARCH} -f Dockerfile --load ${DOCKER_BUILD_OPTS} -t ${ARCH_IMAGE} ."
 	docker buildx build --platform linux/${ARCH} -f Dockerfile --load ${DOCKER_BUILD_OPTS} -t ${ARCH_IMAGE} .
 
