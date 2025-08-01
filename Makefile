@@ -16,6 +16,7 @@
 # Override this variable in CI env.
 BUILD_LOCALLY ?= 0
 
+
 OPERATOR_SDK ?= $(shell which operator-sdk)
 #CONTROLLER_GEN ?= $(shell which controller-gen)
 KUSTOMIZE ?= $(shell which kustomize)
@@ -155,8 +156,7 @@ $(eval BUILD_DATE := $(shell date +%m/%d@%H:%M:%S))
 $(eval GIT_COMMIT := $(shell git rev-parse --short HEAD))
 $(eval VCS_REF := $(GIT_COMMIT))
 IMAGE_RELEASE=$(VCS_REF)
-GIT_REMOTE_URL=https://github.com/IBM/ibm-commonui-operator
-$(eval DOCKER_BUILD_OPTS := --build-arg "GOARCH=$(LOCAL_ARCH)" --build-arg "IMAGE_NAME=$(IMAGE_NAME)" --build-arg "IMAGE_DISPLAY_NAME=$(IMAGE_DISPLAY_NAME)" --build-arg "IMAGE_MAINTAINER=$(IMAGE_MAINTAINER)" --build-arg "IMAGE_VENDOR=$(IMAGE_VENDOR)" --build-arg "IMAGE_VERSION=$(IMAGE_VERSION)" --build-arg "IMAGE_RELEASE=$(IMAGE_RELEASE)" --build-arg "IMAGE_DESCRIPTION=$(IMAGE_DESCRIPTION)" --build-arg "IMAGE_SUMMARY=$(IMAGE_SUMMARY)" --build-arg "IMAGE_OPENSHIFT_TAGS=$(IMAGE_OPENSHIFT_TAGS)" --build-arg "VCS_REF=$(VCS_REF)" --build-arg "VCS_URL=$(GIT_REMOTE_URL)" --build-arg "SELF_METER_IMAGE_TAG=$(SELF_METER_IMAGE_TAG)")
+$(eval DOCKER_BUILD_OPTS := --build-arg "GOARCH=$(LOCAL_ARCH)" --build-arg "IMAGE_NAME=$(IMAGE_NAME)" --build-arg "IMAGE_DISPLAY_NAME=$(IMAGE_DISPLAY_NAME)" --build-arg "IMAGE_MAINTAINER=$(IMAGE_MAINTAINER)" --build-arg "IMAGE_VENDOR=$(IMAGE_VENDOR)" --build-arg "IMAGE_VERSION=$(IMAGE_VERSION)" --build-arg "IMAGE_RELEASE=$(IMAGE_RELEASE)" --build-arg "IMAGE_DESCRIPTION=$(IMAGE_DESCRIPTION)" --build-arg "IMAGE_SUMMARY=$(IMAGE_SUMMARY)" --build-arg "IMAGE_OPENSHIFT_TAGS=$(IMAGE_OPENSHIFT_TAGS)" --build-arg "VCS_REF=$(VCS_REF)" --build-arg "SELF_METER_IMAGE_TAG=$(SELF_METER_IMAGE_TAG)")
 
 ifeq ($(BUILD_LOCALLY),1)
 	ifneq ("$(realpath $(DEST))", "$(realpath $(PWD))")
