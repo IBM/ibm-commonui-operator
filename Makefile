@@ -12,10 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-
 # This repo is build locally for dev/test by default;
 # Override this variable in CI env.
-BUILD_LOCALLY ?= 1
+BUILD_LOCALLY ?= 0
+
 
 OPERATOR_SDK ?= $(shell which operator-sdk)
 #CONTROLLER_GEN ?= $(shell which controller-gen)
@@ -136,7 +136,6 @@ else
     $(error "This system's OS $(LOCAL_OS) isn't recognized/supported")
 endif
 
-ARCH := $(shell uname -m)
 LOCAL_ARCH := "amd64"
 ifeq ($(ARCH),x86_64)
     LOCAL_ARCH="amd64"
@@ -144,8 +143,8 @@ else ifeq ($(ARCH),ppc64le)
     LOCAL_ARCH="ppc64le"
 else ifeq ($(ARCH),s390x)
     LOCAL_ARCH="s390x"
-else
-    $(error "This system's ARCH $(ARCH) isn't recognized/supported")
+# else
+#     $(error "This system's ARCH $(ARCH) isn't recognized/supported")
 endif
 
 IMAGE_NAME=$(IMG)
@@ -161,11 +160,12 @@ $(eval BUILD_DATE := $(shell date +%m/%d@%H:%M:%S))
 $(eval GIT_COMMIT := $(shell git rev-parse --short HEAD))
 $(eval VCS_REF := $(GIT_COMMIT))
 IMAGE_RELEASE=$(VCS_REF)
-GIT_REMOTE_URL = $(shell git config --get remote.origin.url)
-$(eval DOCKER_BUILD_OPTS := --build-arg "IMAGE_NAME=$(IMAGE_NAME)" --build-arg "IMAGE_DISPLAY_NAME=$(IMAGE_DISPLAY_NAME)" --build-arg "IMAGE_MAINTAINER=$(IMAGE_MAINTAINER)" --build-arg "IMAGE_VENDOR=$(IMAGE_VENDOR)" --build-arg "IMAGE_VERSION=$(IMAGE_VERSION)" --build-arg "IMAGE_RELEASE=$(IMAGE_RELEASE)" --build-arg "IMAGE_DESCRIPTION=$(IMAGE_DESCRIPTION)" --build-arg "IMAGE_SUMMARY=$(IMAGE_SUMMARY)" --build-arg "IMAGE_OPENSHIFT_TAGS=$(IMAGE_OPENSHIFT_TAGS)" --build-arg "VCS_REF=$(VCS_REF)" --build-arg "VCS_URL=$(GIT_REMOTE_URL)" --build-arg "SELF_METER_IMAGE_TAG=$(SELF_METER_IMAGE_TAG)")
+$(eval DOCKER_BUILD_OPTS := --build-arg "GOARCH=$(LOCAL_ARCH)" --build-arg "IMAGE_NAME=$(IMAGE_NAME)" --build-arg "IMAGE_DISPLAY_NAME=$(IMAGE_DISPLAY_NAME)" --build-arg "IMAGE_MAINTAINER=$(IMAGE_MAINTAINER)" --build-arg "IMAGE_VENDOR=$(IMAGE_VENDOR)" --build-arg "IMAGE_VERSION=$(IMAGE_VERSION)" --build-arg "IMAGE_RELEASE=$(IMAGE_RELEASE)" --build-arg "IMAGE_DESCRIPTION=$(IMAGE_DESCRIPTION)" --build-arg "IMAGE_SUMMARY=$(IMAGE_SUMMARY)" --build-arg "IMAGE_OPENSHIFT_TAGS=$(IMAGE_OPENSHIFT_TAGS)" --build-arg "VCS_REF=$(VCS_REF)" --build-arg "SELF_METER_IMAGE_TAG=$(SELF_METER_IMAGE_TAG)")
 
-ifneq ("$(realpath $(DEST))", "$(realpath $(PWD))")
-    $(error Please run 'make' from $(DEST). Current directory is $(PWD))
+ifeq ($(BUILD_LOCALLY),1)
+	ifneq ("$(realpath $(DEST))", "$(realpath $(PWD))")
+		$(error Please run 'make' from $(DEST). Current directory is $(PWD))
+	endif
 endif
 
 include common/Makefile.common.mk
@@ -227,9 +227,14 @@ build-local:
 ############################################################
 build-push-image: build-image push-image
 
-build-image: $(CONFIG_DOCKER_TARGET) build
-	@echo "Building the $(IMG) docker image for $(LOCAL_ARCH)..."
-	@docker build -t $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-$(LOCAL_ARCH)" -f Dockerfile .
+# build-image: $(CONFIG_DOCKER_TARGET) build
+# 	@echo "Building the $(IMG) docker image for $(LOCAL_ARCH)..."
+# 	#@docker build -t $(REGISTRY)/$(IMG)-$(LOCAL_ARCH):$(VERSION) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(IMAGE_NAME)-$(LOCAL_ARCH)" -f Dockerfile .
+# 	@docker build -t $(ARCH_IMAGE) $(DOCKER_BUILD_OPTS) --build-arg "IMAGE_NAME_ARCH=$(ARCH_IMAGE)" -f Dockerfile .
+
+build-image: fmt vet build-binary
+	@echo "building image -> docker buildx build --platform linux/${ARCH} -f Dockerfile --load ${DOCKER_BUILD_OPTS} -t ${ARCH_IMAGE} ."
+	docker buildx build --platform linux/${ARCH} -f Dockerfile --load ${DOCKER_BUILD_OPTS} -t ${ARCH_IMAGE} .
 
 push-image: $(CONFIG_DOCKER_TARGET) build-image
 	@echo "Pushing the $(IMG) docker image for $(LOCAL_ARCH)..."
