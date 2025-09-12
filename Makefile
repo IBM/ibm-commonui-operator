@@ -16,7 +16,6 @@
 # Override this variable in CI env.
 BUILD_LOCALLY ?= 0
 
-
 OPERATOR_SDK ?= $(shell which operator-sdk)
 #CONTROLLER_GEN ?= $(shell which controller-gen)
 KUSTOMIZE ?= $(shell which kustomize)
