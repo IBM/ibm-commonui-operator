@@ -9,12 +9,16 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: commonwebuis.operators.ibm.com
-    {{- with .Values.cpfs.labels }}
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
-    {{- with .Values.cpfs.clusterLabels }}
-      {{- toYaml . | nindent 4 }}
-    {{- end }}
+    {{- if .Values.cpfs.labels }}
+      {{- with .Values.cpfs.labels }}
+        {{- toYaml . | nindent 4 }}
+      {{- end }}
+    {{- end}}
+    {{- if .Values.cpfs.clusterLabels }}
+      {{- with .Values.cpfs.clusterLabels }}
+        {{- toYaml . | nindent 4 }}
+      {{- end }}
+    {{- end}}
 spec:
   group: operators.ibm.com
   names:
