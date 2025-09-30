@@ -18,9 +18,6 @@ metadata:
 {{- $watchNamespaces = append $watchNamespaces .Values.global.instanceNamespace -}}
 {{- end -}}
 {{- $watchNamespaces = prepend $watchNamespaces .Values.global.operatorNamespace -}}
-{{- if .Values.cpfs.labels }}
-  {{- $labels := .Values.cpfs.labels }}
-{{- end }}
 {{- range $namespace := $watchNamespaces | uniq }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
@@ -30,11 +27,11 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     component-id: {{$.Chart.Name}}
-    {{- if .Values.cpfs.labels }}
-      {{- with $labels }}
+    {{- if $.Values.cpfs.labels }}
+      {{- with $.Values.cpfs.labels }}
         {{- toYaml . | nindent 4 }}
       {{- end }}
-    {{- end }}
+    {{- end}}
   name: ibm-commonui-operator
   namespace: {{$namespace}}
 rules:
@@ -255,11 +252,11 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     component-id: {{$.Chart.Name}}
-    {{- if .Values.cpfs.labels }}
-      {{- with $labels }}
+    {{- if $.Values.cpfs.labels }}
+      {{- with $.Values.cpfs.labels }}
         {{- toYaml . | nindent 4 }}
       {{- end }}
-    {{- end }}
+    {{- end}}
 subjects:
 - kind: ServiceAccount
   name: ibm-commonui-operator
