@@ -7,15 +7,17 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/managed-by: ibm-commonui-operator
     app.kubernetes.io/name: navconfigurations.foundation.ibm.com
-    {{- if .Values.cpfs.labels }}
-      {{- with .Values.cpfs.labels }}
-        {{- toYaml . | nindent 4 }}
-      {{- end }}
-    {{- end}}
-    {{- if .Values.cpfs.clusterLabels }}
-      {{- with .Values.cpfs.clusterLabels }}
-        {{- toYaml . | nindent 4 }}
-      {{- end }}
+    {{- if .Values.cpfs }}
+      {{- if .Values.cpfs.labels }}
+        {{- with .Values.cpfs.labels }}
+          {{- toYaml . | nindent 4 }}
+        {{- end }}
+      {{- end}}
+      {{- if .Values.cpfs.clusterLabels }}
+        {{- with .Values.cpfs.clusterLabels }}
+          {{- toYaml . | nindent 4 }}
+        {{- end }}
+      {{- end}}
     {{- end}}
 spec:
   group: foundation.ibm.com

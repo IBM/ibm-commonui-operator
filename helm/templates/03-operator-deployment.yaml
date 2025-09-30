@@ -8,10 +8,12 @@ metadata:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
     component-id: {{.Chart.Name}}
-    {{- if .Values.cpfs.labels }}
-      {{- with .Values.cpfs.labels }}
-        {{- toYaml . | nindent 4 }}
-      {{- end }}
+    {{- if .Values.cpfs }}
+      {{- if .Values.cpfs.labels }}
+        {{- with .Values.cpfs.labels }}
+          {{- toYaml . | nindent 4 }}
+        {{- end }}
+      {{- end}}
     {{- end}}
   annotations:
     packageName: ibm-commonui-operator-app
