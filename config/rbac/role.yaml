@@ -79,13 +79,6 @@ rules:
   - update
   - watch
 - apiGroups:
-  - monitoring.coreos.com
-  resources:
-  - servicemonitors
-  verbs:
-  - get
-  - create
-- apiGroups:
   - apps
   resourceNames:
   - common-webui
