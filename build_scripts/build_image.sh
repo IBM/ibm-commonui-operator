@@ -7,7 +7,7 @@ env
 echo "================================================="
 echo "Installing Go                                    "
 echo "================================================="
-export GO_VERSION=1.23.11
+export GO_VERSION=1.25.4
 wget -q https://go.dev/dl/go$GO_VERSION.linux-amd64.tar.gz
 tar -C /usr/local -xzf go$GO_VERSION.linux-amd64.tar.gz
 export PATH=$PATH:/usr/local/go/bin:$HOME/go/bin
