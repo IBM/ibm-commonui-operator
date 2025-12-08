@@ -497,7 +497,7 @@ func IsCertificateEqual(oldCertificate, newCertificate *certmgr.Certificate) boo
 }
 
 // Use DeepEqual to determine if 2 service accounts are equal.
-// Check metadata.
+// Check metadata and AutomountServiceAccountToken.
 // If there are any differences, return false. Otherwise, return true.
 func IsServiceAccountEqual(oldSA, newSA *corev1.ServiceAccount) bool {
 	logger := log.WithValues("func", "IsServiceAccountEqual")
@@ -511,6 +511,13 @@ func IsServiceAccountEqual(oldSA, newSA *corev1.ServiceAccount) bool {
 		logger.Info("Labels not equal",
 			"old", fmt.Sprintf("%v", oldSA.ObjectMeta.Labels),
 			"new", fmt.Sprintf("%v", newSA.ObjectMeta.Labels))
+		return false
+	}
+
+	if !reflect.DeepEqual(oldSA.AutomountServiceAccountToken, newSA.AutomountServiceAccountToken) {
+		logger.Info("AutomountServiceAccountToken not equal",
+			"old", oldSA.AutomountServiceAccountToken,
+			"new", newSA.AutomountServiceAccountToken)
 		return false
 	}
 
