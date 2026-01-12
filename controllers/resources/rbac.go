@@ -15,6 +15,7 @@ package resources
 
 import (
 	"context"
+	"reflect"
 
 	corev1 "k8s.io/api/core/v1"
 	rbacv1 "k8s.io/api/rbac/v1"
@@ -34,6 +35,7 @@ const OperandRoleBindingName = "ibm-commonui-operand"
 func getDesiredServiceAccount(client client.Client, instance *operatorsv1alpha1.CommonWebUI) (*corev1.ServiceAccount, error) {
 	reqLogger := log.WithValues("func", "getDesiredServiceAccount", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 
+	automountServiceAccountToken := false
 	serviceAccount := &corev1.ServiceAccount{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      ServiceAccountName,
@@ -44,6 +46,7 @@ func getDesiredServiceAccount(client client.Client, instance *operatorsv1alpha1.
 				"app.kubernetes.io/managed-by": "ibm-commonui-operator",
 			},
 		},
+		AutomountServiceAccountToken: &automountServiceAccountToken,
 	}
 
 	err := controllerutil.SetControllerReference(instance, serviceAccount, client.Scheme())
@@ -94,15 +97,40 @@ func ReconcileServiceAccount(ctx context.Context, client client.Client, instance
 		reqLogger.Info("Comparing current and desired service accounts")
 
 		if !IsServiceAccountEqual(serviceAccount, desiredSA) {
-			reqLogger.Info("Updating service account", "SA.Namespace", desiredSA.Namespace, "SA.Name", desiredSA.Name)
+			reqLogger.Info("Service account has changed", "SA.Namespace", desiredSA.Namespace, "SA.Name", desiredSA.Name)
 
-			serviceAccount.ObjectMeta.Name = desiredSA.ObjectMeta.Name
-			serviceAccount.ObjectMeta.Labels = desiredSA.ObjectMeta.Annotations
+			// Check if AutomountServiceAccountToken has changed - this field is immutable
+			if !reflect.DeepEqual(serviceAccount.AutomountServiceAccountToken, desiredSA.AutomountServiceAccountToken) {
+				reqLogger.Info("AutomountServiceAccountToken has changed, recreating service account",
+					"old", serviceAccount.AutomountServiceAccountToken,
+					"new", desiredSA.AutomountServiceAccountToken)
 
-			err = client.Update(ctx, serviceAccount)
-			if err != nil {
-				reqLogger.Error(err, "Failed to update service account", "SA.Namespace", desiredSA.Namespace, "SA.Name", desiredSA.Name)
-				return err
+				// Delete the existing service account
+				err = client.Delete(ctx, serviceAccount)
+				if err != nil {
+					reqLogger.Error(err, "Failed to delete service account for recreation", "SA.Namespace", desiredSA.Namespace, "SA.Name", desiredSA.Name)
+					return err
+				}
+
+				// Create the new service account
+				err = client.Create(ctx, desiredSA)
+				if err != nil {
+					reqLogger.Error(err, "Failed to recreate service account", "SA.Namespace", desiredSA.Namespace, "SA.Name", desiredSA.Name)
+					return err
+				}
+				*needToRequeue = true
+			} else {
+				// Update other fields (labels, etc.)
+				reqLogger.Info("Updating service account metadata", "SA.Namespace", desiredSA.Namespace, "SA.Name", desiredSA.Name)
+
+				serviceAccount.ObjectMeta.Name = desiredSA.ObjectMeta.Name
+				serviceAccount.ObjectMeta.Labels = desiredSA.ObjectMeta.Labels
+
+				err = client.Update(ctx, serviceAccount)
+				if err != nil {
+					reqLogger.Error(err, "Failed to update service account", "SA.Namespace", desiredSA.Namespace, "SA.Name", desiredSA.Name)
+					return err
+				}
 			}
 		}
 	}
