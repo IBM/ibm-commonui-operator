@@ -28,6 +28,7 @@ metadata:
   labels:
     app.kubernetes.io/instance: ibm-commonui-operator
     app.kubernetes.io/name: ibm-commonui-operator
+    rbac.authorization.k8s.io/aggregate-to-admin: "true"
     component-id: {{$.Chart.Name}}
     {{- if $.Values.cpfs }}
       {{- if $.Values.cpfs.labels }}
