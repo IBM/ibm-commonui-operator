@@ -59,14 +59,6 @@ rules:
   verbs:
   - create
 - apiGroups:
-  - route.openshift.io
-  resources:
-  - routes/status
-  verbs:
-  - get
-  - list
-  - watch
-- apiGroups:
   - rbac.authorization.k8s.io
   resources:
   - roles
@@ -100,7 +92,6 @@ rules:
   - apps
   resources:
   - deployments
-  - daemonsets
   verbs:
   - create
   - delete
@@ -109,14 +100,6 @@ rules:
   - patch
   - update
   - watch
-- apiGroups:
-  - apps
-  resourceNames:
-  - common-webui
-  resources:
-  - deployments/finalizers
-  verbs:
-  - update
 - apiGroups:
   - ""
   resources:
@@ -137,12 +120,9 @@ rules:
   resources:
   - ingresses
   verbs:
-  - create
   - delete
   - get
   - list
-  - patch
-  - update
   - watch
 - apiGroups:
   - operator.ibm.com
