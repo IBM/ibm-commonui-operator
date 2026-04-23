@@ -92,6 +92,24 @@ var CommonContainer = corev1.Container{
 		FailureThreshold:    3,
 	},
 
+	StartupProbe: &corev1.Probe{
+		ProbeHandler: corev1.ProbeHandler{
+			HTTPGet: &corev1.HTTPGetAction{
+				Path: "/readinessProbe",
+				Port: intstr.IntOrString{
+					Type:   intstr.Int,
+					IntVal: 3000,
+				},
+				Scheme: corev1.URISchemeHTTPS,
+			},
+		},
+		InitialDelaySeconds: 10,
+		TimeoutSeconds:      15,
+		PeriodSeconds:       10,
+		SuccessThreshold:    1,
+		FailureThreshold:    30,
+	},
+
 	// CommonEnvVars will be added by the controller
 	Env: []corev1.EnvVar{
 		{
