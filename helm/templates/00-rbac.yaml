@@ -76,7 +76,6 @@ rules:
   resources:
   - pods
   - services
-  - services/finalizers
   - configmaps
   - secrets
   - serviceaccounts
@@ -101,16 +100,9 @@ rules:
   - update
   - watch
 - apiGroups:
-  - ""
-  resources:
-  - pods
-  verbs:
-  - get
-- apiGroups:
   - apps
   resources:
   - replicasets
-  - deployments
   - statefulsets
   verbs:
   - get

@@ -573,7 +573,6 @@ spec:
           resources:
           - pods
           - services
-          - services/finalizers
           - configmaps
           - secrets
           - serviceaccounts
@@ -598,16 +597,9 @@ spec:
           - update
           - watch
         - apiGroups:
-          - ""
-          resources:
-          - pods
-          verbs:
-          - get
-        - apiGroups:
           - apps
           resources:
           - replicasets
-          - deployments
           - statefulsets
           verbs:
           - get
