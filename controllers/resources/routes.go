@@ -49,26 +49,26 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 
 	reqLogger := log.WithValues("func", "ReconcileRoutes", "namespace", instance.Namespace)
 
-	//If zenFrontDoor is enabled in the IM authentication CR, then we will skip route creation and
-	//delete the route if it already exists
-	if ZenFrontDoorEnabled(ctx, client, instance.Namespace) {
-		reqLogger.Info("Zen front door support is enabled - delete route if it exists", "routeName", CnRouteName)
+	// If routes should be suppressed (zenFrontDoor enabled OR ingress.gvk set to "none"),
+	// then we will skip route creation and delete the route if it already exists
+	if ShouldSuppressRoutes(ctx, client, instance.Namespace) {
+		reqLogger.Info("Route management is disabled - delete route if it exists", "routeName", CnRouteName)
 
 		route := &route.Route{}
 		err := client.Get(ctx, types.NamespacedName{Name: CnRouteName, Namespace: instance.Namespace}, route)
 		if err != nil {
 			if errors.IsNotFound(err) {
-				reqLogger.Info("Route not found - deletion is skipped for zen front door support")
+				reqLogger.Info("Route not found - deletion is skipped")
 			} else {
-				reqLogger.Error(err, "Unable to read the route for deletion with zen front door support enabled - route deletion skipped, but reconciliation will proceed")
+				reqLogger.Error(err, "Unable to read the route for deletion - route deletion skipped, but reconciliation will proceed")
 			}
 			return nil //Do not stop reconciliation if there was an error
 		}
 		err = client.Delete(ctx, route)
 		if err != nil {
-			reqLogger.Error(err, "Error deleting route for zen front door support - reconciliation will proceed")
+			reqLogger.Error(err, "Error deleting route - reconciliation will proceed")
 		} else {
-			reqLogger.Info("Route deleted for zen front door support")
+			reqLogger.Info("Route deleted successfully")
 		}
 		return nil //Do not stop reconciliation if there was an error
 	}
@@ -274,25 +274,36 @@ func GetDesiredRoute(client client.Client, instance *operatorsv1alpha1.CommonWeb
 	return r, nil
 }
 
-func ZenFrontDoorEnabled(ctx context.Context, crclient client.Client, namespace string) bool {
-	reqLogger := log.WithValues("func", "zenFrontDoorEnabled", "namespace", namespace)
+// ShouldSuppressRoutes returns true if routes should be suppressed based on Authentication CR settings.
+// Routes are suppressed when:
+// 1. ZenFrontDoor is enabled, OR
+// 2. ingress.gvk is set to "none"
+func ShouldSuppressRoutes(ctx context.Context, crclient client.Client, namespace string) bool {
+	reqLogger := log.WithValues("func", "ShouldSuppressRoutes", "namespace", namespace)
 
 	crList := &im.AuthenticationList{}
 	err := crclient.List(ctx, crList, client.InNamespace(namespace))
 	if err != nil {
-		reqLogger.Error(err, "Error listing authentication CRs - zenFrontDoor is assumed to be false")
+		reqLogger.Error(err, "Error listing authentication CRs - routes will not be suppressed")
 		return false
 	}
 	if len(crList.Items) == 0 {
-		reqLogger.Info("No authentication CRs were found in namespace - zenFrontDoor is assumed to be false")
+		reqLogger.Info("No authentication CRs were found in namespace - routes will not be suppressed")
 		return false
 	}
 	authentication := &crList.Items[0]
 
-	// Set front door from CR
-	zenFrontDoor := authentication.Spec.Config.ZenFrontDoor
+	// Check if routes should be removed based on ingress.gvk setting
+	if authentication.ShouldRemoveRoutes() {
+		reqLogger.Info("Routes are disabled via .spec.config.ingress.gvk=none")
+		return true
+	}
 
-	reqLogger.Info("example-authentication loaded", "zenFrontDoor", zenFrontDoor)
+	// Check if ZenFrontDoor is enabled
+	if authentication.Spec.Config.ZenFrontDoor {
+		reqLogger.Info("Routes are disabled via zenFrontDoor=true")
+		return true
+	}
 
-	return zenFrontDoor
+	return false
 }

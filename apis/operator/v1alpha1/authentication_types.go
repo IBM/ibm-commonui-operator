@@ -110,42 +110,53 @@ type ClientRegistrationSpec struct {
 	Resources     *corev1.ResourceRequirements `json:"resources,omitempty"`
 }
 
+type IngressConfig struct {
+	Hostname *string `json:"hostname,omitempty"`
+	Secret   *string `json:"secret,omitempty"`
+	// GVK specifies which ingress resource type to use. Valid values: "none", "openshift.io/v1/route"
+	// When set to "openshift.io/v1/route", Routes are created when OpenShift is detected.
+	// When set to "none", all Routes are removed.
+	// When unspecified, defaults to "openshift.io/v1/route" behavior.
+	GVK *string `json:"gvk,omitempty"`
+}
+
 type ConfigSpec struct {
-	ClusterCADomain             string `json:"clusterCADomain"`
-	DefaultAdminUser            string `json:"defaultAdminUser"`
-	DefaultAdminPassword        string `json:"defaultAdminPassword"`
-	ScimAdminUser               string `json:"scimAdminUser"`
-	ScimAdminPassword           string `json:"scimAdminPassword"`
-	ClusterName                 string `json:"clusterName"`
-	ClusterInternalAddress      string `json:"clusterInternalAddress"`
-	ClusterExternalAddress      string `json:"clusterExternalAddress"`
-	WLPClientID                 string `json:"wlpClientID"`
-	WLPClientSecret             string `json:"wlpClientSecret"`
-	AuthUniqueHosts             string `json:"authUniqueHosts"`
-	WLPClientRegistrationSecret string `json:"wlpClientRegistrationSecret"`
-	InstallType                 string `json:"installType"`
-	IsOpenshiftEnv              bool   `json:"isOpenshiftEnv"`
-	OpenshiftPort               int32  `json:"openshiftPort"`
-	ICPPort                     int32  `json:"icpPort"`
-	FIPSEnabled                 bool   `json:"fipsEnabled"`
-	ROKSEnabled                 bool   `json:"roksEnabled"`
-	IBMCloudSaas                bool   `json:"ibmCloudSaas,omitempty"`
-	OnPremMultipleDeploy        bool   `json:"onPremMultipleDeploy,omitempty"`
-	SaasClientRedirectUrl       string `json:"saasClientRedirectUrl,omitempty"` //nolint
-	NONCEEnabled                bool   `json:"nonceEnabled"`
-	XFrameDomain                string `json:"xframeDomain,omitempty"`
-	PreferredLogin              string `json:"preferredLogin,omitempty"`
-	ROKSURL                     string `json:"roksURL"`
-	ROKSUserPrefix              string `json:"roksUserPrefix"`
-	EnableImpersonation         bool   `json:"enableImpersonation"`
-	BootstrapUserId             string `json:"bootstrapUserId,omitempty"` //nolint
-	ProviderIssuerURL           string `json:"providerIssuerURL,omitempty"`
-	ClaimsSupported             string `json:"claimsSupported,omitempty"`
-	ClaimsMap                   string `json:"claimsMap,omitempty"`
-	ScopeClaim                  string `json:"scopeClaim,omitempty"`
-	OIDCIssuerURL               string `json:"oidcIssuerURL"`
-	AttrMappingFromConfig       bool   `json:"attrMappingFromConfig,omitempty"`
-	ZenFrontDoor                bool   `json:"zenFrontDoor,omitempty"`
+	ClusterCADomain             string         `json:"clusterCADomain"`
+	DefaultAdminUser            string         `json:"defaultAdminUser"`
+	DefaultAdminPassword        string         `json:"defaultAdminPassword"`
+	ScimAdminUser               string         `json:"scimAdminUser"`
+	ScimAdminPassword           string         `json:"scimAdminPassword"`
+	ClusterName                 string         `json:"clusterName"`
+	ClusterInternalAddress      string         `json:"clusterInternalAddress"`
+	ClusterExternalAddress      string         `json:"clusterExternalAddress"`
+	WLPClientID                 string         `json:"wlpClientID"`
+	WLPClientSecret             string         `json:"wlpClientSecret"`
+	AuthUniqueHosts             string         `json:"authUniqueHosts"`
+	WLPClientRegistrationSecret string         `json:"wlpClientRegistrationSecret"`
+	InstallType                 string         `json:"installType"`
+	IsOpenshiftEnv              bool           `json:"isOpenshiftEnv"`
+	OpenshiftPort               int32          `json:"openshiftPort"`
+	ICPPort                     int32          `json:"icpPort"`
+	FIPSEnabled                 bool           `json:"fipsEnabled"`
+	ROKSEnabled                 bool           `json:"roksEnabled"`
+	IBMCloudSaas                bool           `json:"ibmCloudSaas,omitempty"`
+	OnPremMultipleDeploy        bool           `json:"onPremMultipleDeploy,omitempty"`
+	SaasClientRedirectUrl       string         `json:"saasClientRedirectUrl,omitempty"` //nolint
+	NONCEEnabled                bool           `json:"nonceEnabled"`
+	XFrameDomain                string         `json:"xframeDomain,omitempty"`
+	PreferredLogin              string         `json:"preferredLogin,omitempty"`
+	ROKSURL                     string         `json:"roksURL"`
+	ROKSUserPrefix              string         `json:"roksUserPrefix"`
+	EnableImpersonation         bool           `json:"enableImpersonation"`
+	BootstrapUserId             string         `json:"bootstrapUserId,omitempty"` //nolint
+	ProviderIssuerURL           string         `json:"providerIssuerURL,omitempty"`
+	ClaimsSupported             string         `json:"claimsSupported,omitempty"`
+	ClaimsMap                   string         `json:"claimsMap,omitempty"`
+	ScopeClaim                  string         `json:"scopeClaim,omitempty"`
+	OIDCIssuerURL               string         `json:"oidcIssuerURL"`
+	AttrMappingFromConfig       bool           `json:"attrMappingFromConfig,omitempty"`
+	ZenFrontDoor                bool           `json:"zenFrontDoor,omitempty"`
+	Ingress                     *IngressConfig `json:"ingress,omitempty"`
 }
 
 type ManagedResourceStatus struct {
@@ -257,6 +268,23 @@ type AuthenticationList struct {
 func init() {
 	SchemeBuilder.Register(&Authentication{}, &AuthenticationList{})
 }
+// ShouldManageRoutes returns true if Routes should be created/managed.
+// Returns false when .spec.config.ingress.gvk is set to "none".
+// Returns true when .spec.config.ingress.gvk is set to "openshift.io/v1/route" or unspecified (default).
+func (a *Authentication) ShouldManageRoutes() bool {
+	if a.Spec.Config.Ingress != nil && a.Spec.Config.Ingress.GVK != nil {
+		return *a.Spec.Config.Ingress.GVK != "none"
+	}
+	// Default behavior: manage routes (equivalent to "openshift.io/v1/route")
+	return true
+}
+
+// ShouldRemoveRoutes returns true if all Routes should be removed from the cluster.
+// Returns true when .spec.config.ingress.gvk is set to "none".
+func (a *Authentication) ShouldRemoveRoutes() bool {
+	return !a.ShouldManageRoutes()
+}
+
 
 const AnnotationAuthMigrationComplete string = "authentication.operator.ibm.com/migration-complete"
 const AnnotationAuthRetainMigrationArtifacts string = "authentication.operator.ibm.com/retain-migration-artifacts"
