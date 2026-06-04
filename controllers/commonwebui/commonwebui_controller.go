@@ -461,16 +461,21 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	// Get OPERATOR_NAMESPACE for permission checks
 	operatorNamespace := os.Getenv("OPERATOR_NAMESPACE")
 
+	// Check Ingress permissions (used by both CNCF and OpenShift for legacy cleanup)
+	ingressVerbs := []string{"get", "list", "watch", "delete"}
+	if r.IsCncf {
+		// CNCF clusters need full Ingress permissions
+		ingressVerbs = []string{"get", "list", "watch", "create", "delete", "update", "patch"}
+	}
+	hasIngressAccess, err := res.HasAPIAccess(ctx, r.Client, operatorNamespace, "networking.k8s.io", "ingresses", ingressVerbs)
+	if err != nil {
+		setupLog.Error(err, "Failed to check Ingress permissions for watch setup")
+	} else if !hasIngressAccess {
+		setupLog.Info("Ingress API present but missing required permissions; skipping Ingress watch")
+	}
+
 	//Skip routes when it is cncf
 	if r.IsCncf {
-		// Check if operator has required Ingress permissions for CNCF clusters
-		ingressVerbs := []string{"get", "list", "watch", "create", "delete", "update", "patch"}
-		hasIngressAccess, err := res.HasAPIAccess(ctx, r.Client, operatorNamespace, "networking.k8s.io", "ingresses", ingressVerbs)
-		if err != nil {
-			setupLog.Error(err, "Failed to check Ingress permissions for watch setup")
-		} else if !hasIngressAccess {
-			setupLog.Info("Ingress API present but missing required permissions; skipping Ingress watch")
-		}
 
 		cncfBuilder := ctrl.NewControllerManagedBy(mgr).
 			For(&operatorsv1alpha1.CommonWebUI{}).
@@ -543,7 +548,6 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&corev1.Secret{}).
-		Owns(&netv1.Ingress{}).
 		Owns(&certmgr.Certificate{}).
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.Role{}).
@@ -584,6 +588,12 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if hasRouteAccess && hasCustomHostAccess {
 		setupLog.V(1).Info("Route API present with all required permissions; setting up Route watch")
 		openshiftBuilder.Owns(&route.Route{})
+	}
+
+	// Only add Ingress watch if we have permissions (for legacy ingress cleanup)
+	if hasIngressAccess {
+		setupLog.V(1).Info("Ingress API present with required permissions; setting up Ingress watch for legacy cleanup")
+		openshiftBuilder.Owns(&netv1.Ingress{})
 	}
 
 	return openshiftBuilder.Complete(r)
