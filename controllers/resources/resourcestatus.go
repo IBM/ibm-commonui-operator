@@ -184,8 +184,18 @@ func GetCurrentServiceStatus(ctx context.Context, k8sClient client.Client, insta
 		f: getAllRouteStatus,
 	}
 
+	// Only check Route status if not CNCF, zen front door is disabled, AND we have Route permissions
 	if !isCncf && !ZenFrontDoorEnabled(ctx, k8sClient, instance.Namespace) {
-		statusRetrievals = append(statusRetrievals, routeStatusRetrieval)
+		// Check if operator has Route permissions before trying to get Route status
+		routeVerbs := []string{"get"}
+		hasRouteAccess, err := HasAPIAccess(ctx, k8sClient, instance.Namespace, "route.openshift.io", "routes", routeVerbs)
+		if err != nil {
+			reqLogger.Error(err, "Failed to check Route permissions for status retrieval; skipping Route status")
+		} else if !hasRouteAccess {
+			reqLogger.V(1).Info("Operator does not have Route get permission; skipping Route status")
+		} else {
+			statusRetrievals = append(statusRetrievals, routeStatusRetrieval)
+		}
 	}
 
 	status = v1alpha1.ServiceStatus{
