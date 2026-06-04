@@ -19,7 +19,6 @@ package resources
 import (
 	"context"
 	"fmt"
-	"os"
 
 	route "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -50,12 +49,9 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 
 	reqLogger := log.WithValues("func", "ReconcileRoutes", "namespace", instance.Namespace)
 
-	// Get OPERATOR_NAMESPACE for permission checks
-	operatorNamespace := os.Getenv("OPERATOR_NAMESPACE")
-
-	// Check if operator has required Route permissions
+	// Check if operator has required Route permissions in the instance namespace
 	routeVerbs := []string{"get", "list", "watch", "create", "delete", "update", "patch"}
-	hasRouteAccess, err := HasAPIAccess(ctx, client, operatorNamespace, "route.openshift.io", "routes", routeVerbs)
+	hasRouteAccess, err := HasAPIAccess(ctx, client, instance.Namespace, "route.openshift.io", "routes", routeVerbs)
 	if err != nil {
 		reqLogger.Error(err, "Failed to check Route permissions; skipping Route reconciliation")
 		return nil
@@ -66,7 +62,7 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 	}
 
 	// Also check routes/custom-host subresource permission
-	hasCustomHostAccess, err := HasAPIAccess(ctx, client, operatorNamespace, "route.openshift.io", "routes/custom-host", []string{"create"})
+	hasCustomHostAccess, err := HasAPIAccess(ctx, client, instance.Namespace, "route.openshift.io", "routes/custom-host", []string{"create"})
 	if err != nil {
 		reqLogger.Error(err, "Failed to check routes/custom-host permissions; skipping Route reconciliation")
 		return nil

@@ -458,20 +458,36 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	setupLog := log.WithName("setup")
 	ctx := context.Background()
 
-	// Get OPERATOR_NAMESPACE for permission checks
-	operatorNamespace := os.Getenv("OPERATOR_NAMESPACE")
+	// Get watched namespaces (can be comma-delimited list or empty for cluster-scoped)
+	watchNamespace := os.Getenv("WATCH_NAMESPACE")
+	var watchedNamespaces []string
+	if watchNamespace == "" {
+		// Cluster-scoped: check with empty namespace
+		watchedNamespaces = []string{""}
+	} else {
+		// Namespace-scoped: check all watched namespaces
+		watchedNamespaces = strings.Split(watchNamespace, ",")
+	}
 
-	// Check Ingress permissions (used by both CNCF and OpenShift for legacy cleanup)
+	// Check Ingress permissions in all watched namespaces
 	ingressVerbs := []string{"get", "list", "watch", "delete"}
 	if r.IsCncf {
 		// CNCF clusters need full Ingress permissions
 		ingressVerbs = []string{"get", "list", "watch", "create", "delete", "update", "patch"}
 	}
-	hasIngressAccess, err := res.HasAPIAccess(ctx, r.Client, operatorNamespace, "networking.k8s.io", "ingresses", ingressVerbs)
-	if err != nil {
-		setupLog.Error(err, "Failed to check Ingress permissions for watch setup")
-	} else if !hasIngressAccess {
-		setupLog.Info("Ingress API present but missing required permissions; skipping Ingress watch")
+	hasIngressAccess := true
+	for _, ns := range watchedNamespaces {
+		hasAccess, err := res.HasAPIAccess(ctx, r.Client, ns, "networking.k8s.io", "ingresses", ingressVerbs)
+		if err != nil {
+			setupLog.Error(err, "Failed to check Ingress permissions for watch setup", "namespace", ns)
+			hasIngressAccess = false
+			break
+		}
+		if !hasAccess {
+			setupLog.Info("Ingress API present but missing required permissions; skipping Ingress watch", "namespace", ns)
+			hasIngressAccess = false
+			break
+		}
 	}
 
 	//Skip routes when it is cncf
@@ -519,26 +535,44 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		return cncfBuilder.Complete(r)
 	}
 
-	// For OpenShift clusters, check Route permissions
+	// For OpenShift clusters, check Route permissions in all watched namespaces
 	routeVerbs := []string{"get", "list", "watch", "create", "delete", "update", "patch"}
-	hasRouteAccess, err := res.HasAPIAccess(ctx, r.Client, operatorNamespace, "route.openshift.io", "routes", routeVerbs)
-	if err != nil {
-		setupLog.Error(err, "Failed to check Route permissions for watch setup")
-	} else if !hasRouteAccess {
-		setupLog.Info("Route API present but missing required permissions; skipping Route watch")
+	hasRouteAccess := true
+	for _, ns := range watchedNamespaces {
+		hasAccess, err := res.HasAPIAccess(ctx, r.Client, ns, "route.openshift.io", "routes", routeVerbs)
+		if err != nil {
+			setupLog.Error(err, "Failed to check Route permissions for watch setup", "namespace", ns)
+			hasRouteAccess = false
+			break
+		}
+		if !hasAccess {
+			setupLog.Info("Route API present but missing required permissions; skipping Route watch", "namespace", ns)
+			hasRouteAccess = false
+			break
+		}
 	}
 
-	// Also check routes/custom-host subresource permission
+	// Also check routes/custom-host subresource permission in all watched namespaces
 	hasCustomHostAccess := false
 	if hasRouteAccess {
-		hasCustomHostAccess, err = res.HasAPIAccess(ctx, r.Client, operatorNamespace, "route.openshift.io", "routes/custom-host", []string{"create"})
-		if err != nil {
-			setupLog.Error(err, "Failed to check routes/custom-host permissions for watch setup")
-		} else if !hasCustomHostAccess {
-			setupLog.Info("Route API present but missing routes/custom-host create permission; skipping Route watch")
-			hasRouteAccess = false // Disable route watch if custom-host permission is missing
+		hasCustomHostAccess = true
+		for _, ns := range watchedNamespaces {
+			hasAccess, err := res.HasAPIAccess(ctx, r.Client, ns, "route.openshift.io", "routes/custom-host", []string{"create"})
+			if err != nil {
+				setupLog.Error(err, "Failed to check routes/custom-host permissions for watch setup", "namespace", ns)
+				hasCustomHostAccess = false
+				break
+			}
+			if !hasAccess {
+				setupLog.Info("Route API present but missing routes/custom-host create permission; skipping Route watch", "namespace", ns)
+				hasCustomHostAccess = false
+				break
+			}
+		}
+		if hasCustomHostAccess {
+			setupLog.V(1).Info("Route API present with all required permissions including routes/custom-host in all watched namespaces; setting up Route watch")
 		} else {
-			setupLog.V(1).Info("Route API present with all required permissions including routes/custom-host; setting up Route watch")
+			hasRouteAccess = false // Disable route watch if custom-host permission is missing in any namespace
 		}
 	}
 
