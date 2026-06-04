@@ -455,16 +455,29 @@ func hpaPredicate() predicate.Predicate {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	setupLog := log.WithName("setup")
+	ctx := context.Background()
+
+	// Get OPERATOR_NAMESPACE for permission checks
+	operatorNamespace := os.Getenv("OPERATOR_NAMESPACE")
 
 	//Skip routes when it is cncf
 	if r.IsCncf {
-		return ctrl.NewControllerManagedBy(mgr).
+		// Check if operator has required Ingress permissions for CNCF clusters
+		ingressVerbs := []string{"get", "list", "watch", "create", "delete", "update", "patch"}
+		hasIngressAccess, err := res.HasAPIAccess(ctx, r.Client, operatorNamespace, "networking.k8s.io", "ingresses", ingressVerbs)
+		if err != nil {
+			setupLog.Error(err, "Failed to check Ingress permissions for watch setup")
+		} else if !hasIngressAccess {
+			setupLog.Info("Ingress API present but missing required permissions; skipping Ingress watch")
+		}
+
+		cncfBuilder := ctrl.NewControllerManagedBy(mgr).
 			For(&operatorsv1alpha1.CommonWebUI{}).
 			Owns(&corev1.ConfigMap{}).
 			Owns(&appsv1.Deployment{}).
 			Owns(&corev1.Service{}).
 			Owns(&corev1.Secret{}).
-			Owns(&netv1.Ingress{}).
 			Owns(&certmgr.Certificate{}).
 			Owns(&corev1.ServiceAccount{}).
 			Owns(&rbacv1.Role{}).
@@ -490,11 +503,41 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 							Namespace: a.GetNamespace(),
 						}},
 					}
-				}), builder.WithPredicates(hpaPredicate())).
-			Complete(r)
+				}), builder.WithPredicates(hpaPredicate()))
+
+		// Only add Ingress watch if we have permissions
+		if hasIngressAccess {
+			setupLog.V(1).Info("Ingress API present with required permissions; setting up Ingress watch")
+			cncfBuilder.Owns(&netv1.Ingress{})
+		}
+
+		return cncfBuilder.Complete(r)
 	}
 
-	return ctrl.NewControllerManagedBy(mgr).
+	// For OpenShift clusters, check Route permissions
+	routeVerbs := []string{"get", "list", "watch", "create", "delete", "update", "patch"}
+	hasRouteAccess, err := res.HasAPIAccess(ctx, r.Client, operatorNamespace, "route.openshift.io", "routes", routeVerbs)
+	if err != nil {
+		setupLog.Error(err, "Failed to check Route permissions for watch setup")
+	} else if !hasRouteAccess {
+		setupLog.Info("Route API present but missing required permissions; skipping Route watch")
+	}
+
+	// Also check routes/custom-host subresource permission
+	hasCustomHostAccess := false
+	if hasRouteAccess {
+		hasCustomHostAccess, err = res.HasAPIAccess(ctx, r.Client, operatorNamespace, "route.openshift.io", "routes/custom-host", []string{"create"})
+		if err != nil {
+			setupLog.Error(err, "Failed to check routes/custom-host permissions for watch setup")
+		} else if !hasCustomHostAccess {
+			setupLog.Info("Route API present but missing routes/custom-host create permission; skipping Route watch")
+			hasRouteAccess = false // Disable route watch if custom-host permission is missing
+		} else {
+			setupLog.V(1).Info("Route API present with all required permissions including routes/custom-host; setting up Route watch")
+		}
+	}
+
+	openshiftBuilder := ctrl.NewControllerManagedBy(mgr).
 		For(&operatorsv1alpha1.CommonWebUI{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.Deployment{}).
@@ -502,7 +545,6 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 		Owns(&corev1.Secret{}).
 		Owns(&netv1.Ingress{}).
 		Owns(&certmgr.Certificate{}).
-		Owns(&route.Route{}).
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
@@ -536,6 +578,13 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 						Namespace: a.GetNamespace(),
 					}},
 				}
-			}), builder.WithPredicates(hpaPredicate())).
-		Complete(r)
+			}), builder.WithPredicates(hpaPredicate()))
+
+	// Only add Route watch if we have permissions
+	if hasRouteAccess && hasCustomHostAccess {
+		setupLog.V(1).Info("Route API present with all required permissions; setting up Route watch")
+		openshiftBuilder.Owns(&route.Route{})
+	}
+
+	return openshiftBuilder.Complete(r)
 }

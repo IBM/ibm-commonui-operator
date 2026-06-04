@@ -1,5 +1,8 @@
 ---
 cpfs:
+  # Set to true to manage OpenShift Routes and Ingress resources
+  # When false, Route and Ingress API permissions are excluded from RBAC
+  manageNetworking: true
   imageRegistryNamespaceOperator: cpopen
   imageRegistryNamespaceOperand: cpopen/cpfs
   labels:

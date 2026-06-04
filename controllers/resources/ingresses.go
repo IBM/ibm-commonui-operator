@@ -18,6 +18,7 @@ package resources
 
 import (
 	"context"
+	"os"
 
 	netv1 "k8s.io/api/networking/v1"
 	"k8s.io/apimachinery/pkg/api/errors"
@@ -33,6 +34,21 @@ import (
 
 func ReconcileRemoveIngresses(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI, needToRequeue *bool) {
 	reqLogger := log.WithValues("func", "ReconcileRemoveIngresses")
+
+	// Get OPERATOR_NAMESPACE for permission checks
+	operatorNamespace := os.Getenv("OPERATOR_NAMESPACE")
+
+	// Check if operator has required Ingress permissions
+	ingressVerbs := []string{"get", "list", "watch", "delete"}
+	hasIngressAccess, err := HasAPIAccess(ctx, client, operatorNamespace, "networking.k8s.io", "ingresses", ingressVerbs)
+	if err != nil {
+		reqLogger.Error(err, "Failed to check Ingress permissions; skipping Ingress removal")
+		return
+	}
+	if !hasIngressAccess {
+		reqLogger.Info("Operator does not have required Ingress permissions; skipping Ingress removal")
+		return
+	}
 
 	//No error checking as we will just make a best attempt to remove the legacy ingresses
 	//Do not fail based on inability to delete the ingresses

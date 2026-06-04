@@ -19,6 +19,7 @@ package resources
 import (
 	"context"
 	"fmt"
+	"os"
 
 	route "github.com/openshift/api/route/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -49,6 +50,32 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 
 	reqLogger := log.WithValues("func", "ReconcileRoutes", "namespace", instance.Namespace)
 
+	// Get OPERATOR_NAMESPACE for permission checks
+	operatorNamespace := os.Getenv("OPERATOR_NAMESPACE")
+
+	// Check if operator has required Route permissions
+	routeVerbs := []string{"get", "list", "watch", "create", "delete", "update", "patch"}
+	hasRouteAccess, err := HasAPIAccess(ctx, client, operatorNamespace, "route.openshift.io", "routes", routeVerbs)
+	if err != nil {
+		reqLogger.Error(err, "Failed to check Route permissions; skipping Route reconciliation")
+		return nil
+	}
+	if !hasRouteAccess {
+		reqLogger.Info("Operator does not have required Route permissions; skipping Route reconciliation")
+		return nil
+	}
+
+	// Also check routes/custom-host subresource permission
+	hasCustomHostAccess, err := HasAPIAccess(ctx, client, operatorNamespace, "route.openshift.io", "routes/custom-host", []string{"create"})
+	if err != nil {
+		reqLogger.Error(err, "Failed to check routes/custom-host permissions; skipping Route reconciliation")
+		return nil
+	}
+	if !hasCustomHostAccess {
+		reqLogger.Info("Operator does not have routes/custom-host create permission; skipping Route reconciliation")
+		return nil
+	}
+
 	//If zenFrontDoor is enabled in the IM authentication CR, then we will skip route creation and
 	//delete the route if it already exists
 	if ZenFrontDoorEnabled(ctx, client, instance.Namespace) {
@@ -75,7 +102,7 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 
 	//Get the destination cert for the route
 	secret := &corev1.Secret{}
-	err := client.Get(ctx, types.NamespacedName{Name: UICertSecretName, Namespace: instance.Namespace}, secret)
+	err = client.Get(ctx, types.NamespacedName{Name: UICertSecretName, Namespace: instance.Namespace}, secret)
 
 	if err != nil {
 		if errors.IsNotFound(err) {

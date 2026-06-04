@@ -17,8 +17,13 @@
 package resources
 
 import (
+	"context"
+	"fmt"
 	"os"
 	"strconv"
+
+	authorizationv1 "k8s.io/api/authorization/v1"
+	"sigs.k8s.io/controller-runtime/pkg/client"
 )
 
 // Returns the labels associated with the resource being created
@@ -149,4 +154,34 @@ func MergeMap(in map[string]string, mergeMap map[string]string) map[string]strin
 		in[k] = v
 	}
 	return in
+}
+
+// HasAPIAccess uses SelfSubjectAccessReviews to confirm whether the Operator's ServiceAccount has authorization to use a
+// list of verbs on a given apiversion and kind.
+func HasAPIAccess(ctx context.Context, client client.Client, namespace string, group string, resource string, verbs []string) (hasAccess bool, err error) {
+	reqLogger := log.WithValues("namespace", namespace, "group", group, "resource", resource, "verbs", verbs)
+	for _, verb := range verbs {
+		ssar := &authorizationv1.SelfSubjectAccessReview{
+			Spec: authorizationv1.SelfSubjectAccessReviewSpec{
+				ResourceAttributes: &authorizationv1.ResourceAttributes{
+					Namespace: namespace,
+					Verb:      verb,
+					Group:     group,
+					Resource:  resource,
+				},
+			},
+		}
+		reqLogger.V(1).Info("Creating SSAR", "namespace", namespace, "verb", verb, "group", group, "resource", resource)
+		if err = client.Create(ctx, ssar); err != nil {
+			reqLogger.Error(err, "Failed to make access check query")
+			return false, fmt.Errorf("failed to make access check query: %w", err)
+		}
+		if !ssar.Status.Allowed {
+			reqLogger.Info("Operator ServiceAccount is not authorized", "allowed", ssar.Status.Allowed, "denied", ssar.Status.Denied, "reason", ssar.Status.Reason)
+			return
+		}
+	}
+
+	reqLogger.V(1).Info("Operator ServiceAccount is authorized")
+	return true, nil
 }
