@@ -40,6 +40,7 @@ metadata:
   name: ibm-commonui-operator
   namespace: {{$namespace}}
 rules:
+{{- if $.Values.cpfs.manageNetworking }}
 - apiGroups:
   - route.openshift.io
   resources:
@@ -58,6 +59,7 @@ rules:
   - routes/custom-host
   verbs:
   - create
+{{- end }}
 - apiGroups:
   - rbac.authorization.k8s.io
   resources:
@@ -107,6 +109,7 @@ rules:
   verbs:
   - get
   - list
+{{- if $.Values.cpfs.manageNetworking }}
 - apiGroups:
   - networking.k8s.io
   resources:
@@ -116,6 +119,7 @@ rules:
   - get
   - list
   - watch
+{{- end }}
 - apiGroups:
   - operator.ibm.com
   resources:

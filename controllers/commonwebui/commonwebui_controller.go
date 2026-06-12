@@ -455,16 +455,50 @@ func hpaPredicate() predicate.Predicate {
 
 // SetupWithManager sets up the controller with the Manager.
 func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
+	setupLog := log.WithName("setup")
+	ctx := context.Background()
+
+	// Get watched namespaces (can be comma-delimited list or empty for cluster-scoped)
+	watchNamespace := os.Getenv("WATCH_NAMESPACE")
+	var watchedNamespaces []string
+	if watchNamespace == "" {
+		// Cluster-scoped: check with empty namespace
+		watchedNamespaces = []string{""}
+	} else {
+		// Namespace-scoped: check all watched namespaces
+		watchedNamespaces = strings.Split(watchNamespace, ",")
+	}
+
+	// Check Ingress permissions in all watched namespaces
+	ingressVerbs := []string{"get", "list", "watch", "delete"}
+	if r.IsCncf {
+		// CNCF clusters need full Ingress permissions
+		ingressVerbs = []string{"get", "list", "watch", "create", "delete", "update", "patch"}
+	}
+	hasIngressAccess := true
+	for _, ns := range watchedNamespaces {
+		hasAccess, err := res.HasAPIAccess(ctx, r.Client, ns, "networking.k8s.io", "ingresses", ingressVerbs)
+		if err != nil {
+			setupLog.Error(err, "Failed to check Ingress permissions for watch setup", "namespace", ns)
+			hasIngressAccess = false
+			break
+		}
+		if !hasAccess {
+			setupLog.Info("Ingress API present but missing required permissions; skipping Ingress watch", "namespace", ns)
+			hasIngressAccess = false
+			break
+		}
+	}
 
 	//Skip routes when it is cncf
 	if r.IsCncf {
-		return ctrl.NewControllerManagedBy(mgr).
+
+		cncfBuilder := ctrl.NewControllerManagedBy(mgr).
 			For(&operatorsv1alpha1.CommonWebUI{}).
 			Owns(&corev1.ConfigMap{}).
 			Owns(&appsv1.Deployment{}).
 			Owns(&corev1.Service{}).
 			Owns(&corev1.Secret{}).
-			Owns(&netv1.Ingress{}).
 			Owns(&certmgr.Certificate{}).
 			Owns(&corev1.ServiceAccount{}).
 			Owns(&rbacv1.Role{}).
@@ -490,19 +524,65 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 							Namespace: a.GetNamespace(),
 						}},
 					}
-				}), builder.WithPredicates(hpaPredicate())).
-			Complete(r)
+				}), builder.WithPredicates(hpaPredicate()))
+
+		// Only add Ingress watch if we have permissions
+		if hasIngressAccess {
+			setupLog.V(1).Info("Ingress API present with required permissions; setting up Ingress watch")
+			cncfBuilder.Owns(&netv1.Ingress{})
+		}
+
+		return cncfBuilder.Complete(r)
 	}
 
-	return ctrl.NewControllerManagedBy(mgr).
+	// For OpenShift clusters, check Route permissions in all watched namespaces
+	routeVerbs := []string{"get", "list", "watch", "create", "delete", "update", "patch"}
+	hasRouteAccess := true
+	for _, ns := range watchedNamespaces {
+		hasAccess, err := res.HasAPIAccess(ctx, r.Client, ns, "route.openshift.io", "routes", routeVerbs)
+		if err != nil {
+			setupLog.Error(err, "Failed to check Route permissions for watch setup", "namespace", ns)
+			hasRouteAccess = false
+			break
+		}
+		if !hasAccess {
+			setupLog.Info("Route API present but missing required permissions; skipping Route watch", "namespace", ns)
+			hasRouteAccess = false
+			break
+		}
+	}
+
+	// Also check routes/custom-host subresource permission in all watched namespaces
+	hasCustomHostAccess := false
+	if hasRouteAccess {
+		hasCustomHostAccess = true
+		for _, ns := range watchedNamespaces {
+			hasAccess, err := res.HasAPIAccess(ctx, r.Client, ns, "route.openshift.io", "routes/custom-host", []string{"create"})
+			if err != nil {
+				setupLog.Error(err, "Failed to check routes/custom-host permissions for watch setup", "namespace", ns)
+				hasCustomHostAccess = false
+				break
+			}
+			if !hasAccess {
+				setupLog.Info("Route API present but missing routes/custom-host create permission; skipping Route watch", "namespace", ns)
+				hasCustomHostAccess = false
+				break
+			}
+		}
+		if hasCustomHostAccess {
+			setupLog.V(1).Info("Route API present with all required permissions including routes/custom-host in all watched namespaces; setting up Route watch")
+		} else {
+			hasRouteAccess = false // Disable route watch if custom-host permission is missing in any namespace
+		}
+	}
+
+	openshiftBuilder := ctrl.NewControllerManagedBy(mgr).
 		For(&operatorsv1alpha1.CommonWebUI{}).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
 		Owns(&corev1.Secret{}).
-		Owns(&netv1.Ingress{}).
 		Owns(&certmgr.Certificate{}).
-		Owns(&route.Route{}).
 		Owns(&corev1.ServiceAccount{}).
 		Owns(&rbacv1.Role{}).
 		Owns(&rbacv1.RoleBinding{}).
@@ -536,6 +616,19 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 						Namespace: a.GetNamespace(),
 					}},
 				}
-			}), builder.WithPredicates(hpaPredicate())).
-		Complete(r)
+			}), builder.WithPredicates(hpaPredicate()))
+
+	// Only add Route watch if we have permissions
+	if hasRouteAccess && hasCustomHostAccess {
+		setupLog.V(1).Info("Route API present with all required permissions; setting up Route watch")
+		openshiftBuilder.Owns(&route.Route{})
+	}
+
+	// Only add Ingress watch if we have permissions (for legacy ingress cleanup)
+	if hasIngressAccess {
+		setupLog.V(1).Info("Ingress API present with required permissions; setting up Ingress watch for legacy cleanup")
+		openshiftBuilder.Owns(&netv1.Ingress{})
+	}
+
+	return openshiftBuilder.Complete(r)
 }
