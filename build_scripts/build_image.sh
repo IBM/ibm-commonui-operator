@@ -31,7 +31,7 @@ echo "================================================="
 echo "Pushing $ARCH_IMAGE"
 #skopeo copy --dest-creds=$DOCKER_USER:$DOCKER_PASS --format=v2s2 docker-daemon:$ARCH_IMAGE docker://$ARCH_IMAGE
 #docker push $ARCH_IMAGE
-skopeo copy --format v2s2 --dest-creds=$DOCKER_USER:$DOCKER_PASS docker-daemon:$ARCH_IMAGE docker://$ARCH_IMAGE
+skopeo copy --dest-compress-format gzip --format v2s2 --dest-creds=$DOCKER_USER:$DOCKER_PASS docker-daemon:$ARCH_IMAGE docker://$ARCH_IMAGE
 dpret=$?
 if [ $dpret -ne 0 ]; then
   echo "docker push failed with code $dpret"
