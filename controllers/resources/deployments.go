@@ -175,32 +175,6 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 							},
 						},
 						PodAntiAffinity: &corev1.PodAntiAffinity{
-							// RequiredDuringSchedulingIgnoredDuringExecution: []corev1.PodAffinityTerm{
-							// 	{
-							// 		LabelSelector: &metav1.LabelSelector{
-							// 			MatchExpressions: []metav1.LabelSelectorRequirement{
-							// 				{
-							// 					Key:      "app.kubernetes.io/name",
-							// 					Operator: metav1.LabelSelectorOpIn,
-							// 					Values:   []string{DeploymentName},
-							// 				},
-							// 			},
-							// 		},
-							// 		TopologyKey: "topology.kubernetes.io/zone",
-							// 	},
-							// 	{
-							// 		LabelSelector: &metav1.LabelSelector{
-							// 			MatchExpressions: []metav1.LabelSelectorRequirement{
-							// 				{
-							// 					Key:      "app.kubernetes.io/name",
-							// 					Operator: metav1.LabelSelectorOpIn,
-							// 					Values:   []string{DeploymentName},
-							// 				},
-							// 			},
-							// 		},
-							// 		TopologyKey: "kubernetes.io/hostname",
-							// 	},
-							// },
 							PreferredDuringSchedulingIgnoredDuringExecution: []corev1.WeightedPodAffinityTerm{
 								{
 									Weight: 100,
