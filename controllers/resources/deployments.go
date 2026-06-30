@@ -139,6 +139,16 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 						},
 						{
 							MaxSkew:           1,
+							TopologyKey:       "kubernetes.io/hostname",
+							WhenUnsatisfiable: corev1.ScheduleAnyway,
+							LabelSelector: &metav1.LabelSelector{
+								MatchLabels: map[string]string{
+									"k8s-app": DeploymentName,
+								},
+							},
+						},
+						{
+							MaxSkew:           1,
 							TopologyKey:       "topology.kubernetes.io/region",
 							WhenUnsatisfiable: corev1.ScheduleAnyway,
 							LabelSelector: &metav1.LabelSelector{
