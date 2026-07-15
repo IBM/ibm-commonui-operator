@@ -48,7 +48,7 @@ spec:
       containers:
         - name: manager
           # Replace this with the built image name
-          image: icr.io/cpopen/ibm-commonui-operator:4.4.19
+          image: icr.io/cpopen/ibm-commonui-operator:4.4.20
           command:
           - ibm-commonui-operator
           imagePullPolicy: IfNotPresent
