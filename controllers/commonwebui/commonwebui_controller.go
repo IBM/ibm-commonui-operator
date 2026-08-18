@@ -561,7 +561,7 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	if r.IsCncf {
 
 		cncfBuilder := ctrl.NewControllerManagedBy(mgr).
-			For(&operatorsv1alpha1.CommonWebUI{}).
+			For(&operatorsv1alpha1.CommonWebUI{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 			Owns(&corev1.ConfigMap{}).
 			Owns(&appsv1.Deployment{}).
 			Owns(&corev1.Service{}).
@@ -644,7 +644,7 @@ func (r *CommonWebUIReconciler) SetupWithManager(mgr ctrl.Manager) error {
 	}
 
 	openshiftBuilder := ctrl.NewControllerManagedBy(mgr).
-		For(&operatorsv1alpha1.CommonWebUI{}).
+		For(&operatorsv1alpha1.CommonWebUI{}, builder.WithPredicates(predicate.GenerationChangedPredicate{})).
 		Owns(&corev1.ConfigMap{}).
 		Owns(&appsv1.Deployment{}).
 		Owns(&corev1.Service{}).
