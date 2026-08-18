@@ -216,8 +216,6 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	}
 	r.Recorder.Event(instance, corev1.EventTypeNormal, "DependencyReady",
 		"Dependency common-web-ui-cert is ready")
-		return ctrl.Result{}, err
-	}
 	// Only record dependency timing when the wait was non-trivial (cert was not immediately present).
 	var certDepTiming []operatorsv1alpha1.DependencyTiming
 	if certWaitEnd.Sub(certWaitStart) >= time.Second {
