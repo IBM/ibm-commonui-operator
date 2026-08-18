@@ -390,6 +390,9 @@ spec:
         - description: Displays names of pods associated with the Common Web UI service
           displayName: Pod Names
           path: nodes
+        - description: Timing history for the last 5 reconcile runs (newest first), per CPD §5 Reconcile Timing Tracking
+          displayName: Reconcile Timing
+          path: reconcileTiming
     - description: |
         Documentation For additional details regarding install parameters check: https://ibm.biz/icpfs39install.
          License By installing this product you accept the license terms https://ibm.biz/icpfs39license.'
