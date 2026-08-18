@@ -87,6 +87,23 @@ type CommonWebUISpec struct {
 	// License           License           `json:"license,omitempty"`
 }
 
+// ReconcileTimingEntry records the timing of a single reconcile run.
+type ReconcileTimingEntry struct {
+	StartTime      metav1.Time        `json:"startTime"`
+	EndTime        metav1.Time        `json:"endTime"`
+	TotalDuration  string             `json:"totalDuration"`
+	Phase          string             `json:"phase"`
+	DependencyTime []DependencyTiming `json:"dependencyTime,omitempty"`
+}
+
+// DependencyTiming records how long the operator waited for an external dependency.
+type DependencyTiming struct {
+	Component          string      `json:"component"`
+	StartTime          metav1.Time `json:"startTime"`
+	ReadyTime          metav1.Time `json:"readyTime"`
+	DependencyDuration string      `json:"dependencyDuration"`
+}
+
 // CommonWebUIStatus defines the observed state of CommonWebUI
 type CommonWebUIStatus struct {
 	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
@@ -94,9 +111,10 @@ type CommonWebUIStatus struct {
 	// PodNames will hold the names of the commonwebui's
 	Nodes []string `json:"nodes"`
 	// Versions Versions `json:"versions,omitempty"`
-	Service         ServiceStatus `json:"service,omitempty"`
-	OperatorVersion string        `json:"operatorVersion,omitempty"`
-	OperandVersion  string        `json:"operandVersion,omitempty"`
+	Service         ServiceStatus          `json:"service,omitempty"`
+	OperatorVersion string                 `json:"operatorVersion,omitempty"`
+	OperandVersion  string                 `json:"operandVersion,omitempty"`
+	ReconcileTiming []ReconcileTimingEntry `json:"reconcileTiming,omitempty"`
 }
 
 // ServiceStatus struct

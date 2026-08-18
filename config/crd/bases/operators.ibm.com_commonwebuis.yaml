@@ -151,6 +151,50 @@ spec:
                 type: string
               operatorVersion:
                 type: string
+              reconcileTiming:
+                items:
+                  description: ReconcileTimingEntry records the timing of a single
+                    reconcile run.
+                  properties:
+                    dependencyTime:
+                      items:
+                        description: DependencyTiming records how long the operator
+                          waited for an external dependency.
+                        properties:
+                          component:
+                            type: string
+                          dependencyDuration:
+                            type: string
+                          readyTime:
+                            format: date-time
+                            type: string
+                          startTime:
+                            format: date-time
+                            type: string
+                        required:
+                        - component
+                        - dependencyDuration
+                        - readyTime
+                        - startTime
+                        type: object
+                      type: array
+                    endTime:
+                      format: date-time
+                      type: string
+                    phase:
+                      type: string
+                    startTime:
+                      format: date-time
+                      type: string
+                    totalDuration:
+                      type: string
+                  required:
+                  - endTime
+                  - phase
+                  - startTime
+                  - totalDuration
+                  type: object
+                type: array
               service:
                 description: Versions Versions `json:"versions,omitempty"`
                 properties:
