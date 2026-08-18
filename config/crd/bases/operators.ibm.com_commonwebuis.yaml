@@ -149,11 +149,9 @@ spec:
                 type: array
               operandVersion:
                 type: string
-              operatorVersion:
-                type: string
-              reconcileTiming:
+              operationTiming:
                 items:
-                  description: ReconcileTimingEntry records the timing of a single
+                  description: OperationTimingEntry records the timing of a single
                     reconcile run.
                   properties:
                     dependencyTime:
@@ -195,6 +193,8 @@ spec:
                   - totalDuration
                   type: object
                 type: array
+              operatorVersion:
+                type: string
               service:
                 description: Versions Versions `json:"versions,omitempty"`
                 properties:

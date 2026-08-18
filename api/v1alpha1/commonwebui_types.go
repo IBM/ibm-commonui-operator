@@ -87,8 +87,8 @@ type CommonWebUISpec struct {
 	// License           License           `json:"license,omitempty"`
 }
 
-// ReconcileTimingEntry records the timing of a single reconcile run.
-type ReconcileTimingEntry struct {
+// OperationTimingEntry records the timing of a single reconcile run.
+type OperationTimingEntry struct {
 	StartTime      metav1.Time        `json:"startTime"`
 	EndTime        metav1.Time        `json:"endTime"`
 	TotalDuration  string             `json:"totalDuration"`
@@ -111,10 +111,10 @@ type CommonWebUIStatus struct {
 	// PodNames will hold the names of the commonwebui's
 	Nodes []string `json:"nodes"`
 	// Versions Versions `json:"versions,omitempty"`
-	Service         ServiceStatus          `json:"service,omitempty"`
-	OperatorVersion string                 `json:"operatorVersion,omitempty"`
-	OperandVersion  string                 `json:"operandVersion,omitempty"`
-	ReconcileTiming []ReconcileTimingEntry `json:"reconcileTiming,omitempty"`
+	Service          ServiceStatus          `json:"service,omitempty"`
+	OperatorVersion  string                 `json:"operatorVersion,omitempty"`
+	OperandVersion   string                 `json:"operandVersion,omitempty"`
+	OperationTiming  []OperationTimingEntry `json:"operationTiming,omitempty"`
 }
 
 // ServiceStatus struct
