@@ -82,6 +82,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	// Capture reconcile start time for timing tracking (CPD §5 Reconcile Timing Tracking).
 	reconcileStart := time.Now()
+	timingUpdated := false
 
 	var err error
 
@@ -119,7 +120,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	//Setup status update before returning
 	defer func() {
-		err := r.updateStatus(ctx, instance)
+		err := r.updateStatus(ctx, instance, timingUpdated)
 		if err != nil {
 			reqLogger.Error(err, "Error updating current CR status")
 		}
@@ -133,7 +134,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		err = r.Client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set CommonWebUI default status")
-			r.prependReconcileTiming(instance, reconcileStart, "Failed", nil)
+			r.prependReconcileTiming(instance, reconcileStart, "Failed", nil, &timingUpdated)
 			return ctrl.Result{}, err
 		}
 	}
@@ -147,20 +148,20 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Check if the log4js configmap already exists. If not, create a new one.
 	err = res.ReconcileLog4jsConfigMap(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
-		r.prependReconcileTiming(instance, reconcileStart, "Failed", nil)
+		r.prependReconcileTiming(instance, reconcileStart, "Failed", nil, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 
 	// Check if the common-web-ui-config configmap already exists. If not, create a new one.
 	err = res.ReconcileCommonUIConfigConfigMap(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
-		r.prependReconcileTiming(instance, reconcileStart, "Failed", nil)
+		r.prependReconcileTiming(instance, reconcileStart, "Failed", nil, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 
 	err = res.ReconcileServiceAccount(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
-		r.prependReconcileTiming(instance, reconcileStart, "Failed", nil)
+		r.prependReconcileTiming(instance, reconcileStart, "Failed", nil, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 
@@ -170,7 +171,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Check if the certificates already exists. If not, create new v1 certs.
 	err = res.ReconcileCertificates(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
-		r.prependReconcileTiming(instance, reconcileStart, "Failed", nil)
+		r.prependReconcileTiming(instance, reconcileStart, "Failed", nil, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 
@@ -190,7 +191,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 				DependencyDuration: certWaitEnd.Sub(certWaitStart).Round(time.Second).String(),
 			},
 		}
-		r.prependReconcileTiming(instance, reconcileStart, "WaitingForCertSecret", depTiming)
+		r.prependReconcileTiming(instance, reconcileStart, "WaitingForCertSecret", depTiming, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 	// Only record dependency timing when the wait was non-trivial (cert was not immediately present).
@@ -209,14 +210,14 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Check if the deployment already exists. If not, create a new one.
 	err = res.ReconcileDeployment(ctx, r.Client, instance, isZen, isCncf, &needToRequeue)
 	if err != nil {
-		r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming)
+		r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 
 	// Check if the service already exists. If not, create a new one.
 	err = res.ReconcileService(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
-		r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming)
+		r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 
@@ -224,7 +225,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	if !isCncf {
 		err = res.ReconcileRoutes(ctx, r.Client, instance, &needToRequeue)
 		if err != nil {
-			r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming)
+			r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming, &timingUpdated)
 			return ctrl.Result{}, err
 		}
 	}
@@ -236,14 +237,14 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Update admin hub nav config, if it exists.
 	err = res.ReconcileAdminHubNavConfig(ctx, r.Client, instance)
 	if err != nil {
-		r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming)
+		r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 
 	// Check if the certificates already exists. If not, create new v1 certs.
 	err = res.ReconcileHorizontalPodAutoscaler(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
-		r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming)
+		r.prependReconcileTiming(instance, reconcileStart, "Failed", certDepTiming, &timingUpdated)
 		return ctrl.Result{}, err
 	}
 
@@ -259,22 +260,24 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	if needToRequeue {
 		// One or more resources were created, so requeue the request
 		reqLogger.Info("Requeuing the request")
-		r.prependReconcileTiming(instance, reconcileStart, "Completed", certDepTiming)
+		r.prependReconcileTiming(instance, reconcileStart, "Completed", certDepTiming, &timingUpdated)
 		return ctrl.Result{Requeue: true}, nil
 	}
 
 	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
-	r.prependReconcileTiming(instance, reconcileStart, "Completed", certDepTiming)
+	r.prependReconcileTiming(instance, reconcileStart, "Completed", certDepTiming, &timingUpdated)
 	return ctrl.Result{}, nil
 }
 
 // prependReconcileTiming builds a ReconcileTimingEntry and prepends it to instance.Status.ReconcileTiming,
 // capping the slice at 5 entries (newest first) per CPD §5 Reconcile Timing Tracking.
+// updated is set to true so the caller's updateStatus knows to persist the change.
 func (r *CommonWebUIReconciler) prependReconcileTiming(
 	instance *operatorsv1alpha1.CommonWebUI,
 	startTime time.Time,
 	phase string,
 	depTiming []operatorsv1alpha1.DependencyTiming,
+	updated *bool,
 ) {
 	now := time.Now()
 	entry := operatorsv1alpha1.ReconcileTimingEntry{
@@ -291,6 +294,7 @@ func (r *CommonWebUIReconciler) prependReconcileTiming(
 	if len(instance.Status.ReconcileTiming) > 5 {
 		instance.Status.ReconcileTiming = instance.Status.ReconcileTiming[:5]
 	}
+	*updated = true
 }
 
 func (r *CommonWebUIReconciler) waitForCertSecret(ctx context.Context, client client.Client, ns string) error {
@@ -417,7 +421,7 @@ func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instanc
 	}
 }
 
-func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) error {
+func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI, timingUpdated bool) error {
 	reqLogger := log.WithValues("func", "updateStatus", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
 	reqLogger.Info("Updating CommonWebUI status")
 
@@ -457,12 +461,9 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 		reqLogger.Error(err, "Failed to list pods - CR status will not be updated")
 	}
 
-	// ReconcileTiming is always updated each reconcile run; always persist it.
-	updateReconcileTiming := len(instance.Status.ReconcileTiming) > 0
-
-	//Update any service status updates
-	if updateServiceStatus || updateNodeStatus || updateReconcileTiming {
-		reqLogger.Info("Updating status", "updateServiceStatus", updateServiceStatus, "updateNodeStatus", updateNodeStatus, "updateReconcileTiming", updateReconcileTiming)
+	//Update status only when something actually changed
+	if updateServiceStatus || updateNodeStatus || timingUpdated {
+		reqLogger.Info("Updating status", "updateServiceStatus", updateServiceStatus, "updateNodeStatus", updateNodeStatus, "timingUpdated", timingUpdated)
 		err := r.Client.Status().Update(ctx, instance)
 		if err != nil {
 			return err
