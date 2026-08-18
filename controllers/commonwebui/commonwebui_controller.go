@@ -18,6 +18,7 @@ package controllers
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"reflect"
 	"strings"
@@ -36,6 +37,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/types"
+	"k8s.io/client-go/tools/record"
 	ctrl "sigs.k8s.io/controller-runtime"
 	"sigs.k8s.io/controller-runtime/pkg/builder"
 	"sigs.k8s.io/controller-runtime/pkg/client"
@@ -55,9 +57,10 @@ var log = logf.Log.WithName("controller_commonwebui")
 
 // CommonWebUIReconciler reconciles a CommonWebUI object
 type CommonWebUIReconciler struct {
-	Client client.Client
-	Scheme *runtime.Scheme
-	IsCncf bool
+	Client   client.Client
+	Scheme   *runtime.Scheme
+	IsCncf   bool
+	Recorder record.EventRecorder
 }
 
 const finalizerName = "commonui.operators.ibm.com"
@@ -80,7 +83,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	reqLogger := log.WithValues("Request.Namespace", request.Namespace, "Request.Name", request.Name)
 	reqLogger.Info("Reconciling CommonWebUI Controller")
 
-	// Capture reconcile start time for timing tracking (CPD §5 Reconcile Timing Tracking).
+	// Capture reconcile start time for timing tracking (CPD §5 Operation Timing Tracking).
 	reconcileStart := time.Now()
 
 	var err error
@@ -117,6 +120,10 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	reqLogger.Info("CommonWebUI instance version: " + instance.Spec.OperatorVersion)
 
+	// Emit OperationStarted event (CPD §5.5)
+	r.Recorder.Event(instance, corev1.EventTypeNormal, "OperationStarted",
+		fmt.Sprintf("Reconcile operation started (version: %s)", instance.Spec.OperatorVersion))
+
 	//Setup status update before returning
 	defer func() {
 		err := r.updateStatus(ctx, instance)
@@ -134,6 +141,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		if err != nil {
 			reqLogger.Error(err, "Failed to set CommonWebUI default status")
 			r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
+			r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+				"phase=Failed: failed to set default status")
 			return ctrl.Result{}, err
 		}
 	}
@@ -148,6 +157,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	err = res.ReconcileLog4jsConfigMap(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
@@ -155,12 +166,16 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	err = res.ReconcileCommonUIConfigConfigMap(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
 	err = res.ReconcileServiceAccount(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
@@ -171,6 +186,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	err = res.ReconcileCertificates(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
@@ -178,6 +195,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// wait is not inserted, then the deployment gets updated multiple times in rapid
 	// succession which can mess up zone spreading
 	// https://github.ibm.com/IBMPrivateCloud/roadmap/issues/63642
+	r.Recorder.Event(instance, corev1.EventTypeNormal, "DependencyWaitStarted",
+		"Waiting for dependency: common-web-ui-cert")
 	certWaitStart := time.Now()
 	err = r.waitForCertSecret(ctx, r.Client, instance.Namespace)
 	certWaitEnd := time.Now()
@@ -191,8 +210,12 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 			},
 		}
 		r.prependOperationTiming(instance, reconcileStart, "WaitingForCertSecret", depTiming)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			"phase=WaitingForCertSecret: timeout waiting for common-web-ui-cert secret")
 		return ctrl.Result{}, err
 	}
+	r.Recorder.Event(instance, corev1.EventTypeNormal, "DependencyReady",
+		"Dependency common-web-ui-cert is ready")
 	// Only record dependency timing when the wait was non-trivial (cert was not immediately present).
 	var certDepTiming []operatorsv1alpha1.DependencyTiming
 	if certWaitEnd.Sub(certWaitStart) >= time.Second {
@@ -210,6 +233,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	err = res.ReconcileDeployment(ctx, r.Client, instance, isZen, isCncf, &needToRequeue)
 	if err != nil {
 		r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
@@ -217,6 +242,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	err = res.ReconcileService(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
@@ -225,6 +252,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		err = res.ReconcileRoutes(ctx, r.Client, instance, &needToRequeue)
 		if err != nil {
 			r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
+			r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+				fmt.Sprintf("phase=Failed: %v", err))
 			return ctrl.Result{}, err
 		}
 	}
@@ -237,6 +266,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	err = res.ReconcileAdminHubNavConfig(ctx, r.Client, instance)
 	if err != nil {
 		r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
@@ -244,6 +275,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	err = res.ReconcileHorizontalPodAutoscaler(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
 		r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
+		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
+			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
@@ -260,11 +293,15 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		// One or more resources were created, so requeue the request
 		reqLogger.Info("Requeuing the request")
 		r.prependOperationTiming(instance, reconcileStart, "Completed", certDepTiming)
+		r.Recorder.Event(instance, corev1.EventTypeNormal, "OperationEnded",
+			"phase=Completed: reconcile completed, requeuing for additional resource settling")
 		return ctrl.Result{Requeue: true}, nil
 	}
 
 	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
 	r.prependOperationTiming(instance, reconcileStart, "Completed", certDepTiming)
+	r.Recorder.Event(instance, corev1.EventTypeNormal, "OperationEnded",
+		"phase=Completed: reconcile completed successfully")
 	return ctrl.Result{}, nil
 }
 
