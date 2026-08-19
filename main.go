@@ -49,7 +49,6 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/manager"
 
 	certmgr "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
-	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	cmmeta "github.com/ibm/ibm-cert-manager-operator/apis/meta.cert-manager/v1"
 	routesv1 "github.com/openshift/api/route/v1"
 
@@ -83,7 +82,6 @@ func init() {
 
 	// add cert manager scheme to controller
 	utilruntime.Must(certmgr.AddToScheme(scheme))
-	utilruntime.Must(certmgrv1alpha1.AddToScheme(scheme))
 
 	// add cert manager scheme to controller
 	utilruntime.Must(cmmeta.AddToScheme(scheme))

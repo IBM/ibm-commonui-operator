@@ -361,7 +361,6 @@ var NavIngressAnnotations = map[string]string{
 }
 
 const DefaultClusterIssuer = "cs-ca-issuer"
-const Certv1alpha1APIVersion = "certmanager.k8s.io/v1alpha1"
 const UICertName = "common-web-ui-ca-cert"
 const UICertCommonName = "common-web-ui"
 

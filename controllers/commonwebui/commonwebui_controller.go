@@ -27,7 +27,6 @@ import (
 	autoscalingv2 "k8s.io/api/autoscaling/v2"
 
 	certmgr "github.com/ibm/ibm-cert-manager-operator/apis/cert-manager/v1"
-	certmgrv1alpha1 "github.com/ibm/ibm-cert-manager-operator/apis/certmanager/v1alpha1"
 	route "github.com/openshift/api/route/v1"
 	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
@@ -178,9 +177,6 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
-
-	// For 1.15.0 operator version, check if v1alpha1 certs exits on upgrade and delete if so
-	r.deleteCertsv1alpha1(ctx, instance)
 
 	// Check if the certificates already exists. If not, create new v1 certs.
 	err = res.ReconcileCertificates(ctx, r.Client, instance, &needToRequeue)
@@ -419,38 +415,6 @@ func (r *CommonWebUIReconciler) removeLegacyFinalizers(ctx context.Context, inst
 		if err := r.Client.Update(ctx, instance); err != nil {
 			reqLogger.Error(err, "Failed to update after removing finalizer")
 		}
-	}
-}
-
-func (r *CommonWebUIReconciler) deleteCertsv1alpha1(ctx context.Context, instance *operatorsv1alpha1.CommonWebUI) {
-	reqLogger := log.WithValues("func", "deleteCertsv1alpha1", "instance.Name", instance.Name, "instance.Namespace", instance.Namespace)
-
-	certificate := &certmgrv1alpha1.Certificate{
-		ObjectMeta: metav1.ObjectMeta{
-			Name:      res.UICertName,
-			Namespace: instance.Namespace,
-		},
-	}
-	err := r.Client.Get(ctx, types.NamespacedName{Name: res.UICertName, Namespace: instance.Namespace}, certificate)
-
-	if err != nil {
-		if !errors.IsNotFound(err) {
-			reqLogger.Info("Unable to load v1alpha1 certificate - most likely this means the CRD doesn't exist and this can be ignored")
-		}
-		return
-	}
-	reqLogger.Info("Certificate common-web-ui-ca-cert found, checking api version..")
-	reqLogger.Info("API version is: " + certificate.APIVersion)
-	if certificate.APIVersion == res.Certv1alpha1APIVersion {
-		reqLogger.Info("deleting cert: " + res.UICertName)
-		err = r.Client.Delete(ctx, certificate)
-		if err != nil {
-			reqLogger.Error(err, "Failed to delete")
-		} else {
-			reqLogger.Info("Successfully deleted")
-		}
-	} else {
-		reqLogger.Info("API version is NOT v1alpha1, returning..")
 	}
 }
 
