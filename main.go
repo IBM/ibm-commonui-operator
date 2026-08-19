@@ -237,9 +237,10 @@ func main() {
 	}
 
 	if err = (&commonwebuicontrollers.CommonWebUIReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-		IsCncf: isCncf,
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		IsCncf:   isCncf,
+		Recorder: mgr.GetEventRecorderFor("ibm-commonui-operator"),
 	}).SetupWithManager(mgr); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "CommonWebUI")
 		os.Exit(1)
