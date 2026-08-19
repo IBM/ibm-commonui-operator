@@ -663,18 +663,6 @@ spec:
           - update
           - watch
         - apiGroups:
-          - certmanager.k8s.io
-          resources:
-          - certificates
-          verbs:
-          - create
-          - delete
-          - get
-          - list
-          - patch
-          - update
-          - watch
-        - apiGroups:
           - cert-manager.io
           resources:
           - certificates
