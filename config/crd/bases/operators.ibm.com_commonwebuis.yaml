@@ -195,6 +195,20 @@ spec:
                 type: array
               operatorVersion:
                 type: string
+              progress:
+                description: Progress represents the percentage of completion towards
+                  the current operation (e.g. "0%", "100%").
+                type: string
+              progressMessage:
+                description: ProgressMessage is a human-readable description of the
+                  current reconcile checkpoint.
+                type: string
+              reconcileHistory:
+                description: ReconcileHistory holds up to 3 recent timestamped failure
+                  or status messages (newest first).
+                items:
+                  type: string
+                type: array
               service:
                 description: Versions Versions `json:"versions,omitempty"`
                 properties:

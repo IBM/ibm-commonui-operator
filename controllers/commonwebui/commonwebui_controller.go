@@ -84,6 +84,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	// Capture reconcile start time for timing tracking (CPD §5 Reconcile Timing Tracking).
 	reconcileStart := time.Now()
+	reconcileStartStr := reconcileStart.UTC().Format(time.RFC3339)
 
 	var err error
 
@@ -121,7 +122,10 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	// Emit OperationStarted event (CPD §5.5)
 	r.Recorder.Event(instance, corev1.EventTypeNormal, "OperationStarted",
-		fmt.Sprintf("Reconcile operation started (version: %s)", instance.Spec.OperatorVersion))
+		fmt.Sprintf("Reconcile operation started: version %s", instance.Spec.OperatorVersion))
+
+	// CPD §1.3 / §3.2 — set progress to 0% at the start of every reconcile loop.
+	r.setProgress(instance, "0%", "New Reconcile Loop Begin")
 
 	//Setup status update before returning
 	defer func() {
@@ -139,6 +143,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		err = r.Client.Status().Update(ctx, instance)
 		if err != nil {
 			reqLogger.Error(err, "Failed to set CommonWebUI default status")
+			r.appendReconcileHistory(instance, reconcileStartStr, "Failed to set default status")
 			r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
 			r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 				"phase=Failed: failed to set default status")
@@ -155,6 +160,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Check if the log4js configmap already exists. If not, create a new one.
 	err = res.ReconcileLog4jsConfigMap(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
+		r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileLog4jsConfigMap failed: %v", err))
 		r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			fmt.Sprintf("phase=Failed: %v", err))
@@ -164,6 +170,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Check if the common-web-ui-config configmap already exists. If not, create a new one.
 	err = res.ReconcileCommonUIConfigConfigMap(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
+		r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileCommonUIConfigConfigMap failed: %v", err))
 		r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			fmt.Sprintf("phase=Failed: %v", err))
@@ -172,6 +179,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 
 	err = res.ReconcileServiceAccount(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
+		r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileServiceAccount failed: %v", err))
 		r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			fmt.Sprintf("phase=Failed: %v", err))
@@ -181,6 +189,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Check if the certificates already exists. If not, create new v1 certs.
 	err = res.ReconcileCertificates(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
+		r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileCertificates failed: %v", err))
 		r.prependOperationTiming(instance, reconcileStart, "Failed", nil)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			fmt.Sprintf("phase=Failed: %v", err))
@@ -205,6 +214,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 				DependencyDuration: certWaitEnd.Sub(certWaitStart).Round(time.Second).String(),
 			},
 		}
+		r.appendReconcileHistory(instance, reconcileStartStr, "Timeout waiting for common-web-ui-cert secret")
 		r.prependOperationTiming(instance, reconcileStart, "WaitingForCertSecret", depTiming)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			"phase=WaitingForCertSecret: timeout waiting for common-web-ui-cert secret")
@@ -225,9 +235,12 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 		}
 	}
 
+	r.setProgress(instance, "50%", "Certificate dependency ready, reconciling core resources")
+
 	// Check if the deployment already exists. If not, create a new one.
 	err = res.ReconcileDeployment(ctx, r.Client, instance, isZen, isCncf, &needToRequeue)
 	if err != nil {
+		r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileDeployment failed: %v", err))
 		r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			fmt.Sprintf("phase=Failed: %v", err))
@@ -237,6 +250,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Check if the service already exists. If not, create a new one.
 	err = res.ReconcileService(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
+		r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileService failed: %v", err))
 		r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			fmt.Sprintf("phase=Failed: %v", err))
@@ -247,6 +261,7 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	if !isCncf {
 		err = res.ReconcileRoutes(ctx, r.Client, instance, &needToRequeue)
 		if err != nil {
+			r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileRoutes failed: %v", err))
 			r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
 			r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 				fmt.Sprintf("phase=Failed: %v", err))
@@ -261,15 +276,19 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	// Update admin hub nav config, if it exists.
 	err = res.ReconcileAdminHubNavConfig(ctx, r.Client, instance)
 	if err != nil {
+		r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileAdminHubNavConfig failed: %v", err))
 		r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			fmt.Sprintf("phase=Failed: %v", err))
 		return ctrl.Result{}, err
 	}
 
+	r.setProgress(instance, "90%", "Core resources reconciled, finalizing")
+
 	// Check if the certificates already exists. If not, create new v1 certs.
 	err = res.ReconcileHorizontalPodAutoscaler(ctx, r.Client, instance, &needToRequeue)
 	if err != nil {
+		r.appendReconcileHistory(instance, reconcileStartStr, fmt.Sprintf("ReconcileHorizontalPodAutoscaler failed: %v", err))
 		r.prependOperationTiming(instance, reconcileStart, "Failed", certDepTiming)
 		r.Recorder.Event(instance, corev1.EventTypeWarning, "OperationEnded",
 			fmt.Sprintf("phase=Failed: %v", err))
@@ -288,6 +307,8 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	if needToRequeue {
 		// One or more resources were created, so requeue the request
 		reqLogger.Info("Requeuing the request")
+		r.setProgress(instance, "100%", "The Current Operation Is Completed")
+		r.clearReconcileHistory(instance)
 		r.prependOperationTiming(instance, reconcileStart, "Completed", certDepTiming)
 		r.Recorder.Event(instance, corev1.EventTypeNormal, "OperationEnded",
 			"phase=Completed: reconcile completed, requeuing for additional resource settling")
@@ -295,10 +316,43 @@ func (r *CommonWebUIReconciler) Reconcile(ctx context.Context, request ctrl.Requ
 	}
 
 	reqLogger.Info("COMMON UI CONTROLLER RECONCILE ALL DONE")
+	r.setProgress(instance, "100%", "The Current Operation Is Completed")
+	r.clearReconcileHistory(instance)
 	r.prependOperationTiming(instance, reconcileStart, "Completed", certDepTiming)
 	r.Recorder.Event(instance, corev1.EventTypeNormal, "OperationEnded",
 		"phase=Completed: reconcile completed successfully")
 	return ctrl.Result{}, nil
+}
+
+// setProgress updates the progress percentage and message on the instance status in memory.
+// Per CPD §3.2: only advances progress (or resets to 0%), never goes backwards.
+func (r *CommonWebUIReconciler) setProgress(instance *operatorsv1alpha1.CommonWebUI, percentage string, message string) {
+	instance.Status.Progress = percentage
+	instance.Status.ProgressMessage = message
+}
+
+// appendReconcileHistory prepends a timestamped failure message to ReconcileHistory,
+// keeping at most 3 entries (newest first) per CPD §1.3.
+func (r *CommonWebUIReconciler) appendReconcileHistory(instance *operatorsv1alpha1.CommonWebUI, timestamp string, message string) {
+	entry := timestamp + " " + message
+	instance.Status.ReconcileHistory = append(
+		[]string{entry},
+		instance.Status.ReconcileHistory...,
+	)
+	if len(instance.Status.ReconcileHistory) > 3 {
+		instance.Status.ReconcileHistory = instance.Status.ReconcileHistory[:3]
+	}
+}
+
+// clearReconcileHistory resets ReconcileHistory to a single success entry after a successful reconcile,
+// per CPD §1.3 ("update the latest history to be 'The last reconciliation was completed successfully.'").
+func (r *CommonWebUIReconciler) clearReconcileHistory(instance *operatorsv1alpha1.CommonWebUI) {
+	successMsg := time.Now().UTC().Format(time.RFC3339) + " The last reconciliation was completed successfully."
+	if len(instance.Status.ReconcileHistory) == 0 {
+		instance.Status.ReconcileHistory = []string{successMsg}
+	} else {
+		instance.Status.ReconcileHistory[0] = successMsg
+	}
 }
 
 // prependOperationTiming builds a OperationTimingEntry and prepends it to instance.Status.OperationTiming,
@@ -453,8 +507,11 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 		reqLogger.Error(err, "Failed to list pods - CR status will not be updated")
 	}
 
-	// Timing is always written; also write when service or node status changed.
-	needsUpdate := updateServiceStatus || updateNodeStatus || len(instance.Status.OperationTiming) > 0
+	// Always write when timing, progress, or reconcileHistory changed, or when service/node status changed.
+	needsUpdate := updateServiceStatus || updateNodeStatus ||
+		len(instance.Status.OperationTiming) > 0 ||
+		instance.Status.Progress != "" ||
+		len(instance.Status.ReconcileHistory) > 0
 
 	if needsUpdate {
 		reqLogger.Info("Updating status", "updateServiceStatus", updateServiceStatus, "updateNodeStatus", updateNodeStatus)
@@ -475,6 +532,9 @@ func (r *CommonWebUIReconciler) updateStatus(ctx context.Context, instance *oper
 			fresh.Status.OperandVersion = version.Version
 		}
 		fresh.Status.OperationTiming = instance.Status.OperationTiming
+		fresh.Status.Progress = instance.Status.Progress
+		fresh.Status.ProgressMessage = instance.Status.ProgressMessage
+		fresh.Status.ReconcileHistory = instance.Status.ReconcileHistory
 
 		if err := r.Client.Status().Update(ctx, fresh); err != nil {
 			return err
