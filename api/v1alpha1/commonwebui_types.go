@@ -115,6 +115,12 @@ type CommonWebUIStatus struct {
 	OperatorVersion  string                 `json:"operatorVersion,omitempty"`
 	OperandVersion   string                 `json:"operandVersion,omitempty"`
 	OperationTiming  []OperationTimingEntry `json:"operationTiming,omitempty"`
+	// Progress represents the percentage of completion towards the current operation (e.g. "0%", "100%").
+	Progress string `json:"progress,omitempty"`
+	// ProgressMessage is a human-readable description of the current reconcile checkpoint.
+	ProgressMessage string `json:"progressMessage,omitempty"`
+	// ReconcileHistory holds up to 3 recent timestamped failure or status messages (newest first).
+	ReconcileHistory []string `json:"reconcileHistory,omitempty"`
 }
 
 // ServiceStatus struct
