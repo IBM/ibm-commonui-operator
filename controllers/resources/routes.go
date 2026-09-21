@@ -36,6 +36,11 @@ import (
 const CnRouteName = "cp-console"
 const CnRoutePath = "/"
 
+// With the zen front door enabled the cluster host is served by zen and the catch-all route cannot
+// be created, so the OIDC callback path is routed to the common web ui on its own
+const CnCallbackRouteName = "common-web-ui-callback-route"
+const CnCallbackRoutePath = "/auth/liberty/callback"
+
 var CnAnnotations = map[string]string{
 	"haproxy.router.openshift.io/timeout":                               "90s",
 	"haproxy.router.openshift.io/pod-concurrent-connections":            "100",
@@ -72,28 +77,20 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 		return nil
 	}
 
-	//If zenFrontDoor is enabled in the IM authentication CR, then we will skip route creation and
-	//delete the route if it already exists
+	//If zenFrontDoor is enabled the cluster host is served by zen; a catch-all route there would
+	//take over zen's own traffic, so only the OIDC login callback path is routed to the common web ui
+	routeName := CnRouteName
+	routePath := CnRoutePath
+
 	if ZenFrontDoorEnabled(ctx, client, instance.Namespace) {
 		reqLogger.Info("Zen front door support is enabled - delete route if it exists", "routeName", CnRouteName)
 
-		route := &route.Route{}
-		err := client.Get(ctx, types.NamespacedName{Name: CnRouteName, Namespace: instance.Namespace}, route)
-		if err != nil {
-			if errors.IsNotFound(err) {
-				reqLogger.Info("Route not found - deletion is skipped for zen front door support")
-			} else {
-				reqLogger.Error(err, "Unable to read the route for deletion with zen front door support enabled - route deletion skipped, but reconciliation will proceed")
-			}
-			return nil //Do not stop reconciliation if there was an error
-		}
-		err = client.Delete(ctx, route)
-		if err != nil {
-			reqLogger.Error(err, "Error deleting route for zen front door support - reconciliation will proceed")
-		} else {
-			reqLogger.Info("Route deleted for zen front door support")
-		}
-		return nil //Do not stop reconciliation if there was an error
+		deleteRouteIfPresent(ctx, client, instance.Namespace, CnRouteName)
+
+		routeName = CnCallbackRouteName
+		routePath = CnCallbackRoutePath
+	} else {
+		deleteRouteIfPresent(ctx, client, instance.Namespace, CnCallbackRouteName)
 	}
 
 	//Get the destination cert for the route
@@ -133,12 +130,36 @@ func ReconcileRoutes(ctx context.Context, client client.Client, instance *operat
 
 	routeHost = clusterInfoConfigMap.Data["cluster_address"]
 
-	err = ReconcileRoute(ctx, client, instance, CnRouteName, CnAnnotations, routeHost, CnRoutePath, destinationCAcert, needToRequeue)
+	err = ReconcileRoute(ctx, client, instance, routeName, CnAnnotations, routeHost, routePath, destinationCAcert, needToRequeue)
 	if err != nil {
 		return err
 	}
 
 	return nil
+}
+
+// deleteRouteIfPresent removes a Route that should not exist in the current configuration; failures
+// are logged but never stop reconciliation
+func deleteRouteIfPresent(ctx context.Context, client client.Client, namespace string, name string) {
+	reqLogger := log.WithValues("func", "deleteRouteIfPresent", "namespace", namespace, "routeName", name)
+
+	existingRoute := &route.Route{}
+	err := client.Get(ctx, types.NamespacedName{Name: name, Namespace: namespace}, existingRoute)
+	if err != nil {
+		if errors.IsNotFound(err) {
+			reqLogger.Info("Route not found - deletion is skipped for zen front door support")
+		} else {
+			reqLogger.Error(err, "Unable to read the route for deletion with zen front door support enabled - route deletion skipped, but reconciliation will proceed")
+		}
+		return
+	}
+
+	if err = client.Delete(ctx, existingRoute); err != nil {
+		reqLogger.Error(err, "Error deleting route for zen front door support - reconciliation will proceed")
+		return
+	}
+	reqLogger.Info("Route deleted for zen front door support")
+
 }
 
 func ReconcileRoute(ctx context.Context, client client.Client, instance *operatorsv1alpha1.CommonWebUI,
