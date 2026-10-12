@@ -17,6 +17,7 @@ limitations under the License.
 package v1alpha1
 
 import (
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -84,6 +85,7 @@ type CommonWebUISpec struct {
 	EnableInstanaMetricCollection bool              `json:"enableInstanaMetricCollection,omitempty"`
 	LoginConfirmation             LoginConfirmation `json:"loginConfirmation,omitempty"`
 	AutoScaleConfig               bool              `json:"autoScaleConfig,omitempty"`
+	Tolerations                   []corev1.Toleration `json:"tolerations,omitempty"`
 	// License           License           `json:"license,omitempty"`
 }
 
