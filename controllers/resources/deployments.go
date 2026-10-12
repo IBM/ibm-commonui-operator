@@ -47,6 +47,21 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 
 	var err error
 
+	tolerations := []corev1.Toleration{
+		{
+			Key:      "dedicated",
+			Operator: corev1.TolerationOpExists,
+			Effect:   corev1.TaintEffectNoSchedule,
+		},
+		{
+			Key:      "CriticalAddonsOnly",
+			Operator: corev1.TolerationOpExists,
+		},
+	}
+	if len(instance.Spec.Tolerations) > 0 {
+		tolerations = instance.Spec.Tolerations
+	}
+
 	replicas := instance.Spec.Replicas
 	if replicas == 0 {
 		replicas = 1
@@ -209,17 +224,7 @@ func getDesiredDeployment(ctx context.Context, client client.Client, instance *o
 							},
 						},
 					},
-					Tolerations: []corev1.Toleration{
-						{
-							Key:      "dedicated",
-							Operator: corev1.TolerationOpExists,
-							Effect:   corev1.TaintEffectNoSchedule,
-						},
-						{
-							Key:      "CriticalAddonsOnly",
-							Operator: corev1.TolerationOpExists,
-						},
-					},
+					Tolerations: tolerations,
 					Volumes: volumes,
 					Containers: []corev1.Container{
 						container,

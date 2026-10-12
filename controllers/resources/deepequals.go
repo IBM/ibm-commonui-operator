@@ -97,6 +97,13 @@ func isPodTemplateEqual(oldPodTemplate, newPodTemplate corev1.PodTemplateSpec) b
 		return false
 	}
 
+	if !reflect.DeepEqual(oldPodTemplate.Spec.Tolerations, newPodTemplate.Spec.Tolerations) {
+		logger.Info("Pod tolerations not equal",
+			"old", fmt.Sprintf("%v", oldPodTemplate.Spec.Tolerations),
+			"new", fmt.Sprintf("%v", newPodTemplate.Spec.Tolerations))
+		return false
+	}
+
 	oldVolumes := oldPodTemplate.Spec.Volumes
 	newVolumes := newPodTemplate.Spec.Volumes
 	if len(oldVolumes) == len(newVolumes) {
