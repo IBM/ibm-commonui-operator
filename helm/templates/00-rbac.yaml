@@ -40,7 +40,7 @@ metadata:
   name: ibm-commonui-operator
   namespace: {{$namespace}}
 rules:
-{{- if $.Values.cpfs.imNetworking.manageNetworking }}
+{{- if and $.Values.cpfs $.Values.cpfs.imNetworking $.Values.cpfs.imNetworking.manageNetworking }}
 - apiGroups:
   - route.openshift.io
   resources:
@@ -118,7 +118,7 @@ rules:
   verbs:
   - get
   - list
-{{- if $.Values.cpfs.imNetworking.manageNetworking }}
+{{- if and $.Values.cpfs $.Values.cpfs.imNetworking $.Values.cpfs.imNetworking.manageNetworking }}
 - apiGroups:
   - networking.k8s.io
   resources:
